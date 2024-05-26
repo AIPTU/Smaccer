@@ -1,0 +1,39 @@
+# Smaccer Configuration
+
+# Do not change this (Only for internal use)!
+config-version: 1.0
+
+# Default settings for NPCs.
+npc-default-settings:
+  # Cooldown settings for NPC actions.
+  # - enabled: Whether cooldown is enabled or not.
+  # - value: Cooldown duration in seconds.
+  cooldown:
+    enabled: true
+    value: 3
+
+  # Rotation settings for NPC behavior.
+  # - enabled: Whether rotation is enabled or not.
+  # - maxDistance: Maximum distance for NPC rotation.
+  rotation:
+    enabled: true
+    maxDistance: 8
+
+  # Nametag visibility settings for NPCs.
+  # - enabled: Whether nametag visibility is enabled or not.
+  nametagVisible:
+    enabled: true
+
+  # Default entity visibility settings.
+  # - value: Integer representing visibility level.
+  #     0: Visible to everyone.
+  #     1: Visible only to the creator.
+  #     2: Invisible to everyone.
+  entityVisibility:
+    value: 0
+
+  # Slap settings for NPCs.
+  # - enabled: Whether slap-back action is enabled or not.
+  # Note: Set to true if slap action is intended for human NPCs.
+  slapBack:
+    enabled: true

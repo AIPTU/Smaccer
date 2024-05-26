@@ -1,0 +1,37 @@
+name: Smaccer
+main: aiptu\smaccer\Smaccer
+src-namespace-prefix: aiptu\smaccer
+version: 1.0.0
+api: [5.0.0]
+author: AIPTU
+permissions:
+  smaccer.command.create.self:
+    description: Allows players to create their own entities (/smaccer create).
+    default: op
+  smaccer.command.create.others:
+    description: Allows players to create entities owned by others (/smaccer create).
+    default: op
+  smaccer.command.delete.self:
+    description: Allows players to delete their own entities (/smaccer delete).
+    default: op
+  smaccer.command.delete.others:
+    description: Allows players to delete entities owned by others (/smaccer delete).
+    default: op
+  smaccer.command.deleteall.self:
+    description: Allows players to delete all their own entities (/smaccer deleteall).
+    default: op
+  smaccer.command.deleteall.others:
+    description: Allows players to delete all entities owned by others (/smaccer deleteall).
+    default: op
+  smaccer.command.id:
+    description: Allows players to retrieve entity IDs (/smaccer id).
+    default: op
+  smaccer.command.list.self:
+    description: Allows players to list their own entities (/smaccer list).
+    default: op
+  smaccer.command.list.others:
+    description: Allows players to list entities owned by others (/smaccer list).
+    default: op
+  smaccer.command.list.all:
+    description: Allows players to list all entities in the worlds (/smaccer list).
+    default: op
