@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
-use aiptu\smaccer\entity\EntitySmaccer;
-use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
 use CortexPE\Commando\args\IntegerArgument;
@@ -44,17 +42,17 @@ class DeleteSubCommand extends BaseSubCommand {
 		$plugin = $this->plugin;
 		$entity = $plugin->getServer()->getWorldManager()->findEntity($npcId);
 
-		if (!($entity instanceof EntitySmaccer || $entity instanceof HumanSmaccer)) {
+		if ($entity === null) {
 			$sender->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');
 			return;
 		}
 
-		if (!SmaccerHandler::getInstance()->isOwnedBy($entity, $sender) && !$sender->hasPermission('smaccer.command.delete.others')) {
+		if (!SmaccerHandler::getInstance()->isOwnedBy($sender, $entity) && !$sender->hasPermission('smaccer.command.delete.others')) {
 			$sender->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
 			return;
 		}
 
-		SmaccerHandler::getInstance()->despawnNPC($sender, $npcId);
+		SmaccerHandler::getInstance()->despawnNPC($sender, $entity);
 	}
 
 	public function prepare() : void {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace aiptu\smaccer\command;
 
 use aiptu\smaccer\command\subcommand\CreateSubCommand;
-use aiptu\smaccer\command\subcommand\DeleteAllSubCommand;
 use aiptu\smaccer\command\subcommand\DeleteSubCommand;
 use aiptu\smaccer\command\subcommand\IdSubCommand;
 use aiptu\smaccer\command\subcommand\ListSubCommand;
@@ -36,12 +35,8 @@ class SmaccerCommand extends BaseCommand {
 			'smaccer.command.create.others',
 			'smaccer.command.delete.self',
 			'smaccer.command.delete.others',
-			'smaccer.command.deleteall.self',
-			'smaccer.command.deleteall.others',
 			'smaccer.command.id',
-			'smaccer.command.list.self',
-			'smaccer.command.list.others',
-			'smaccer.command.list.all',
+			'smaccer.command.list',
 		]);
 
 		$plugin = $this->getOwningPlugin();
@@ -49,7 +44,6 @@ class SmaccerCommand extends BaseCommand {
 
 		$this->registerSubCommand(new CreateSubCommand($plugin, 'create', 'Create an NPC', ['add', 'spawn']));
 		$this->registerSubCommand(new DeleteSubCommand($plugin, 'delete', 'Delete an NPC', ['remove', 'despawn']));
-		$this->registerSubCommand(new DeleteAllSubCommand($plugin, 'deleteall', 'Delete all NPCs', ['removeall', 'despawnall']));
 		$this->registerSubCommand(new IdSubCommand($plugin, 'id', 'Check an NPC id'));
 		$this->registerSubCommand(new ListSubCommand($plugin, 'list', 'Get a list of NPCs in the world'));
 	}

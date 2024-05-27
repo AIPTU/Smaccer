@@ -193,6 +193,9 @@ class SmaccerHandler {
 
 	private array $registered_npcs = [];
 
+	/** @var array<string, array<int, Entity>> */
+	private array $playerNPCs = [];
+
 	public function __construct() {
 		$this->registerEntity('Human', HumanSmaccer::class);
 
@@ -301,8 +304,10 @@ class SmaccerHandler {
 
 		$motion ??= $player->getMotion();
 
+		$playerId = $player->getUniqueId()->getBytes();
+
 		$nbt = $this->createBaseNBT($pos, $motion, $yaw, $pitch);
-		$nbt->setString(EntityTag::CREATOR, $player->getUniqueId()->getBytes());
+		$nbt->setString(EntityTag::CREATOR, $playerId);
 		$nbt->setFloat(EntityTag::SCALE, $scale);
 		$nbt->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $settings->isRotationEnabled());
 		$nbt->setByte(EntityTag::NAMETAG_VISIBLE, (int) $settings->isNametagVisible());
@@ -357,37 +362,39 @@ class SmaccerHandler {
 
 		$entity->setRotateToPlayers($settings->isRotationEnabled());
 
-		$entity->setVisibility($visibility);
-
 		$entity->spawnToAll();
 
-		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getId());
+		$entity->setVisibility($visibility);
 
-		NPCHandler::getInstance()->addNPC($player, $entity);
+		$entityId = $entity->getId();
+		$this->playerNPCs[$playerId][$entityId] = $entity;
+
+		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entityId);
 		return $entity;
 	}
 
-	public function despawnNPC(Player $player, int $npcId) : bool {
-		$npc = NPCHandler::getInstance()->getNPCById($player, $npcId);
-		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
-			$player->sendMessage(TextFormat::RED . 'NPC ID ' . $npcId . ' not found.');
-			return false;
-		}
-
-		$npc->flagForDespawn();
-		NPCHandler::getInstance()->removeNPC($player, $npcId);
-
-		$player->sendMessage(TextFormat::GREEN . 'NPC ID ' . $npcId . ' despawned successfully.');
-		return true;
-	}
-
-	public function isOwnedBy(Entity $entity, Player $player) : bool {
+	public function despawnNPC(Player $player, Entity $entity) : bool {
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
 			return false;
 		}
 
-		$creatorId = $entity->getCreatorId();
+		$entity->flagForDespawn();
+
 		$playerId = $player->getUniqueId()->getBytes();
-		return $creatorId === $playerId;
+		$entityId = $entity->getId();
+		unset($this->playerNPCs[$playerId][$entityId]);
+
+		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $entityId . ' despawned successfully.');
+		return true;
+	}
+
+	public function isOwnedBy(Player $player, Entity $entity) : bool {
+		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
+			return false;
+		}
+
+		$playerId = $player->getUniqueId()->getBytes();
+		$creatorId = $entity->getCreatorId();
+		return $playerId === $creatorId;
 	}
 }

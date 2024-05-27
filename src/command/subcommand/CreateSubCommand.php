@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\command\argument\EntityTypeArgument;
+use aiptu\smaccer\entity\EntitySmaccer;
+use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
 use CortexPE\Commando\args\BooleanArgument;
@@ -58,13 +60,18 @@ class CreateSubCommand extends BaseSubCommand {
 		$scale = $args['scale'] ?? 1.0;
 		$isBaby = $args['isBaby'] ?? false;
 
-		SmaccerHandler::getInstance()->spawnNPC(
+		$npc = SmaccerHandler::getInstance()->spawnNPC(
 			$entityType,
 			$target,
 			$nameTag,
 			$scale,
 			$isBaby
 		);
+		if ($npc instanceof EntitySmaccer || $npc instanceof HumanSmaccer) {
+			if ($sender !== $target) {
+				$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' created successfully! ID: ' . $npc->getId() . 'for ' . $target->getName());
+			}
+		}
 	}
 
 	public function prepare() : void {
