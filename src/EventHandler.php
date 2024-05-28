@@ -11,11 +11,9 @@ use aiptu\smaccer\utils\Queue;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
-use pocketmine\math\Vector2;
-use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
-use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use function atan2;
-use const M_PI;
+use function rad2deg;
+use function sqrt;
 
 class EventHandler implements Listener {
 	public function onQuit(PlayerQuitEvent $event) : void {
@@ -35,8 +33,7 @@ class EventHandler implements Listener {
 		}
 
 		$world = $player->getWorld();
-		$playerPos = $player->getLocation();
-		$playerVector2 = new Vector2($playerPos->x, $playerPos->z);
+		$playerLocation = $player->getLocation();
 		$maxLookDistance = Smaccer::getInstance()->getDefaultSettings()->getMaxDistance();
 		$boundingBox = $player->getBoundingBox()->expandedCopy($maxLookDistance, $maxLookDistance, $maxLookDistance);
 
@@ -53,32 +50,16 @@ class EventHandler implements Listener {
 					return;
 				}
 
-				$entityPos = $entity->getLocation();
-				$angle = atan2($playerPos->z - $entityPos->z, $playerPos->x - $entityPos->x);
-				$yaw = (($angle * 180) / M_PI) - 90;
+				$entityLocation = $entity->getLocation();
+				$xdiff = $playerLocation->x - $entityLocation->x;
+				$zdiff = $playerLocation->z - $entityLocation->z;
+				$ydiff = $playerLocation->y - $entityLocation->y;
 
-				$distance2D = $playerVector2->distance(new Vector2($entityPos->x, $entityPos->z));
-				$pitchAngle = atan2($distance2D, $playerPos->y - $entityPos->y);
-				$pitch = (($pitchAngle * 180) / M_PI) - 90;
+				$yaw = rad2deg(atan2($zdiff, $xdiff)) - 90;
+				$dist = sqrt($xdiff ** 2 + $zdiff ** 2);
+				$pitch = rad2deg(atan2($dist, $ydiff)) - 90;
 
-				if ($entity instanceof HumanSmaccer) {
-					$pk = new MovePlayerPacket();
-					$pk->actorRuntimeId = $entity->getId();
-					$pk->position = $entityPos->add(0, $entity->getEyeHeight(), 0);
-					$pk->yaw = $yaw;
-					$pk->pitch = $pitch;
-					$pk->headYaw = $yaw;
-					$pk->onGround = $entity->onGround;
-				} else {
-					$pk = new MoveActorAbsolutePacket();
-					$pk->actorRuntimeId = $entity->getId();
-					$pk->position = $entityPos->asVector3();
-					$pk->yaw = $yaw;
-					$pk->pitch = $pitch;
-					$pk->headYaw = $yaw;
-				}
-
-				$player->getNetworkSession()->sendDataPacket($pk);
+				$entity->setRotation($yaw, $pitch);
 			}
 		}
 	}

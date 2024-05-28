@@ -36,7 +36,10 @@ abstract class EntityAgeable extends EntitySmaccer implements Ageable {
 	}
 
 	public function setBaby(bool $value = true) : void {
+		$this->baby = $value;
+
 		$this->setScale($value ? $this->getBabyScale() : 1.0);
+
 		$this->networkPropertiesDirty = true;
 	}
 
