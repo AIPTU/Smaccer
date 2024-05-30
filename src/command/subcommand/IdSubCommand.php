@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
+use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
@@ -29,19 +30,22 @@ class IdSubCommand extends BaseSubCommand {
 			throw new AssumptionFailedError(InGameRequiredConstraint::class . ' should have prevented this');
 		}
 
-		$playerId = $sender->getUniqueId()->getBytes();
-		if (Queue::isInQueue($playerId)) {
-			$sender->sendMessage(TextFormat::RED . "You've been in a queue!");
-			return;
-		}
+		$playerName = $sender->getName();
 
-		Queue::addToQueue($playerId);
-		$sender->sendMessage(TextFormat::GREEN . 'You are in the queue, hit the entity to get the id');
+		try {
+			if (Queue::addToQueue($playerName, Queue::ACTION_RETRIEVE)) {
+				$sender->sendMessage(TextFormat::GREEN . 'You are in the queue, hit the entity to get the id');
+			} else {
+				$sender->sendMessage(TextFormat::RED . "You've been in a queue!");
+			}
+		} catch (\InvalidArgumentException $e) {
+			$sender->sendMessage(TextFormat::RED . $e->getMessage());
+		}
 	}
 
 	public function prepare() : void {
 		$this->addConstraint(new InGameRequiredConstraint($this));
 
-		$this->setPermission('smaccer.command.id');
+		$this->setPermission(Permissions::COMMAND_ID);
 	}
 }

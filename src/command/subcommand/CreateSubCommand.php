@@ -9,6 +9,7 @@ use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\utils\Permissions;
 use CortexPE\Commando\args\BooleanArgument;
 use CortexPE\Commando\args\FloatArgument;
 use CortexPE\Commando\args\RawStringArgument;
@@ -39,9 +40,10 @@ class CreateSubCommand extends BaseSubCommand {
 
 		/** @var Smaccer $plugin */
 		$plugin = $this->plugin;
+
 		$target = $sender;
 		if (isset($args['target'])) {
-			if (!$sender->hasPermission('smaccer.command.create.others')) {
+			if (!$sender->hasPermission(Permissions::COMMAND_CREATE_OTHERS)) {
 				$sender->sendMessage(TextFormat::RED . "You don't have permission to create NPCs for other players.");
 				return;
 			}
@@ -59,6 +61,11 @@ class CreateSubCommand extends BaseSubCommand {
 		$nameTag = $args['nametag'] ?? null;
 		$scale = $args['scale'] ?? 1.0;
 		$isBaby = $args['isBaby'] ?? false;
+
+		if ($nameTag !== null && !Player::isValidUserName($nameTag)) {
+			$sender->sendMessage(TextFormat::RED . 'Invalid nametag specified.');
+			return;
+		}
 
 		$npc = SmaccerHandler::getInstance()->spawnNPC(
 			$entityType,
@@ -78,8 +85,8 @@ class CreateSubCommand extends BaseSubCommand {
 		$this->addConstraint(new InGameRequiredConstraint($this));
 
 		$this->setPermissions([
-			'smaccer.command.create.self',
-			'smaccer.command.create.others',
+			Permissions::COMMAND_CREATE_SELF,
+			Permissions::COMMAND_CREATE_OTHERS,
 		]);
 
 		$this->registerArgument(0, new EntityTypeArgument('entity'));

@@ -8,6 +8,7 @@ use aiptu\smaccer\entity\command\CommandHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\entity\animation\ArmSwingAnimation;
@@ -29,6 +30,7 @@ use function microtime;
 use function round;
 use function str_replace;
 use function str_starts_with;
+use function strtolower;
 use function substr;
 
 class HumanSmaccer extends Human {
@@ -133,15 +135,18 @@ class HumanSmaccer extends Human {
 		$damager = $source->getDamager();
 		if ($damager instanceof Player) {
 			$npcId = $this->getId();
-			$playerId = $damager->getUniqueId()->getBytes();
-			if (Queue::isInQueue($playerId)) {
-				if (!SmaccerHandler::getInstance()->isOwnedBy($damager, $source->getEntity())) {
-					$damager->sendMessage(TextFormat::RED . "You don't own this entity!");
+			$playerName = $damager->getName();
+			if (Queue::isInQueue($playerName, Queue::ACTION_RETRIEVE)) {
+				$damager->sendMessage(TextFormat::GREEN . 'NPC Entity ID: ' . $npcId);
+				Queue::removeFromQueue($playerName, Queue::ACTION_RETRIEVE);
+			} elseif (Queue::isInQueue($playerName, Queue::ACTION_DELETE)) {
+				if (!$this->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
+					$damager->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
 					return;
 				}
 
-				$damager->sendMessage(TextFormat::GREEN . 'NPC Entity ID: ' . $npcId);
-				Queue::removeFromQueue($playerId);
+				SmaccerHandler::getInstance()->despawnNPC($damager, $this);
+				Queue::removeFromQueue($playerName, Queue::ACTION_DELETE);
 			}
 		}
 
@@ -170,8 +175,12 @@ class HumanSmaccer extends Human {
 		$cooldownEnabled = $settings->isCooldownEnabled();
 		$cooldown = $settings->getCooldownValue();
 
+		if ($player->hasPermission(Permissions::BYPASS_COOLDOWN)) {
+			return true;
+		}
+
 		if ($cooldownEnabled && $cooldown > 0) {
-			$playerName = $player->getName();
+			$playerName = strtolower($player->getName());
 			$npcId = $this->getId();
 			$lastHitTime = $this->commandCooldowns[$playerName][$npcId] ?? 0.0;
 			$currentTime = microtime(true);
@@ -220,6 +229,10 @@ class HumanSmaccer extends Human {
 
 	public function getCreator() : ?Player {
 		return Server::getInstance()->getPlayerByRawUUID($this->creator);
+	}
+
+	public function isOwnedBy(Player $player) : bool {
+		return $player->getUniqueId()->getBytes() === $this->creator;
 	}
 
 	public function getCommandHandler() : CommandHandler {

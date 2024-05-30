@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
+use aiptu\smaccer\entity\EntitySmaccer;
+use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\utils\Permissions;
+use aiptu\smaccer\utils\Queue;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
@@ -32,9 +36,19 @@ class DeleteSubCommand extends BaseSubCommand {
 		}
 
 		$npcId = $args['npcId'] ?? null;
+		$playerName = $sender->getName();
 
 		if ($npcId === null) {
-			$sender->sendMessage(TextFormat::RED . 'Usage: /' . $aliasUsed . ' <npcId>');
+			try {
+				if (Queue::addToQueue($playerName, Queue::ACTION_DELETE)) {
+					$sender->sendMessage(TextFormat::GREEN . 'You are in a queue, hit the entity to delete it');
+				} else {
+					$sender->sendMessage(TextFormat::RED . "You've been in a queue!");
+				}
+			} catch (\InvalidArgumentException $e) {
+				$sender->sendMessage(TextFormat::RED . $e->getMessage());
+			}
+
 			return;
 		}
 
@@ -42,12 +56,12 @@ class DeleteSubCommand extends BaseSubCommand {
 		$plugin = $this->plugin;
 		$entity = $plugin->getServer()->getWorldManager()->findEntity($npcId);
 
-		if ($entity === null) {
+		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
 			$sender->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');
 			return;
 		}
 
-		if (!SmaccerHandler::getInstance()->isOwnedBy($sender, $entity) && !$sender->hasPermission('smaccer.command.delete.others')) {
+		if (!$entity->isOwnedBy($sender) && !$sender->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
 			$sender->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
 			return;
 		}
@@ -59,10 +73,10 @@ class DeleteSubCommand extends BaseSubCommand {
 		$this->addConstraint(new InGameRequiredConstraint($this));
 
 		$this->setPermissions([
-			'smaccer.command.delete.self',
-			'smaccer.command.delete.others',
+			Permissions::COMMAND_DELETE_SELF,
+			Permissions::COMMAND_DELETE_OTHERS,
 		]);
 
-		$this->registerArgument(0, new IntegerArgument('npcId'));
+		$this->registerArgument(0, new IntegerArgument('npcId', true));
 	}
 }

@@ -7,7 +7,9 @@ namespace aiptu\smaccer;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
+use aiptu\smaccer\task\ParticleTask;
 use CortexPE\Commando\PacketHooker;
+use forms\BaseForm;
 use InvalidArgumentException;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
@@ -15,6 +17,9 @@ use pocketmine\utils\SingletonTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
+use function array_filter;
+use function class_exists;
+use function count;
 use function is_bool;
 use function is_int;
 use function is_numeric;
@@ -28,6 +33,21 @@ class Smaccer extends PluginBase {
 
 	protected function onEnable() : void {
 		self::setInstance($this);
+
+		$requiredVirions = [
+			'Commando' => PacketHooker::class,
+			'forms' => BaseForm::class,
+		];
+		$missingVirions = array_filter($requiredVirions, fn ($class) => !class_exists($class));
+
+		if (count($missingVirions) > 0) {
+			foreach ($missingVirions as $virionName => $virionClass) {
+				$this->getLogger()->error("Required virion '{$virionName}' (class: {$virionClass}) not found.");
+			}
+
+			$this->getLogger()->error('Disabling plugin due to missing virions.');
+			throw new DisablePluginException();
+		}
 
 		new SmaccerHandler();
 
@@ -45,6 +65,8 @@ class Smaccer extends PluginBase {
 		$this->getServer()->getCommandMap()->register('Smaccer', new SmaccerCommand($this, 'smaccer', 'Smaccer commands.'));
 
 		$this->getServer()->getPluginManager()->registerEvents(new EventHandler(), $this);
+
+		$this->getScheduler()->scheduleRepeatingTask(new ParticleTask(), 2);
 	}
 
 	/**

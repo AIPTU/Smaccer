@@ -18,11 +18,9 @@ use function sqrt;
 class EventHandler implements Listener {
 	public function onQuit(PlayerQuitEvent $event) : void {
 		$player = $event->getPlayer();
-		$playerId = $player->getUniqueId()->getBytes();
+		$playerName = $player->getName();
 
-		if (Queue::isInQueue($playerId)) {
-			Queue::removeFromQueue($playerId);
-		}
+		Queue::removeFromAllQueues($playerName);
 	}
 
 	public function onMove(PlayerMoveEvent $event) : void {

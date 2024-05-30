@@ -7,6 +7,7 @@ namespace aiptu\smaccer\command\subcommand;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\utils\Permissions;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
@@ -63,6 +64,6 @@ class ListSubCommand extends BaseSubCommand {
 	public function prepare() : void {
 		$this->addConstraint(new InGameRequiredConstraint($this));
 
-		$this->setPermission('smaccer.command.list');
+		$this->setPermission(Permissions::COMMAND_LIST);
 	}
 }

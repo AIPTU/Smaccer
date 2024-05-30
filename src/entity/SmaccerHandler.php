@@ -35,7 +35,6 @@ use aiptu\smaccer\entity\npc\HoglinSmaccer;
 use aiptu\smaccer\entity\npc\HorseSmaccer;
 use aiptu\smaccer\entity\npc\HuskSmaccer;
 use aiptu\smaccer\entity\npc\LlamaSmaccer;
-use aiptu\smaccer\entity\npc\LlamaSpitSmaccer;
 use aiptu\smaccer\entity\npc\MagmaCubeSmaccer;
 use aiptu\smaccer\entity\npc\MooshroomSmaccer;
 use aiptu\smaccer\entity\npc\MuleSmaccer;
@@ -53,6 +52,7 @@ use aiptu\smaccer\entity\npc\RabbitSmaccer;
 use aiptu\smaccer\entity\npc\RavagerSmaccer;
 use aiptu\smaccer\entity\npc\SalmonSmaccer;
 use aiptu\smaccer\entity\npc\SheepSmaccer;
+use aiptu\smaccer\entity\npc\ShulkerSmaccer;
 use aiptu\smaccer\entity\npc\SilverfishSmaccer;
 use aiptu\smaccer\entity\npc\SkeletonHorseSmaccer;
 use aiptu\smaccer\entity\npc\SkeletonSmaccer;
@@ -143,7 +143,6 @@ class SmaccerHandler {
 		'Horse' => HorseSmaccer::class,
 		'Husk' => HuskSmaccer::class,
 		'Llama' => LlamaSmaccer::class,
-		'LlamaSpit' => LlamaSpitSmaccer::class,
 		'MagmaCube' => MagmaCubeSmaccer::class,
 		'Mooshroom' => MooshroomSmaccer::class,
 		'Mule' => MuleSmaccer::class,
@@ -161,6 +160,7 @@ class SmaccerHandler {
 		'Ravager' => RavagerSmaccer::class,
 		'Salmon' => SalmonSmaccer::class,
 		'Sheep' => SheepSmaccer::class,
+		'Shulker' => ShulkerSmaccer::class,
 		'Silverfish' => SilverfishSmaccer::class,
 		'SkeletonHorse' => SkeletonHorseSmaccer::class,
 		'Skeleton' => SkeletonSmaccer::class,
@@ -386,15 +386,5 @@ class SmaccerHandler {
 
 		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $entityId . ' despawned successfully.');
 		return true;
-	}
-
-	public function isOwnedBy(Player $player, Entity $entity) : bool {
-		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			return false;
-		}
-
-		$playerId = $player->getUniqueId()->getBytes();
-		$creatorId = $entity->getCreatorId();
-		return $playerId === $creatorId;
 	}
 }

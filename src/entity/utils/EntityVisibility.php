@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\utils;
 
+use function strtolower;
+
 enum EntityVisibility : int {
 	case VISIBLE_TO_EVERYONE = 0;
 	case VISIBLE_TO_CREATOR = 1;
@@ -16,5 +18,23 @@ enum EntityVisibility : int {
 			self::INVISIBLE_TO_EVERYONE->value => self::INVISIBLE_TO_EVERYONE,
 			default => throw new \InvalidArgumentException("Invalid visibility value: {$value}"),
 		};
+	}
+
+	public static function fromString(string $value) : self {
+		return match (strtolower($value)) {
+			'visible_to_everyone' => self::VISIBLE_TO_EVERYONE,
+			'visible_to_creator' => self::VISIBLE_TO_CREATOR,
+			'invisible_to_everyone' => self::INVISIBLE_TO_EVERYONE,
+			default => throw new \InvalidArgumentException("Invalid visibility string: {$value}"),
+		};
+	}
+
+	public static function getAll() : array {
+		$visibilities = [];
+		foreach (self::cases() as $visibility) {
+			$visibilities[$visibility->value] = $visibility->name;
+		}
+
+		return $visibilities;
 	}
 }
