@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
 
+use aiptu\libsounds\SoundInstance;
 use aiptu\smaccer\entity\command\CommandHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
@@ -160,8 +161,8 @@ abstract class EntitySmaccer extends Entity {
 	private function canExecuteCommands(Player $player) : bool {
 		$plugin = Smaccer::getInstance();
 		$settings = $plugin->getDefaultSettings();
-		$cooldownEnabled = $settings->isCooldownEnabled();
-		$cooldown = $settings->getCooldownValue();
+		$cooldownEnabled = $settings->isCommandCooldownEnabled();
+		$cooldown = $settings->getCommandCooldownValue();
 
 		if ($player->hasPermission(Permissions::BYPASS_COOLDOWN)) {
 			return true;
@@ -209,6 +210,10 @@ abstract class EntitySmaccer extends Entity {
 			EntityTag::COMMAND_TYPE_PLAYER => $commandMap->dispatch($player, $command),
 			default => throw new \InvalidArgumentException("Invalid command type: {$type}")
 		};
+	}
+
+	public function addSound(SoundInstance $soundInstance) : void {
+		$this->broadcastSound($soundInstance);
 	}
 
 	public function getCreatorId() : string {

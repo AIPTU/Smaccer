@@ -5,10 +5,10 @@ config-version: 1.0
 
 # Default settings for NPCs.
 npc-default-settings:
-  # Cooldown settings for NPC actions.
-  # - enabled: Whether cooldown is enabled or not.
+  # Cooldown settings for NPC commands.
+  # - enabled: Whether command cooldown is enabled or not.
   # - value: Cooldown duration in seconds.
-  cooldown:
+  commandCooldown:
     enabled: true
     value: 3
 
@@ -37,3 +37,19 @@ npc-default-settings:
   # Note: Set to true if slap action is intended for human NPCs.
   slapBack:
     enabled: true
+
+  # Cooldown settings for NPC emotes.
+  # - enabled: Whether emote cooldown is enabled or not.
+  # - value: Cooldown duration in seconds.
+  # Note: Emotes are non-interactive gestures or expressions performed by NPCs.
+  emoteCooldown:
+    enabled: true
+    value: 5
+
+  # Cooldown settings for NPC action emotes.
+  # - enabled: Whether action emote cooldown is enabled or not.
+  # - value: Cooldown duration in seconds.
+  # Note: Action emotes are interactive gestures or expressions that trigger specific actions when performed by NPCs.
+  actionEmoteCooldown:
+    enabled: true
+    value: 5

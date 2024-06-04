@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
 
+use aiptu\libsounds\SoundInstance;
 use aiptu\smaccer\entity\command\CommandHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
+use pocketmine\color\Color;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\entity\animation\ArmSwingAnimation;
 use pocketmine\entity\Human;
@@ -22,12 +24,20 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\NetworkBroadcastUtils;
+use pocketmine\network\mcpe\protocol\EmotePacket;
 use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\particle\DustParticle;
 use function array_map;
+use function cos;
+use function deg2rad;
 use function microtime;
+use function mt_rand;
 use function round;
+use function sin;
 use function str_replace;
 use function str_starts_with;
 use function strtolower;
@@ -39,8 +49,16 @@ class HumanSmaccer extends Human {
 	protected CommandHandler $commandHandler;
 	protected bool $rotateToPlayers = true;
 	protected bool $slapBack = true;
+	protected ?string $actionEmoteId = null;
+	protected ?string $emoteId = null;
 
-	private array $commandCooldowns = [];
+	protected array $emoteCooldowns = [];
+	protected array $actionEmoteCooldowns = [];
+	protected array $commandCooldowns = [];
+
+	private const RADIUS = 0.8;
+	private const ANGLE_INCREMENT = 0.09;
+	private const PARTICLE_Y_MULTIPLIER = 2.0;
 
 	public function __construct(Location $location, Skin $skin, ?CompoundTag $nbt = null) {
 		if ($nbt instanceof CompoundTag) {
@@ -60,7 +78,11 @@ class HumanSmaccer extends Human {
 		$this->setNameTagAlwaysVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagAlwaysVisible()));
 		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible()));
 		$this->setVisibility(EntityVisibility::fromInt($nbt->getInt(EntityTag::VISIBILITY)));
+
 		$this->setSlapBack((bool) $nbt->getByte(EntityTag::SLAP_BACK, (int) $this->slapBack));
+
+		$this->actionEmoteId = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? $nbt->getString(EntityTag::ACTION_EMOTE) : null;
+		$this->emoteId = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? $nbt->getString(EntityTag::EMOTE) : null;
 	}
 
 	public function saveNBT() : CompoundTag {
@@ -71,7 +93,16 @@ class HumanSmaccer extends Human {
 		$nbt->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $this->rotateToPlayers);
 		$nbt->setByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible());
 		$nbt->setInt(EntityTag::VISIBILITY, $this->visibility->value);
+
 		$nbt->setByte(EntityTag::SLAP_BACK, (int) $this->slapBack);
+
+		if ($this->actionEmoteId !== null) {
+			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmoteId);
+		}
+
+		if ($this->emoteId !== null) {
+			$nbt->setString(EntityTag::EMOTE, $this->emoteId);
+		}
 
 		$commands = array_map(function ($commandData) {
 			$commandTag = CompoundTag::create();
@@ -119,6 +150,60 @@ class HumanSmaccer extends Human {
 		}
 	}
 
+	public function setActionEmoteId(?string $actionEmoteId) : void {
+		$this->actionEmoteId = $actionEmoteId;
+	}
+
+	public function getActionEmoteId() : ?string {
+		return $this->actionEmoteId;
+	}
+
+	public function setEmoteId(?string $emoteId) : void {
+		$this->emoteId = $emoteId;
+	}
+
+	public function getEmoteId() : ?string {
+		return $this->emoteId;
+	}
+
+	protected function entityBaseTick(int $tickDiff = 1) : bool {
+		$hasUpdate = parent::entityBaseTick($tickDiff);
+
+		$entityPos = $this->getPosition();
+		$entityWorld = $entityPos->getWorld();
+		$entityScale = $this->getScale();
+
+		$angle = $this->ticksLived / self::ANGLE_INCREMENT;
+		$offsetX = cos(deg2rad($angle)) * self::RADIUS;
+		$offsetZ = sin(deg2rad($angle)) * self::RADIUS;
+		$offsetY = self::PARTICLE_Y_MULTIPLIER * $entityScale;
+
+		$particle1Pos = $entityPos->add(-$offsetX, $offsetY, -$offsetZ);
+		$particle2Pos = $entityPos->add(-$offsetZ, $offsetY, -$offsetX);
+
+		$particle1 = new DustParticle($this->getRandomColor());
+		$particle2 = new DustParticle($this->getRandomColor());
+
+		$entityWorld->addParticle($particle1Pos, $particle1);
+		$entityWorld->addParticle($particle2Pos, $particle2);
+
+		if ($this->emoteId !== null && Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
+			if ($this->handleEmoteCooldown($this->emoteId)) {
+				$this->broadcastEmote($this->emoteId);
+				$hasUpdate = true;
+			}
+		} elseif ($this->emoteId !== null) {
+			$this->broadcastEmote($this->emoteId);
+			$hasUpdate = true;
+		}
+
+		return $hasUpdate;
+	}
+
+	private function getRandomColor() : Color {
+		return new Color(mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255));
+	}
+
 	public function spawnTo(Player $player) : void {
 		if ($this->visibility === EntityVisibility::INVISIBLE_TO_EVERYONE) {
 			return;
@@ -163,7 +248,17 @@ class HumanSmaccer extends Human {
 		}
 
 		if ($this->canSlapBack()) {
-			$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
+			$this->broadcastAnimation(new ArmSwingAnimation($this));
+		}
+
+		if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
+			if ($this->actionEmoteId !== null && $this->handleActionEmoteCooldown($this->actionEmoteId)) {
+				$this->broadcastEmote($this->actionEmoteId, [$player]);
+			}
+		} else {
+			if ($this->actionEmoteId !== null) {
+				$this->broadcastEmote($this->actionEmoteId, [$player]);
+			}
 		}
 
 		return true;
@@ -172,8 +267,8 @@ class HumanSmaccer extends Human {
 	private function canExecuteCommands(Player $player) : bool {
 		$plugin = Smaccer::getInstance();
 		$settings = $plugin->getDefaultSettings();
-		$cooldownEnabled = $settings->isCooldownEnabled();
-		$cooldown = $settings->getCooldownValue();
+		$cooldownEnabled = $settings->isCommandCooldownEnabled();
+		$cooldown = $settings->getCommandCooldownValue();
 
 		if ($player->hasPermission(Permissions::BYPASS_COOLDOWN)) {
 			return true;
@@ -221,6 +316,36 @@ class HumanSmaccer extends Human {
 			EntityTag::COMMAND_TYPE_PLAYER => $commandMap->dispatch($player, $command),
 			default => throw new \InvalidArgumentException("Invalid command type: {$type}")
 		};
+	}
+
+	private function handleEmoteCooldown(string $emoteId) : bool {
+		$currentTime = microtime(true);
+		if (isset($this->emoteCooldowns[$emoteId]) && ($currentTime - $this->emoteCooldowns[$emoteId]) < Smaccer::getInstance()->getDefaultSettings()->getEmoteCooldownValue()) {
+			return false;
+		}
+
+		$this->emoteCooldowns[$emoteId] = $currentTime;
+		return true;
+	}
+
+	private function handleActionEmoteCooldown(string $actionEmoteId) : bool {
+		$currentTime = microtime(true);
+		if (isset($this->actionEmoteCooldowns[$actionEmoteId]) && ($currentTime - $this->actionEmoteCooldowns[$actionEmoteId]) < Smaccer::getInstance()->getDefaultSettings()->getActionEmoteCooldownValue()) {
+			return false;
+		}
+
+		$this->actionEmoteCooldowns[$actionEmoteId] = $currentTime;
+		return true;
+	}
+
+	public function broadcastEmote(string $emoteId, ?array $targets = null) : void {
+		NetworkBroadcastUtils::broadcastPackets($targets ?? $this->getViewers(), [
+			EmotePacket::create($this->getId(), $emoteId, '', '', EmotePacket::FLAG_MUTE_ANNOUNCEMENT),
+		]);
+	}
+
+	public function addSound(SoundInstance $soundInstance) : void {
+		$this->broadcastSound($soundInstance);
 	}
 
 	public function getCreatorId() : string {

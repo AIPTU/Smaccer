@@ -7,7 +7,6 @@ namespace aiptu\smaccer;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
-use aiptu\smaccer\task\ParticleTask;
 use CortexPE\Commando\PacketHooker;
 use forms\BaseForm;
 use InvalidArgumentException;
@@ -65,8 +64,6 @@ class Smaccer extends PluginBase {
 		$this->getServer()->getCommandMap()->register('Smaccer', new SmaccerCommand($this, 'smaccer', 'Smaccer commands.'));
 
 		$this->getServer()->getPluginManager()->registerEvents(new EventHandler(), $this);
-
-		$this->getScheduler()->scheduleRepeatingTask(new ParticleTask(), 2);
 	}
 
 	/**
@@ -82,23 +79,25 @@ class Smaccer extends PluginBase {
 
 		/**
 		 * @var array{
-		 *     cooldown: array{enabled: bool, value: float|int},
+		 *     commandCooldown: array{enabled: bool, value: float|int},
 		 *     rotation: array{enabled: bool, 'max-distance': float|int},
 		 *     nametagVisible: array{enabled: bool},
 		 *     entityVisibility: array{value: int},
-		 *     slapBack: array{enabled: bool}
+		 *     slapBack: array{enabled: bool},
+		 *     emoteCooldown: array{enabled: bool, value: float|int},
+		 *     actionEmoteCooldown: array{enabled: bool, value: float|int}
 		 * } $npcSettings
 		 */
 		$npcSettings = $config->get('npc-default-settings', []);
 
-		$cooldownEnabled = $npcSettings['cooldown']['enabled'] ?? null;
-		$cooldownValue = $npcSettings['cooldown']['value'] ?? null;
+		$commandCooldownEnabled = $npcSettings['commandCooldown']['enabled'] ?? null;
+		$commandCooldownValue = $npcSettings['commandCooldown']['value'] ?? null;
 
-		if (!isset($cooldownEnabled) || !is_bool($cooldownEnabled) || !isset($cooldownValue) || !is_numeric($cooldownValue)) {
-			throw new InvalidArgumentException("Invalid cooldown settings. 'enabled' must be a boolean and 'value' must be provided and numeric.");
+		if (!isset($commandCooldownEnabled) || !is_bool($commandCooldownEnabled) || !isset($commandCooldownValue) || !is_numeric($commandCooldownValue)) {
+			throw new InvalidArgumentException("Invalid command cooldown settings. 'enabled' must be a boolean and 'value' must be provided and numeric.");
 		}
 
-		$cooldownValue = (float) $cooldownValue;
+		$commandCooldownValue = (float) $commandCooldownValue;
 
 		$rotationEnabled = $npcSettings['rotation']['enabled'] ?? null;
 		$maxDistance = $npcSettings['rotation']['maxDistance'] ?? null;
@@ -125,14 +124,36 @@ class Smaccer extends PluginBase {
 			throw new InvalidArgumentException("Invalid slap settings. 'enabled' must be a boolean.");
 		}
 
+		$emoteCooldownEnabled = $npcSettings['emoteCooldown']['enabled'] ?? null;
+		$emoteCooldownValue = $npcSettings['emoteCooldown']['value'] ?? null;
+
+		if (!isset($emoteCooldownEnabled) || !is_bool($emoteCooldownEnabled) || !isset($emoteCooldownValue) || !is_numeric($emoteCooldownValue)) {
+			throw new InvalidArgumentException("Invalid emote cooldown settings. 'enabled' must be a boolean and 'value' must be provided and numeric.");
+		}
+
+		$emoteCooldownValue = (float) $emoteCooldownValue;
+
+		$actionEmoteCooldownEnabled = $npcSettings['actionEmoteCooldown']['enabled'] ?? null;
+		$actionEmoteCooldownValue = $npcSettings['actionEmoteCooldown']['value'] ?? null;
+
+		if (!isset($actionEmoteCooldownEnabled) || !is_bool($actionEmoteCooldownEnabled) || !isset($actionEmoteCooldownValue) || !is_numeric($actionEmoteCooldownValue)) {
+			throw new InvalidArgumentException("Invalid action emote cooldown settings. 'enabled' must be a boolean and 'value' must be provided and numeric.");
+		}
+
+		$actionEmoteCooldownValue = (float) $actionEmoteCooldownValue;
+
 		$this->npcDefaultSettings = new NPCDefaultSettings(
-			$cooldownEnabled,
-			$cooldownValue,
+			$commandCooldownEnabled,
+			$commandCooldownValue,
 			$rotationEnabled,
 			$maxDistance,
 			$nametagVisible,
 			EntityVisibility::fromInt($entityVisibility),
-			$slapEnabled
+			$slapEnabled,
+			$emoteCooldownEnabled,
+			$emoteCooldownValue,
+			$actionEmoteCooldownEnabled,
+			$actionEmoteCooldownValue
 		);
 	}
 

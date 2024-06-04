@@ -8,21 +8,25 @@ use aiptu\smaccer\entity\utils\EntityVisibility;
 
 class NPCDefaultSettings {
 	public function __construct(
-		private bool $cooldownEnabled,
-		private float $cooldownValue,
+		private bool $commandCooldownEnabled,
+		private float $commandCooldownValue,
 		private bool $rotationEnabled,
 		private float $maxDistance,
 		private bool $nametagVisible,
 		private EntityVisibility $entityVisibility,
-		private bool $slapEnabled
+		private bool $slapEnabled,
+		private bool $emoteCooldownEnabled,
+		private float $emoteCooldownValue,
+		private bool $actionEmoteCooldownEnabled,
+		private float $actionEmoteCooldownValue,
 	) {}
 
-	public function isCooldownEnabled() : bool {
-		return $this->cooldownEnabled;
+	public function isCommandCooldownEnabled() : bool {
+		return $this->commandCooldownEnabled;
 	}
 
-	public function getCooldownValue() : float {
-		return $this->cooldownValue;
+	public function getCommandCooldownValue() : float {
+		return $this->commandCooldownValue;
 	}
 
 	public function isRotationEnabled() : bool {
@@ -43,5 +47,21 @@ class NPCDefaultSettings {
 
 	public function isSlapEnabled() : bool {
 		return $this->slapEnabled;
+	}
+
+	public function isEmoteCooldownEnabled() : bool {
+		return $this->emoteCooldownEnabled;
+	}
+
+	public function getEmoteCooldownValue() : float {
+		return $this->emoteCooldownValue;
+	}
+
+	public function isActionEmoteCooldownEnabled() : bool {
+		return $this->actionEmoteCooldownEnabled;
+	}
+
+	public function getActionEmoteCooldownValue() : float {
+		return $this->actionEmoteCooldownValue;
 	}
 }

@@ -335,6 +335,9 @@ class SmaccerHandler {
 			);
 
 			$nbt->setByte(EntityTag::SLAP_BACK, (int) $settings->isSlapEnabled());
+
+			$nbt->setString(EntityTag::ACTION_EMOTE, '1e137be8-8c5a-c880-e65e-8e98548d5b51'); // Awesome flip
+			$nbt->setString(EntityTag::EMOTE, '2a2ea1f8-55ca-e1db-9562-0c786a62f2cd'); // Dab dance
 		}
 
 		$entity = $this->createEntity($type, $pos, $nbt);
