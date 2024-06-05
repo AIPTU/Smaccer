@@ -62,11 +62,6 @@ class CreateSubCommand extends BaseSubCommand {
 		$scale = $args['scale'] ?? 1.0;
 		$isBaby = $args['isBaby'] ?? false;
 
-		if ($nameTag !== null && !Player::isValidUserName($nameTag)) {
-			$sender->sendMessage(TextFormat::RED . 'Invalid nametag specified.');
-			return;
-		}
-
 		$npc = SmaccerHandler::getInstance()->spawnNPC(
 			$entityType,
 			$target,

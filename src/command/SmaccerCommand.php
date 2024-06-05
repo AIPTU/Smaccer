@@ -18,10 +18,12 @@ use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
 use forms\CustomForm;
 use forms\CustomFormResponse;
-use forms\element\Dropdown;
 use forms\element\Input;
 use forms\element\StepSlider;
 use forms\element\Toggle;
+use forms\menu\Button;
+use forms\menu\Image;
+use forms\MenuForm;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
@@ -32,7 +34,6 @@ use function array_map;
 use function array_values;
 use function assert;
 use function count;
-use function trim;
 
 class SmaccerCommand extends BaseCommand {
 	/** @param list<string> $aliases */
@@ -51,46 +52,64 @@ class SmaccerCommand extends BaseCommand {
 		}
 
 		if (count($args) === 0) {
-			$sender->sendForm(new CustomForm('Spawn NPC', [
-				new Dropdown('Select NPC type', array_map('strtolower', array_keys(SmaccerHandler::getInstance()->getRegisteredNPC()))),
-				new Input('Enter NPC nametag', 'NPC Name', ''),
-				new Input('Set NPC scale (0.1 - 10.0)', '1.0', '1.0'),
-				new Toggle('Is Baby?', false),
-				new StepSlider('Select visibility', array_values(EntityVisibility::getAll())),
-			], function (Player $player, CustomFormResponse $response) : void {
-				/**
-				 * @var string $npcType
-				 * @var string $nameTag
-				 * @var string $scaleStr
-				 * @var bool $isBaby
-				 * @var string $visibility
-				 */
-				[$npcType, $nameTag, $scaleStr, $isBaby, $visibility] = $response->getValues();
-
-				if (trim($nameTag) !== '' && !Player::isValidUserName($nameTag)) {
-					$player->sendMessage(TextFormat::RED . 'Invalid nametag specified.');
-					return;
+			$sender->sendForm(new MenuForm('NPC Management', 'Choose an action:', [
+				new Button('Create NPC'),
+			], function (Player $player, Button $selected) : void {
+				switch ($selected->text) {
+					case 'Create NPC':
+						$this->sendEntitySelectionForm($player);
+						break;
+					default:
+						$player->sendMessage(TextFormat::RED . 'Invalid option selected.');
+						break;
 				}
-
-				$scale = (float) $scaleStr;
-				if ($scale < 0.1 || $scale > 10.0) {
-					$player->sendMessage(TextFormat::RED . 'Invalid scale value. Please enter a number between 0.1 and 10.0.');
-					return;
-				}
-
-				$visibilityEnum = EntityVisibility::fromString($visibility);
-
-				$npc = SmaccerHandler::getInstance()->spawnNPC(
-					$npcType,
-					$player,
-					$nameTag,
-					$scale,
-					$isBaby,
-					$visibilityEnum,
-				);
 			}));
+
 			return;
 		}
+	}
+
+	private function sendEntitySelectionForm(Player $player) : void {
+		$entityTypes = array_keys(SmaccerHandler::getInstance()->getRegisteredNPC());
+		$player->sendForm(new MenuForm('Select Entity', 'Choose an entity to create:', array_map(fn ($type) => new Button($type, Image::url("https://raw.githubusercontent.com/AIPTU/Smaccer/master/assets/{$type}Face.png")), $entityTypes), function (Player $player, Button $selected) use ($entityTypes) : void {
+			$selectedEntityType = $entityTypes[$selected->getValue()];
+
+			$this->sendCreateNPCForm($player, $selectedEntityType);
+		}));
+	}
+
+	private function sendCreateNPCForm(Player $player, string $entityType) : void {
+		$player->sendForm(new CustomForm('Spawn NPC', [
+			new Input('Enter NPC nametag', 'NPC Name', ''),
+			new Input('Set NPC scale (0.1 - 10.0)', '1.0', '1.0'),
+			new Toggle('Is Baby?', false),
+			new StepSlider('Select visibility', array_values(EntityVisibility::getAll())),
+		], function (Player $player, CustomFormResponse $response) use ($entityType) : void {
+			/**
+			 * @var string $nameTag
+			 * @var string $scaleStr
+			 * @var bool $isBaby
+			 * @var string $visibility
+			 */
+			[$nameTag, $scaleStr, $isBaby, $visibility] = $response->getValues();
+
+			$scale = (float) $scaleStr;
+			if ($scale < 0.1 || $scale > 10.0) {
+				$player->sendMessage(TextFormat::RED . 'Invalid scale value. Please enter a number between 0.1 and 10.0.');
+				return;
+			}
+
+			$visibilityEnum = EntityVisibility::fromString($visibility);
+
+			SmaccerHandler::getInstance()->spawnNPC(
+				$entityType,
+				$player,
+				$nameTag,
+				$scale,
+				$isBaby,
+				$visibilityEnum,
+			);
+		}));
 	}
 
 	public function prepare() : void {
