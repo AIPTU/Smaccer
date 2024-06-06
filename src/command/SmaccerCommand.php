@@ -30,12 +30,15 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\TextFormat;
 use function array_keys;
-use function array_map;
+use function array_search;
 use function array_values;
 use function assert;
 use function count;
+use function min;
 
 class SmaccerCommand extends BaseCommand {
+	private const ITEMS_PER_PAGE = 13;
+
 	/** @param list<string> $aliases */
 	public function __construct(
 		PluginBase $plugin,
@@ -57,7 +60,7 @@ class SmaccerCommand extends BaseCommand {
 			], function (Player $player, Button $selected) : void {
 				switch ($selected->text) {
 					case 'Create NPC':
-						$this->sendEntitySelectionForm($player);
+						$this->sendEntitySelectionForm($player, 0);
 						break;
 					default:
 						$player->sendMessage(TextFormat::RED . 'Invalid option selected.');
@@ -69,12 +72,36 @@ class SmaccerCommand extends BaseCommand {
 		}
 	}
 
-	private function sendEntitySelectionForm(Player $player) : void {
+	private function sendEntitySelectionForm(Player $player, int $page) : void {
 		$entityTypes = array_keys(SmaccerHandler::getInstance()->getRegisteredNPC());
-		$player->sendForm(new MenuForm('Select Entity', 'Choose an entity to create:', array_map(fn ($type) => new Button($type, Image::url("https://raw.githubusercontent.com/AIPTU/Smaccer/master/assets/{$type}Face.png")), $entityTypes), function (Player $player, Button $selected) use ($entityTypes) : void {
-			$selectedEntityType = $entityTypes[$selected->getValue()];
 
-			$this->sendCreateNPCForm($player, $selectedEntityType);
+		$start = $page * self::ITEMS_PER_PAGE;
+		$end = min($start + self::ITEMS_PER_PAGE, count($entityTypes));
+
+		$buttons = [];
+		for ($i = $start; $i < $end; ++$i) {
+			$type = $entityTypes[$i];
+			$buttons[] = new Button($type, Image::url("https://raw.githubusercontent.com/AIPTU/Smaccer/master/assets/{$type}Face.png"));
+		}
+
+		if ($page > 0) {
+			$buttons[] = new Button('Previous Page', Image::path('textures/ui/arrowLeft.png'));
+		}
+
+		if ($end < count($entityTypes)) {
+			$buttons[] = new Button('Next Page', Image::path('textures/ui/arrowRight.png'));
+		}
+
+		$player->sendForm(new MenuForm('Select Entity', 'Choose an entity to create:', $buttons, function (Player $player, Button $selected) use ($entityTypes, $page) : void {
+			$selectedText = $selected->text;
+			if ($selectedText === 'Previous Page') {
+				$this->sendEntitySelectionForm($player, $page - 1);
+			} elseif ($selectedText === 'Next Page') {
+				$this->sendEntitySelectionForm($player, $page + 1);
+			} else {
+				$selectedEntityType = $entityTypes[array_search($selectedText, $entityTypes, true)];
+				$this->sendCreateNPCForm($player, $selectedEntityType);
+			}
 		}));
 	}
 
