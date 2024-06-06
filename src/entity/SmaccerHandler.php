@@ -34,6 +34,7 @@ use aiptu\smaccer\entity\npc\GuardianSmaccer;
 use aiptu\smaccer\entity\npc\HoglinSmaccer;
 use aiptu\smaccer\entity\npc\HorseSmaccer;
 use aiptu\smaccer\entity\npc\HuskSmaccer;
+use aiptu\smaccer\entity\npc\IronGolemSmaccer;
 use aiptu\smaccer\entity\npc\LlamaSmaccer;
 use aiptu\smaccer\entity\npc\MagmaCubeSmaccer;
 use aiptu\smaccer\entity\npc\MooshroomSmaccer;
@@ -58,6 +59,7 @@ use aiptu\smaccer\entity\npc\SkeletonHorseSmaccer;
 use aiptu\smaccer\entity\npc\SkeletonSmaccer;
 use aiptu\smaccer\entity\npc\SlimeSmaccer;
 use aiptu\smaccer\entity\npc\SnifferSmaccer;
+use aiptu\smaccer\entity\npc\SnowGolemSmaccer;
 use aiptu\smaccer\entity\npc\SpiderSmaccer;
 use aiptu\smaccer\entity\npc\SquidSmaccer;
 use aiptu\smaccer\entity\npc\StraySmaccer;
@@ -142,6 +144,7 @@ class SmaccerHandler {
 		'Hoglin' => HoglinSmaccer::class,
 		'Horse' => HorseSmaccer::class,
 		'Husk' => HuskSmaccer::class,
+		'IronGolem' => IronGolemSmaccer::class,
 		'Llama' => LlamaSmaccer::class,
 		'MagmaCube' => MagmaCubeSmaccer::class,
 		'Mooshroom' => MooshroomSmaccer::class,
@@ -166,6 +169,7 @@ class SmaccerHandler {
 		'Skeleton' => SkeletonSmaccer::class,
 		'Slime' => SlimeSmaccer::class,
 		'Sniffer' => SnifferSmaccer::class,
+		'SnowGolem' => SnowGolemSmaccer::class,
 		'Spider' => SpiderSmaccer::class,
 		'Squid' => SquidSmaccer::class,
 		'Stray' => StraySmaccer::class,
