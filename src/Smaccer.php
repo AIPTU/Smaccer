@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer;
 
+use aiptu\libsounds\SoundBuilder;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
@@ -36,6 +37,7 @@ class Smaccer extends PluginBase {
 		$requiredVirions = [
 			'Commando' => PacketHooker::class,
 			'forms' => BaseForm::class,
+			'libsounds' => SoundBuilder::class,
 		];
 		$missingVirions = array_filter($requiredVirions, fn ($class) => !class_exists($class));
 
