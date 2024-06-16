@@ -17,24 +17,24 @@ use aiptu\smaccer\entity\EntitySmaccer;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
-class TadpoleSmaccer extends EntitySmaccer {
+class BoggedSmaccer extends EntitySmaccer {
 	protected function getInitialSizeInfo() : EntitySizeInfo {
 		return new EntitySizeInfo($this->getHeight(), $this->getWidth());
 	}
 
 	public function getHeight() : float {
-		return 0.6;
+		return 1.9;
 	}
 
 	public function getWidth() : float {
-		return 0.8;
+		return 0.6;
 	}
 
 	public static function getNetworkTypeId() : string {
-		return EntityIds::TADPOLE;
+		return EntityIds::BOGGED;
 	}
 
 	public function getName() : string {
-		return 'Tadpole';
+		return 'Bogged';
 	}
 }

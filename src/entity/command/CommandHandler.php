@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * Copyright (c) 2024 AIPTU
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE.md file that was distributed with this source code.
+ *
+ * @see https://github.com/AIPTU/Smaccer
+ */
+
 declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\command;
@@ -18,7 +27,8 @@ class CommandHandler {
 	private int $nextId = 1;
 
 	public function __construct(CompoundTag $nbt) {
-		if (($commandsTag = $nbt->getTag(EntityTag::COMMANDS)) instanceof ListTag) {
+		$commandsTag = $nbt->getTag(EntityTag::COMMANDS);
+		if ($commandsTag instanceof ListTag) {
 			foreach ($commandsTag as $tag) {
 				if ($tag instanceof CompoundTag) {
 					$command = $tag->getString(self::KEY_COMMAND);
@@ -46,6 +56,29 @@ class CommandHandler {
 		$id = $this->nextId++;
 		$this->commands[$id] = [self::KEY_COMMAND => $command, self::KEY_TYPE => $type];
 		return $id;
+	}
+
+	/**
+	 * Edits an existing command identified by its ID.
+	 * Returns true if successful, false if the command ID does not exist.
+	 */
+	public function edit(int $id, string $newCommand, string $newType) : bool {
+		if (!$this->exists($id)) {
+			return false;
+		}
+
+		if (!in_array($newType, [EntityTag::COMMAND_TYPE_PLAYER, EntityTag::COMMAND_TYPE_SERVER], true)) {
+			return false;
+		}
+
+		foreach ($this->commands as $existingId => $data) {
+			if ($existingId !== $id && $data[self::KEY_COMMAND] === $newCommand && $data[self::KEY_TYPE] === $newType) {
+				return false;
+			}
+		}
+
+		$this->commands[$id] = [self::KEY_COMMAND => $newCommand, self::KEY_TYPE => $newType];
+		return true;
 	}
 
 	/**
@@ -87,5 +120,13 @@ class CommandHandler {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Removes or clears all commands.
+	 */
+	public function clearAll() : void {
+		$this->commands = [];
+		$this->nextId = 1;
 	}
 }

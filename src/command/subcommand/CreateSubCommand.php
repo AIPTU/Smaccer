@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * Copyright (c) 2024 AIPTU
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE.md file that was distributed with this source code.
+ *
+ * @see https://github.com/AIPTU/Smaccer
+ */
+
 declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
@@ -7,6 +16,7 @@ namespace aiptu\smaccer\command\subcommand;
 use aiptu\smaccer\command\argument\EntityTypeArgument;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
+use aiptu\smaccer\entity\NPCData;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
@@ -59,15 +69,24 @@ class CreateSubCommand extends BaseSubCommand {
 
 		$entityType = $args['entity'];
 		$nameTag = $args['nametag'] ?? null;
+
 		$scale = $args['scale'] ?? 1.0;
+		if ($scale < 0.1 || $scale > 10.0) {
+			$sender->sendMessage(TextFormat::RED . 'Invalid scale value. Please enter a number between 0.1 and 10.0.');
+			return;
+		}
+
 		$isBaby = $args['isBaby'] ?? false;
+
+		$npcData = NPCData::create()
+			->setNameTag($nameTag)
+			->setScale($scale)
+			->setBaby($isBaby);
 
 		$npc = SmaccerHandler::getInstance()->spawnNPC(
 			$entityType,
 			$target,
-			$nameTag,
-			$scale,
-			$isBaby
+			$npcData
 		);
 		if ($npc instanceof EntitySmaccer || $npc instanceof HumanSmaccer) {
 			if ($sender !== $target) {

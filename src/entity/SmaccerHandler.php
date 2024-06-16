@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * Copyright (c) 2024 AIPTU
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE.md file that was distributed with this source code.
+ *
+ * @see https://github.com/AIPTU/Smaccer
+ */
+
 declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
@@ -10,6 +19,8 @@ use aiptu\smaccer\entity\npc\AxolotlSmaccer;
 use aiptu\smaccer\entity\npc\BatSmaccer;
 use aiptu\smaccer\entity\npc\BeeSmaccer;
 use aiptu\smaccer\entity\npc\BlazeSmaccer;
+use aiptu\smaccer\entity\npc\BoggedSmaccer;
+use aiptu\smaccer\entity\npc\BreezeSmaccer;
 use aiptu\smaccer\entity\npc\CamelSmaccer;
 use aiptu\smaccer\entity\npc\CatSmaccer;
 use aiptu\smaccer\entity\npc\CaveSpiderSmaccer;
@@ -84,8 +95,6 @@ use aiptu\smaccer\entity\npc\ZombieSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerV2Smaccer;
 use aiptu\smaccer\entity\utils\EntityTag;
-use aiptu\smaccer\entity\utils\EntityVisibility;
-use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Utils;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
@@ -120,6 +129,8 @@ class SmaccerHandler {
 		'Bat' => BatSmaccer::class,
 		'Bee' => BeeSmaccer::class,
 		'Blaze' => BlazeSmaccer::class,
+		'Bogged' => BoggedSmaccer::class,
+		'Breeze' => BreezeSmaccer::class,
 		'Camel' => CamelSmaccer::class,
 		'Cat' => CatSmaccer::class,
 		'CaveSpider' => CaveSpiderSmaccer::class,
@@ -291,31 +302,25 @@ class SmaccerHandler {
 	public function spawnNPC(
 		string $type,
 		Player $player,
-		?string $nametag = null,
-		float $scale = 1.0,
-		bool $isBaby = false,
-		EntityVisibility $visibility = EntityVisibility::VISIBLE_TO_EVERYONE,
+		NPCData $npcData,
 		?Location $customPos = null,
-		?Vector3 $motion = null,
-		?string $skinData = null,
+		?Vector3 $motion = null
 	) : ?Entity {
-		$plugin = Smaccer::getInstance();
-		$settings = $plugin->getDefaultSettings();
-
 		$pos = $customPos ?? $player->getLocation();
 		$yaw = $pos->getYaw();
 		$pitch = $pos->getPitch();
-
 		$motion ??= $player->getMotion();
 
 		$playerId = $player->getUniqueId()->getBytes();
-
-		$nbt = $this->createBaseNBT($pos, $motion, $yaw, $pitch);
-		$nbt->setString(EntityTag::CREATOR, $playerId);
-		$nbt->setFloat(EntityTag::SCALE, $scale);
-		$nbt->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $settings->isRotationEnabled());
-		$nbt->setByte(EntityTag::NAMETAG_VISIBLE, (int) $settings->isNametagVisible());
-		$nbt->setInt(EntityTag::VISIBILITY, $visibility->value);
+		$nameTag = $npcData->getNameTag();
+		$scale = $npcData->getScale();
+		$rotationEnabled = $npcData->isRotationEnabled();
+		$nametagVisible = $npcData->isNametagVisible();
+		$visibility = $npcData->getVisibility();
+		$isBaby = $npcData->isBaby();
+		$slapBack = $npcData->getSlapBack();
+		$actionEmote = $npcData->getActionEmote();
+		$emote = $npcData->getEmote();
 
 		$entityClass = $this->getNPC($type);
 		if ($entityClass === null) {
@@ -323,25 +328,39 @@ class SmaccerHandler {
 			return null;
 		}
 
+		$nbt = $this->createBaseNBT($pos, $motion, $yaw, $pitch);
+		$nbt->setString(EntityTag::CREATOR, $playerId)
+			->setFloat(EntityTag::SCALE, $scale)
+			->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $rotationEnabled)
+			->setByte(EntityTag::NAMETAG_VISIBLE, (int) $nametagVisible)
+			->setInt(EntityTag::VISIBILITY, $visibility->value);
+
 		if (is_a($entityClass, EntityAgeable::class, true)) {
 			$nbt->setByte(EntityTag::BABY, (int) $isBaby);
 		}
 
 		if (is_a($entityClass, HumanSmaccer::class, true)) {
+			$skin = $player->getSkin();
+			$skinData = $npcData->getSkinData();
 			$nbt->setTag(
 				'Skin',
 				CompoundTag::create()
-					->setString('Name', $player->getSkin()->getSkinId())
-					->setByteArray('Data', $skinData ?? $player->getSkin()->getSkinData())
-					->setByteArray('CapeData', $player->getSkin()->getCapeData())
-					->setString('GeometryName', $player->getSkin()->getGeometryName())
-					->setByteArray('GeometryData', $player->getSkin()->getGeometryData())
+					->setString('Name', $skin->getSkinId())
+					->setByteArray('Data', $skinData ?? $skin->getSkinData())
+					->setByteArray('CapeData', $skin->getCapeData())
+					->setString('GeometryName', $skin->getGeometryName())
+					->setByteArray('GeometryData', $skin->getGeometryData())
 			);
 
-			$nbt->setByte(EntityTag::SLAP_BACK, (int) $settings->isSlapEnabled());
+			$nbt->setByte(EntityTag::SLAP_BACK, (int) $slapBack);
 
-			$nbt->setString(EntityTag::ACTION_EMOTE, '1e137be8-8c5a-c880-e65e-8e98548d5b51'); // Awesome flip
-			$nbt->setString(EntityTag::EMOTE, '2a2ea1f8-55ca-e1db-9562-0c786a62f2cd'); // Dab dance
+			if ($actionEmote !== null) {
+				$nbt->setString(EntityTag::ACTION_EMOTE, $actionEmote);
+			}
+
+			if ($emote !== null) {
+				$nbt->setString(EntityTag::EMOTE, $emote);
+			}
 		}
 
 		$entity = $this->createEntity($type, $pos, $nbt);
@@ -350,24 +369,23 @@ class SmaccerHandler {
 			return null;
 		}
 
-		if ($nametag !== null) {
-			$nametag = $this->applyNametag($nametag, $player);
-			$entity->setNameTag($nametag);
+		if ($nameTag !== null) {
+			$nameTag = $this->applyNametag($nameTag, $player);
+			$entity->setNameTag($nameTag);
 		}
 
-		$entity->setNameTagAlwaysVisible($settings->isNametagVisible());
-		$entity->setNameTagVisible($settings->isNametagVisible());
-
 		$entity->setScale($scale);
+		$entity->setRotateToPlayers($rotationEnabled);
+		$entity->setNameTagAlwaysVisible($nametagVisible);
+		$entity->setNameTagVisible($nametagVisible);
+
 		if ($entity instanceof EntityAgeable) {
 			$entity->setBaby($isBaby);
 		}
 
 		if ($entity instanceof HumanSmaccer) {
-			$entity->setSlapBack($settings->isSlapEnabled());
+			$entity->setSlapBack($slapBack);
 		}
-
-		$entity->setRotateToPlayers($settings->isRotationEnabled());
 
 		$entity->spawnToAll();
 
@@ -393,5 +411,9 @@ class SmaccerHandler {
 
 		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $entityId . ' despawned successfully.');
 		return true;
+	}
+
+	public function getNPCsFrom(Player $player) : array {
+		return $this->playerNPCs[$player->getUniqueId()->getBytes()] ?? [];
 	}
 }
