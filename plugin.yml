@@ -1,6 +1,5 @@
 name: Smaccer
 main: aiptu\smaccer\Smaccer
-src-namespace-prefix: aiptu\smaccer
 version: 1.0.0
 api: [5.0.0]
 author: AIPTU
