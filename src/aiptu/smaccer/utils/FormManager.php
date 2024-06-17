@@ -86,7 +86,7 @@ final class FormManager {
 		$end = min($start + self::ITEMS_PER_PAGE, count($entityTypes));
 
 		$buttons = array_map(
-			fn ($type) => new Button($type, Image::url("https://raw.githubusercontent.com/AIPTU/Smaccer/master/assets/{$type}Face.png")),
+			fn ($type) => new Button($type, Image::url("https://raw.githubusercontent.com/AIPTU/Smaccer/assets/faces/{$type}.png")),
 			array_slice($entityTypes, $start, self::ITEMS_PER_PAGE)
 		);
 
