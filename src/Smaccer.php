@@ -59,7 +59,7 @@ class Smaccer extends PluginBase {
 			throw new DisablePluginException();
 		}
 
-		new SmaccerHandler();
+		SmaccerHandler::getInstance()->registerAll();
 
 		if (!PacketHooker::isRegistered()) {
 			PacketHooker::register($this);

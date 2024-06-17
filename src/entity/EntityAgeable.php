@@ -25,7 +25,7 @@ abstract class EntityAgeable extends EntitySmaccer implements Ageable {
 	protected function initEntity(CompoundTag $nbt) : void {
 		parent::initEntity($nbt);
 
-		$this->setBaby((bool) $nbt->getByte(EntityTag::BABY, (int) $this->baby));
+		$this->setBaby((bool) $nbt->getByte(EntityTag::BABY, 0));
 	}
 
 	public function saveNBT() : CompoundTag {

@@ -37,9 +37,7 @@ use function array_map;
 use function microtime;
 use function round;
 use function str_replace;
-use function str_starts_with;
 use function strtolower;
-use function substr;
 
 abstract class EntitySmaccer extends Entity {
 	protected string $creator;
@@ -62,11 +60,11 @@ abstract class EntitySmaccer extends Entity {
 	protected function initEntity(CompoundTag $nbt) : void {
 		parent::initEntity($nbt);
 
-		$this->setScale($nbt->getFloat(EntityTag::SCALE, $this->scale));
-		$this->setRotateToPlayers((bool) $nbt->getByte(EntityTag::ROTATE_TO_PLAYERS, (int) $this->rotateToPlayers));
-		$this->setNameTagAlwaysVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagAlwaysVisible()));
-		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible()));
-		$this->setVisibility(EntityVisibility::fromInt($nbt->getInt(EntityTag::VISIBILITY)));
+		$this->setScale($nbt->getFloat(EntityTag::SCALE, 1.0));
+		$this->setRotateToPlayers((bool) $nbt->getByte(EntityTag::ROTATE_TO_PLAYERS, 1));
+		$this->setNameTagAlwaysVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
+		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
+		$this->setVisibility(EntityVisibility::fromInt($nbt->getInt(EntityTag::VISIBILITY, EntityVisibility::VISIBLE_TO_EVERYONE->value)));
 		$this->setNoClientPredictions();
 	}
 
@@ -209,10 +207,6 @@ abstract class EntitySmaccer extends Entity {
 		$plugin = Smaccer::getInstance();
 		$server = $plugin->getServer();
 		$commandMap = $server->getCommandMap();
-
-		if (str_starts_with($command, '/')) {
-			$command = substr($command, 1);
-		}
 
 		match ($type) {
 			EntityTag::COMMAND_TYPE_SERVER => $commandMap->dispatch(new ConsoleCommandSender($server, $server->getLanguage()), $command),

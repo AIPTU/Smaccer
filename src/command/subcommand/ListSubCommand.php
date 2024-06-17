@@ -13,22 +13,16 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
-use aiptu\smaccer\entity\EntitySmaccer;
-use aiptu\smaccer\entity\HumanSmaccer;
+use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
-use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\TextFormat;
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function count;
 use function implode;
 
 class ListSubCommand extends BaseSubCommand {
@@ -50,18 +44,12 @@ class ListSubCommand extends BaseSubCommand {
 		/** @var Smaccer $plugin */
 		$plugin = $this->plugin;
 
-		$entities = [];
-		foreach ($plugin->getServer()->getWorldManager()->getWorlds() as $world) {
-			$filteredEntities = array_filter($world->getEntities(), static fn (Entity $entity) : bool => $entity instanceof EntitySmaccer || $entity instanceof HumanSmaccer);
+		$entityData = SmaccerHandler::getInstance()->getEntitiesInfo(null, true);
+		$totalEntityCount = $entityData['count'];
+		$entities = $entityData['infoList'];
 
-			$entities = array_merge($entities, array_map(
-				static fn (Entity $entity) : string => TextFormat::YELLOW . 'ID: (' . $entity->getId() . ') ' . TextFormat::GREEN . $entity->getNameTag() . TextFormat::GRAY . ' -- ' . TextFormat::AQUA . $entity->getWorld()->getFolderName() . ': ' . $entity->getLocation()->getFloorX() . '/' . $entity->getLocation()->getFloorY() . '/' . $entity->getLocation()->getFloorZ(),
-				$filteredEntities
-			));
-		}
-
-		if (count($entities) > 0) {
-			$message = TextFormat::RED . 'NPC List and Locations: (' . count($entities) . ')';
+		if ($totalEntityCount > 0) {
+			$message = TextFormat::RED . 'NPC List and Locations: (' . $totalEntityCount . ')';
 			$message .= "\n" . TextFormat::WHITE . '- ' . implode("\n - ", $entities);
 		} else {
 			$message = TextFormat::RED . 'No NPCs found in any world.';

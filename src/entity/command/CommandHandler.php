@@ -17,6 +17,8 @@ use aiptu\smaccer\entity\utils\EntityTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use function in_array;
+use function str_starts_with;
+use function substr;
 
 class CommandHandler {
 	public const KEY_COMMAND = 'command';
@@ -51,6 +53,10 @@ class CommandHandler {
 			if ($data[self::KEY_COMMAND] === $command && $data[self::KEY_TYPE] === $type) {
 				return null;
 			}
+		}
+
+		if (str_starts_with($command, '/')) {
+			$command = substr($command, 1);
 		}
 
 		$id = $this->nextId++;

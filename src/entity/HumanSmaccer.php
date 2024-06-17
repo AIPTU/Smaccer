@@ -48,9 +48,7 @@ use function mt_rand;
 use function round;
 use function sin;
 use function str_replace;
-use function str_starts_with;
 use function strtolower;
-use function substr;
 
 class HumanSmaccer extends Human {
 	protected string $creator;
@@ -82,13 +80,13 @@ class HumanSmaccer extends Human {
 	protected function initEntity(CompoundTag $nbt) : void {
 		parent::initEntity($nbt);
 
-		$this->setScale($nbt->getFloat(EntityTag::SCALE, $this->scale));
-		$this->setRotateToPlayers((bool) $nbt->getByte(EntityTag::ROTATE_TO_PLAYERS, (int) $this->rotateToPlayers));
-		$this->setNameTagAlwaysVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagAlwaysVisible()));
-		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible()));
-		$this->setVisibility(EntityVisibility::fromInt($nbt->getInt(EntityTag::VISIBILITY)));
+		$this->setScale($nbt->getFloat(EntityTag::SCALE, 1.0));
+		$this->setRotateToPlayers((bool) $nbt->getByte(EntityTag::ROTATE_TO_PLAYERS, 1));
+		$this->setNameTagAlwaysVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
+		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
+		$this->setVisibility(EntityVisibility::fromInt($nbt->getInt(EntityTag::VISIBILITY, EntityVisibility::VISIBLE_TO_EVERYONE->value)));
 
-		$this->setSlapBack((bool) $nbt->getByte(EntityTag::SLAP_BACK, (int) $this->slapBack));
+		$this->setSlapBack((bool) $nbt->getByte(EntityTag::SLAP_BACK, 1));
 
 		$this->actionEmoteId = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? $nbt->getString(EntityTag::ACTION_EMOTE) : null;
 		$this->emoteId = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? $nbt->getString(EntityTag::EMOTE) : null;
@@ -315,10 +313,6 @@ class HumanSmaccer extends Human {
 		$plugin = Smaccer::getInstance();
 		$server = $plugin->getServer();
 		$commandMap = $server->getCommandMap();
-
-		if (str_starts_with($command, '/')) {
-			$command = substr($command, 1);
-		}
 
 		match ($type) {
 			EntityTag::COMMAND_TYPE_SERVER => $commandMap->dispatch(new ConsoleCommandSender($server, $server->getLanguage()), $command),

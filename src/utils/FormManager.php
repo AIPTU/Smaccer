@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\utils;
 
+use aiptu\smaccer\entity\EntityAgeable;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\NPCData;
@@ -33,15 +34,16 @@ use forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
-use function array_filter;
 use function array_keys;
 use function array_map;
-use function array_merge;
 use function array_search;
 use function array_slice;
 use function array_values;
 use function count;
 use function implode;
+use function is_a;
+use function is_bool;
+use function is_string;
 use function min;
 
 final class FormManager {
@@ -60,7 +62,10 @@ final class FormManager {
 			}
 		);
 
-		if (count(SmaccerHandler::getInstance()->getNPCsFrom($player)) > 0) {
+		$entityData = SmaccerHandler::getInstance()->getEntitiesInfo($player);
+		$ownedEntityCount = $entityData['count'];
+
+		if ($ownedEntityCount > 0) {
 			$form->appendOptions(
 				'Create NPC',
 				'Delete NPC',
@@ -114,16 +119,36 @@ final class FormManager {
 	}
 
 	public static function sendCreateNPCForm(Player $player, string $entityType, callable $onNPCFormSubmit) : void {
+		$entityClass = SmaccerHandler::getInstance()->getNPC($entityType);
+		if ($entityClass === null) {
+			return;
+		}
+
+		$settings = Smaccer::getInstance()->getDefaultSettings();
+		$rotationEnabled = $settings->isRotationEnabled();
+		$nametagVisible = $settings->isNametagVisible();
+		$defaultVisibility = $settings->getEntityVisibility()->value;
+
+		$formElements = [
+			new Input('Enter NPC name tag', 'NPC Name', ''),
+			new Input('Set NPC scale (0.1 - 10.0)', '1.0', '1.0'),
+			new Toggle('Enable rotation?', $rotationEnabled),
+			new Toggle('Set name tag visible', $nametagVisible),
+			new StepSlider('Select visibility', array_values(EntityVisibility::getAll()), $defaultVisibility),
+		];
+
+		if (is_a($entityClass, EntityAgeable::class, true)) {
+			$formElements[] = new Toggle('Is baby?', false);
+		}
+
+		if (is_a($entityClass, HumanSmaccer::class, true)) {
+			$formElements[] = new Toggle('Enable slapback?', Smaccer::getInstance()->getDefaultSettings()->isSlapEnabled());
+		}
+
 		$player->sendForm(
 			new CustomForm(
 				'Spawn NPC',
-				[
-					new Input('Enter NPC name tag', 'NPC Name', ''),
-					new Input('Set NPC scale (0.1 - 10.0)', '1.0', '1.0'),
-					new Toggle('Enable rotation?', true),
-					new Toggle('Set name tag visible', true),
-					new StepSlider('Select visibility', array_values(EntityVisibility::getAll())),
-				],
+				$formElements,
 				function (Player $player, CustomFormResponse $response) use ($entityType, $onNPCFormSubmit) : void {
 					$onNPCFormSubmit($player, $response, $entityType);
 				}
@@ -132,14 +157,23 @@ final class FormManager {
 	}
 
 	public static function handleCreateNPCResponse(Player $player, CustomFormResponse $response, string $entityType) : void {
-		/**
-		 * @var string $nameTag
-		 * @var string $scaleStr
-		 * @var bool $rotationEnabled
-		 * @var bool $nameTagVisible
-		 * @var string $visibility
-		 */
-		[$nameTag, $scaleStr, $rotationEnabled, $nameTagVisible, $visibility] = $response->getValues();
+		$entityClass = SmaccerHandler::getInstance()->getNPC($entityType);
+		if ($entityClass === null) {
+			return;
+		}
+
+		$values = $response->getValues();
+
+		$nameTag = $values[0];
+		$scaleStr = $values[1];
+		$rotationEnabled = $values[2];
+		$nameTagVisible = $values[3];
+		$visibility = $values[4];
+
+		if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility)) {
+			$player->sendMessage(TextFormat::RED . 'Invalid form values.');
+			return;
+		}
 
 		$scale = (float) $scaleStr;
 		if ($scale < 0.1 || $scale > 10.0) {
@@ -155,6 +189,16 @@ final class FormManager {
 			->setRotationEnabled($rotationEnabled)
 			->setNametagVisible($nameTagVisible)
 			->setVisibility($visibilityEnum);
+
+		if (is_a($entityClass, EntityAgeable::class, true) && isset($values[5])) {
+			$isBaby = (bool) $values[5];
+			$npcData->setBaby($isBaby);
+		}
+
+		if (is_a($entityClass, HumanSmaccer::class, true) && isset($values[6])) {
+			$enableSlapback = (bool) $values[6];
+			$npcData->setSlapBack($enableSlapback);
+		}
 
 		SmaccerHandler::getInstance()->spawnNPC($entityType, $player, $npcData);
 	}
@@ -242,26 +286,41 @@ final class FormManager {
 		$visibilityValues = array_values(EntityVisibility::getAll());
 		$currentVisibility = $npc->getVisibility()->name;
 		$defaultVisibilityIndex = array_search($currentVisibility, $visibilityValues, true);
+		$defaultVisibility = Smaccer::getInstance()->getDefaultSettings()->getEntityVisibility()->value;
+
+		$formElements = [
+			new Input('Edit NPC name tag', 'NPC Name', $npc->getNameTag()),
+			new Input('Set NPC scale (0.1 - 10.0)', '1.0', (string) $npc->getScale()),
+			new Toggle('Enable rotation?', $npc->canRotateToPlayers()),
+			new Toggle('Set name tag visible', $npc->isNameTagVisible()),
+			new StepSlider('Select visibility', $visibilityValues, $defaultVisibilityIndex !== false ? (int) $defaultVisibilityIndex : $defaultVisibility),
+		];
+
+		if ($npc instanceof EntityAgeable) {
+			$formElements[] = new Toggle('Is baby?', $npc->isBaby());
+		}
+
+		if ($npc instanceof HumanSmaccer) {
+			$formElements[] = new Toggle('Enable slapback?', $npc->canSlapBack());
+		}
 
 		$player->sendForm(
 			new CustomForm(
 				'Edit NPC',
-				[
-					new Input('Edit NPC name tag', 'NPC Name', $npc->getNameTag()),
-					new Input('Set NPC scale (0.1 - 10.0)', '1.0', (string) $npc->getScale()),
-					new Toggle('Enable rotation?', $npc->canRotateToPlayers()),
-					new Toggle('Set name tag visible', $npc->isNameTagVisible()),
-					new StepSlider('Select visibility', $visibilityValues, $defaultVisibilityIndex !== false ? (int) $defaultVisibilityIndex : 0),
-				],
+				$formElements,
 				function (Player $player, CustomFormResponse $response) use ($npc) : void {
-					/**
-					 * @var string $nameTag
-					 * @var string $scaleStr
-					 * @var bool $rotationEnabled
-					 * @var bool $nameTagVisible
-					 * @var string $visibility
-					 */
-					[$nameTag, $scaleStr, $rotationEnabled, $nameTagVisible, $visibility] = $response->getValues();
+					$values = $response->getValues();
+
+					$nameTag = $values[0];
+					$scaleStr = $values[1];
+					$rotationEnabled = $values[2];
+					$nameTagVisible = $values[3];
+					$visibility = $values[4];
+
+					if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility)) {
+						$player->sendMessage(TextFormat::RED . 'Invalid form values.');
+						return;
+					}
 
 					$scale = (float) $scaleStr;
 					if ($scale < 0.1 || $scale > 10.0) {
@@ -277,6 +336,16 @@ final class FormManager {
 					$npc->setNameTagVisible($nameTagVisible);
 					$npc->setNameTagAlwaysVisible($nameTagVisible);
 					$npc->setVisibility($visibilityEnum);
+
+					if ($npc instanceof EntityAgeable && isset($values[5])) {
+						$isBaby = (bool) $values[5];
+						$npc->setBaby($isBaby);
+					}
+
+					if ($npc instanceof HumanSmaccer && isset($values[5])) {
+						$enableSlapback = (bool) $values[5];
+						$npc->setSlapBack($enableSlapback);
+					}
 
 					$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been updated.");
 				}
@@ -458,18 +527,12 @@ final class FormManager {
 	}
 
 	public static function sendNPCListForm(Player $player) : void {
-		$entities = [];
-		foreach (Smaccer::getInstance()->getServer()->getWorldManager()->getWorlds() as $world) {
-			$filteredEntities = array_filter($world->getEntities(), static fn (Entity $entity) : bool => $entity instanceof EntitySmaccer || $entity instanceof HumanSmaccer);
+		$entityData = SmaccerHandler::getInstance()->getEntitiesInfo(null, true);
+		$totalEntityCount = $entityData['count'];
+		$entities = $entityData['infoList'];
 
-			$entities = array_merge($entities, array_map(
-				static fn (Entity $entity) : string => TextFormat::YELLOW . 'ID: (' . $entity->getId() . ') ' . TextFormat::GREEN . $entity->getNameTag() . TextFormat::GRAY . ' -- ' . TextFormat::AQUA . $entity->getWorld()->getFolderName() . ': ' . $entity->getLocation()->getFloorX() . '/' . $entity->getLocation()->getFloorY() . '/' . $entity->getLocation()->getFloorZ(),
-				$filteredEntities
-			));
-		}
-
-		if (count($entities) > 0) {
-			$content = TextFormat::RED . 'NPC List and Locations: (' . count($entities) . ')';
+		if ($totalEntityCount > 0) {
+			$content = TextFormat::RED . 'NPC List and Locations: (' . $totalEntityCount . ')';
 			$content .= "\n" . TextFormat::WHITE . '- ' . implode("\n - ", $entities);
 		} else {
 			$content = TextFormat::RED . 'No NPCs found in any world.';

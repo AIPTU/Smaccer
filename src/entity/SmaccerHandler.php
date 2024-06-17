@@ -95,6 +95,7 @@ use aiptu\smaccer\entity\npc\ZombieSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerV2Smaccer;
 use aiptu\smaccer\entity\utils\EntityTag;
+use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Utils;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
@@ -211,7 +212,7 @@ class SmaccerHandler {
 	/** @var array<string, array<int, Entity>> */
 	private array $playerNPCs = [];
 
-	public function __construct() {
+	public function registerAll() : void {
 		$this->registerEntity('Human', HumanSmaccer::class);
 
 		foreach ($this->npcs as $type => $class) {
@@ -415,5 +416,28 @@ class SmaccerHandler {
 
 	public function getNPCsFrom(Player $player) : array {
 		return $this->playerNPCs[$player->getUniqueId()->getBytes()] ?? [];
+	}
+
+	public function getEntitiesInfo(?Player $player = null, bool $collectInfo = false) : array {
+		$entityCount = 0;
+		$entityInfoList = [];
+
+		foreach (Smaccer::getInstance()->getServer()->getWorldManager()->getWorlds() as $world) {
+			foreach ($world->getEntities() as $entity) {
+				if ($entity instanceof EntitySmaccer || $entity instanceof HumanSmaccer) {
+					if ($player === null || $entity->isOwnedBy($player)) {
+						++$entityCount;
+						if ($collectInfo) {
+							$entityInfoList[] = TextFormat::YELLOW . 'ID: (' . $entity->getId() . ') ' . TextFormat::GREEN . $entity->getNameTag() . TextFormat::GRAY . ' -- ' . TextFormat::AQUA . $entity->getWorld()->getFolderName() . ': ' . $entity->getLocation()->getFloorX() . '/' . $entity->getLocation()->getFloorY() . '/' . $entity->getLocation()->getFloorZ();
+						}
+					}
+				}
+			}
+		}
+
+		return [
+			'count' => $entityCount,
+			'infoList' => $entityInfoList,
+		];
 	}
 }
