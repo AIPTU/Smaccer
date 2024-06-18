@@ -356,11 +356,11 @@ class SmaccerHandler {
 			$nbt->setByte(EntityTag::SLAP_BACK, (int) $slapBack);
 
 			if ($actionEmote !== null) {
-				$nbt->setString(EntityTag::ACTION_EMOTE, $actionEmote);
+				$nbt->setString(EntityTag::ACTION_EMOTE, $actionEmote->value);
 			}
 
 			if ($emote !== null) {
-				$nbt->setString(EntityTag::EMOTE, $emote);
+				$nbt->setString(EntityTag::EMOTE, $emote->value);
 			}
 		}
 
@@ -386,6 +386,14 @@ class SmaccerHandler {
 
 		if ($entity instanceof HumanSmaccer) {
 			$entity->setSlapBack($slapBack);
+
+			if ($actionEmote !== null) {
+				$entity->setActionEmoteId($actionEmote);
+			}
+
+			if ($emote !== null) {
+				$entity->setEmoteId($emote);
+			}
 		}
 
 		$entity->spawnToAll();
@@ -412,10 +420,6 @@ class SmaccerHandler {
 
 		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $entityId . ' despawned successfully.');
 		return true;
-	}
-
-	public function getNPCsFrom(Player $player) : array {
-		return $this->playerNPCs[$player->getUniqueId()->getBytes()] ?? [];
 	}
 
 	public function getEntitiesInfo(?Player $player = null, bool $collectInfo = false) : array {

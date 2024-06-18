@@ -19,6 +19,8 @@ class Permissions {
 	public const COMMAND_CREATE_OTHERS = 'smaccer.command.create.others';
 	public const COMMAND_DELETE_SELF = 'smaccer.command.delete.self';
 	public const COMMAND_DELETE_OTHERS = 'smaccer.command.delete.others';
+	public const COMMAND_EDIT_SELF = 'smaccer.command.edit.self';
+	public const COMMAND_EDIT_OTHERS = 'smaccer.command.edit.others';
 	public const COMMAND_ID = 'smaccer.command.id';
 	public const COMMAND_LIST = 'smaccer.command.list';
 	public const COMMAND_MOVE_SELF = 'smaccer.command.move.self';

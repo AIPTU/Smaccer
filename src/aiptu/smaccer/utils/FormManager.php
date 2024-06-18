@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\utils;
 
+use aiptu\smaccer\entity\emote\EmoteTypes;
 use aiptu\smaccer\entity\EntityAgeable;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
@@ -36,6 +37,7 @@ use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use function array_keys;
 use function array_map;
+use function array_merge;
 use function array_search;
 use function array_slice;
 use function array_values;
@@ -142,7 +144,7 @@ final class FormManager {
 		}
 
 		if (is_a($entityClass, HumanSmaccer::class, true)) {
-			$formElements[] = new Toggle('Enable slapback?', Smaccer::getInstance()->getDefaultSettings()->isSlapEnabled());
+			$formElements[] = new Toggle('Enable slapback?', $settings->isSlapEnabled());
 		}
 
 		$player->sendForm(
@@ -190,14 +192,20 @@ final class FormManager {
 			->setNametagVisible($nameTagVisible)
 			->setVisibility($visibilityEnum);
 
-		if (is_a($entityClass, EntityAgeable::class, true) && isset($values[5])) {
-			$isBaby = (bool) $values[5];
+		$index = 5;
+
+		if (is_a($entityClass, EntityAgeable::class, true) && isset($values[$index])) {
+			$isBaby = (bool) $values[$index];
 			$npcData->setBaby($isBaby);
+			++$index;
 		}
 
-		if (is_a($entityClass, HumanSmaccer::class, true) && isset($values[6])) {
-			$enableSlapback = (bool) $values[6];
-			$npcData->setSlapBack($enableSlapback);
+		if (is_a($entityClass, HumanSmaccer::class, true)) {
+			if (isset($values[$index])) {
+				$enableSlapback = (bool) $values[$index];
+				$npcData->setSlapBack($enableSlapback);
+				++$index;
+			}
 		}
 
 		SmaccerHandler::getInstance()->spawnNPC($entityType, $player, $npcData);
@@ -219,22 +227,22 @@ final class FormManager {
 						return;
 					}
 
-					if (!$npc->isOwnedBy($player) && !$player->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
+					$hasPermission = match ($action) {
+						'delete' => $player->hasPermission(Permissions::COMMAND_DELETE_OTHERS),
+						'edit' => $player->hasPermission(Permissions::COMMAND_EDIT_OTHERS),
+						default => false,
+					};
+
+					if (!$npc->isOwnedBy($player) && !$hasPermission) {
 						$player->sendMessage(TextFormat::RED . "You don't have permission to {$action} this entity!");
 						return;
 					}
 
-					switch ($action) {
-						case 'delete':
-							self::confirmDeleteNPC($player, $npc);
-							break;
-						case 'edit':
-							self::sendEditMenuForm($player, $npc);
-							break;
-						default:
-							$player->sendMessage(TextFormat::RED . 'Invalid action.');
-							break;
-					}
+					match ($action) {
+						'delete' => self::confirmDeleteNPC($player, $npc),
+						'edit' => self::sendEditMenuForm($player, $npc),
+						default => $player->sendMessage(TextFormat::RED . 'Invalid action.'),
+					};
 				}
 			)
 		);
@@ -261,21 +269,30 @@ final class FormManager {
 			return;
 		}
 
-		$player->sendForm(
-			MenuForm::withOptions(
-				'Edit NPC',
-				'Choose an edit option:',
-				[
-					'General Settings',
-					'Commands',
-				],
-				fn (Player $player, Button $selected) => match ($selected->getValue()) {
-					0 => self::sendEditNPCForm($player, $npc),
-					1 => self::sendEditCommandsForm($player, $npc),
-					default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
-				}
-			)
+		$form = MenuForm::withOptions(
+			'Edit NPC',
+			'Choose an edit option:',
+			[
+				'General Settings',
+				'Commands',
+			],
+			fn (Player $player, Button $selected) => match ($selected->getValue()) {
+				0 => self::sendEditNPCForm($player, $npc),
+				1 => self::sendEditCommandsForm($player, $npc),
+				2 => self::handleEmoteSelection($player, $npc),
+				3 => $player->sendMessage('TODO'),
+				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+			}
 		);
+
+		if ($npc instanceof HumanSmaccer) {
+			$form->appendOptions(
+				'Emote Settings',
+				'Skin Settings',
+			);
+		}
+
+		$player->sendForm($form);
 	}
 
 	public static function sendEditNPCForm(Player $player, Entity $npc) : void {
@@ -337,14 +354,20 @@ final class FormManager {
 					$npc->setNameTagAlwaysVisible($nameTagVisible);
 					$npc->setVisibility($visibilityEnum);
 
-					if ($npc instanceof EntityAgeable && isset($values[5])) {
-						$isBaby = (bool) $values[5];
+					$index = 5;
+
+					if ($npc instanceof EntityAgeable && isset($values[$index])) {
+						$isBaby = (bool) $values[$index];
 						$npc->setBaby($isBaby);
+						++$index;
 					}
 
-					if ($npc instanceof HumanSmaccer && isset($values[5])) {
-						$enableSlapback = (bool) $values[5];
-						$npc->setSlapBack($enableSlapback);
+					if ($npc instanceof HumanSmaccer) {
+						if (isset($values[$index])) {
+							$enableSlapback = (bool) $values[$index];
+							$npc->setSlapBack($enableSlapback);
+							++$index;
+						}
 					}
 
 					$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been updated.");
@@ -521,6 +544,128 @@ final class FormManager {
 				function (Player $player) use ($npc) : void {
 					$npc->getCommandHandler()->clearAll();
 					$player->sendMessage(TextFormat::GREEN . "All commands cleared from NPC {$npc->getName()}.");
+				}
+			)
+		);
+	}
+
+	public static function handleEmoteSelection(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$player->sendForm(
+			MenuForm::withOptions(
+				'Edit Emote',
+				'Choose an emote option:',
+				[
+					'Action Emote',
+					'Emote',
+				],
+				fn (Player $player, Button $selected) => match ($selected->getValue()) {
+					0 => self::sendEditActionEmoteForm($player, $npc),
+					1 => self::sendEditEmoteForm($player, $npc),
+					default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+				}
+			)
+		);
+	}
+
+	public static function sendEditActionEmoteForm(Player $player, Entity $npc, int $page = 0) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$actionEmoteOptions = array_merge(['None'], array_values(EmoteTypes::getAll()));
+		$defaultActionEmote = $npc->getActionEmoteId();
+		$currentActionEmote = $defaultActionEmote === null ? 'None' : $defaultActionEmote->name;
+
+		$start = $page * self::ITEMS_PER_PAGE;
+		$end = min($start + self::ITEMS_PER_PAGE, count($actionEmoteOptions));
+
+		$buttons = array_map(function ($emote) {
+			$image = $emote !== 'None' ? EmoteTypes::imageFromName($emote) : null;
+			return $image !== null ? new Button($emote, Image::url($image)) : new Button($emote);
+		}, array_slice($actionEmoteOptions, $start, self::ITEMS_PER_PAGE));
+
+		if ($page > 0) {
+			$buttons[] = new Button('Previous Page', Image::path('textures/ui/arrowLeft.png'));
+		}
+
+		if ($end < count($actionEmoteOptions)) {
+			$buttons[] = new Button('Next Page', Image::path('textures/ui/arrowRight.png'));
+		}
+
+		$player->sendForm(
+			new MenuForm(
+				'Action Emote',
+				'Current action emote: ' . $currentActionEmote,
+				$buttons,
+				function (Player $player, Button $selected) use ($npc, $page) : void {
+					$actionEmote = $selected->text;
+					if ($actionEmote === 'Previous Page') {
+						self::sendEditActionEmoteForm($player, $npc, $page - 1);
+					} elseif ($actionEmote === 'Next Page') {
+						self::sendEditActionEmoteForm($player, $npc, $page + 1);
+					} else {
+						if ($actionEmote !== 'None') {
+							$npc->setActionEmoteId(EmoteTypes::fromName($actionEmote));
+						} else {
+							$npc->setActionEmoteId(null);
+						}
+
+						$player->sendMessage(TextFormat::GREEN . "Action emote updated for NPC {$npc->getName()}.");
+					}
+				}
+			)
+		);
+	}
+
+	public static function sendEditEmoteForm(Player $player, Entity $npc, int $page = 0) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$emoteOptions = array_merge(['None'], array_values(EmoteTypes::getAll()));
+		$defaultEmote = $npc->getEmoteId();
+		$currentEmote = $defaultEmote === null ? 'None' : $defaultEmote->name;
+
+		$start = $page * self::ITEMS_PER_PAGE;
+		$end = min($start + self::ITEMS_PER_PAGE, count($emoteOptions));
+
+		$buttons = array_map(function ($emote) {
+			$image = $emote !== 'None' ? EmoteTypes::imageFromName($emote) : null;
+			return $image !== null ? new Button($emote, Image::url($image)) : new Button($emote);
+		}, array_slice($emoteOptions, $start, self::ITEMS_PER_PAGE));
+
+		if ($page > 0) {
+			$buttons[] = new Button('Previous Page', Image::path('textures/ui/arrowLeft.png'));
+		}
+
+		if ($end < count($emoteOptions)) {
+			$buttons[] = new Button('Next Page', Image::path('textures/ui/arrowRight.png'));
+		}
+
+		$player->sendForm(
+			new MenuForm(
+				'Emote',
+				'Current emote: ' . $currentEmote,
+				$buttons,
+				function (Player $player, Button $selected) use ($npc, $page) : void {
+					$emote = $selected->text;
+					if ($emote === 'Previous Page') {
+						self::sendEditEmoteForm($player, $npc, $page - 1);
+					} elseif ($emote === 'Next Page') {
+						self::sendEditEmoteForm($player, $npc, $page + 1);
+					} else {
+						if ($emote !== 'None') {
+							$npc->setEmoteId(EmoteTypes::fromName($emote));
+						} else {
+							$npc->setEmoteId(null);
+						}
+
+						$player->sendMessage(TextFormat::GREEN . "Emote updated for NPC {$npc->getName()}.");
+					}
 				}
 			)
 		);

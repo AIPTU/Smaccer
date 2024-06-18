@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
 
+use aiptu\smaccer\entity\emote\EmoteTypes;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 
 class NPCData {
@@ -24,8 +25,8 @@ class NPCData {
 	private EntityVisibility $visibility;
 	private bool $slapBack = false;
 	private ?string $skinData = null;
-	private ?string $actionEmote = null;
-	private ?string $emote = null;
+	private ?EmoteTypes $actionEmote = null;
+	private ?EmoteTypes $emote = null;
 
 	public static function create() : self {
 		return new self();
@@ -103,20 +104,20 @@ class NPCData {
 		return $this;
 	}
 
-	public function getActionEmote() : ?string {
+	public function getActionEmote() : ?EmoteTypes {
 		return $this->actionEmote;
 	}
 
-	public function setActionEmote(?string $actionEmote) : self {
+	public function setActionEmote(?EmoteTypes $actionEmote) : self {
 		$this->actionEmote = $actionEmote;
 		return $this;
 	}
 
-	public function getEmote() : ?string {
+	public function getEmote() : ?EmoteTypes {
 		return $this->emote;
 	}
 
-	public function setEmote(?string $emote) : self {
+	public function setEmote(?EmoteTypes $emote) : self {
 		$this->emote = $emote;
 		return $this;
 	}

@@ -19,6 +19,12 @@ permissions:
   smaccer.command.delete.others:
     description: Allows players to delete entities owned by others (/smaccer delete).
     default: op
+  smaccer.command.edit.self:
+    description: Allows players to edit their own entities (/smaccer edit).
+    default: op
+  smaccer.command.edit.others:
+    description: Allows players to edit entities owned by others (/smaccer edit).
+    default: op
   smaccer.command.id:
     description: Allows players to retrieve entity IDs (/smaccer id).
     default: op

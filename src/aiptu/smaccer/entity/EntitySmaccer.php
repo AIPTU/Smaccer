@@ -95,10 +95,6 @@ abstract class EntitySmaccer extends Entity {
 	}
 
 	public function setVisibility(EntityVisibility $visibility) : void {
-		if ($visibility === $this->visibility) {
-			return;
-		}
-
 		$this->visibility = $visibility;
 
 		switch ($visibility) {

@@ -15,8 +15,8 @@ namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
-use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\utils\FormManager;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
 use CortexPE\Commando\args\IntegerArgument;
@@ -75,7 +75,7 @@ class DeleteSubCommand extends BaseSubCommand {
 			return;
 		}
 
-		SmaccerHandler::getInstance()->despawnNPC($sender, $entity);
+		FormManager::confirmDeleteNPC($sender, $entity);
 	}
 
 	public function prepare() : void {

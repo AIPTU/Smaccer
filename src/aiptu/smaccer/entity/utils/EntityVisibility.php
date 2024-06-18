@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\utils;
 
+use function array_column;
+use function array_map;
 use function strtolower;
 
 enum EntityVisibility : int {
@@ -21,29 +23,26 @@ enum EntityVisibility : int {
 	case INVISIBLE_TO_EVERYONE = 2;
 
 	public static function fromInt(int $value) : self {
-		return match ($value) {
-			self::VISIBLE_TO_EVERYONE->value => self::VISIBLE_TO_EVERYONE,
-			self::VISIBLE_TO_CREATOR->value => self::VISIBLE_TO_CREATOR,
-			self::INVISIBLE_TO_EVERYONE->value => self::INVISIBLE_TO_EVERYONE,
-			default => throw new \InvalidArgumentException("Invalid visibility value: {$value}"),
-		};
+		return self::tryFrom($value) ?? throw new \InvalidArgumentException("Invalid visibility value: {$value}");
 	}
 
 	public static function fromString(string $value) : self {
-		return match (strtolower($value)) {
-			'visible_to_everyone' => self::VISIBLE_TO_EVERYONE,
-			'visible_to_creator' => self::VISIBLE_TO_CREATOR,
-			'invisible_to_everyone' => self::INVISIBLE_TO_EVERYONE,
-			default => throw new \InvalidArgumentException("Invalid visibility string: {$value}"),
-		};
+		$lowercasedValue = strtolower($value);
+
+		foreach (self::cases() as $visibility) {
+			if (strtolower($visibility->name) === $lowercasedValue) {
+				return $visibility;
+			}
+		}
+
+		throw new \InvalidArgumentException("Invalid visibility string: {$value}");
 	}
 
 	public static function getAll() : array {
-		$visibilities = [];
-		foreach (self::cases() as $visibility) {
-			$visibilities[$visibility->value] = $visibility->name;
-		}
-
-		return $visibilities;
+		return array_column(
+			array_map(fn ($visibility) => ['value' => $visibility->value, 'name' => $visibility->name], self::cases()),
+			'name',
+			'value'
+		);
 	}
 }

@@ -15,6 +15,7 @@ namespace aiptu\smaccer\command;
 
 use aiptu\smaccer\command\subcommand\CreateSubCommand;
 use aiptu\smaccer\command\subcommand\DeleteSubCommand;
+use aiptu\smaccer\command\subcommand\EditSubCommand;
 use aiptu\smaccer\command\subcommand\IdSubCommand;
 use aiptu\smaccer\command\subcommand\ListSubCommand;
 use aiptu\smaccer\command\subcommand\MoveSubCommand;
@@ -64,6 +65,8 @@ class SmaccerCommand extends BaseCommand {
 			Permissions::COMMAND_CREATE_OTHERS,
 			Permissions::COMMAND_DELETE_SELF,
 			Permissions::COMMAND_DELETE_OTHERS,
+			Permissions::COMMAND_EDIT_SELF,
+			Permissions::COMMAND_EDIT_OTHERS,
 			Permissions::COMMAND_ID,
 			Permissions::COMMAND_LIST,
 			Permissions::COMMAND_MOVE_SELF,
@@ -77,6 +80,7 @@ class SmaccerCommand extends BaseCommand {
 
 		$this->registerSubCommand(new CreateSubCommand($plugin, 'create', 'Create an NPC', ['add', 'spawn']));
 		$this->registerSubCommand(new DeleteSubCommand($plugin, 'delete', 'Delete an NPC', ['remove', 'despawn']));
+		$this->registerSubCommand(new EditSubCommand($plugin, 'edit', 'Edit an NPC'));
 		$this->registerSubCommand(new IdSubCommand($plugin, 'id', 'Check an NPC id'));
 		$this->registerSubCommand(new ListSubCommand($plugin, 'list', 'Get a list of NPCs in the world'));
 		$this->registerSubCommand(new MoveSubCommand($plugin, 'move', 'Move an NPC to a player', ['mv']));
