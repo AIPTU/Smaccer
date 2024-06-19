@@ -1,91 +1,89 @@
 <?php
 
+declare(strict_types=1);
+
 namespace aiptu\smaccer\entity\emote;
 
-class EmoteManager
-{
-    /** @var EmoteType[] */
-    private array $emotes = [];
+use function extract;
 
-    public function __construct(array $emotes)
-    {
-        $this->loadEmotes($emotes);
-    }
+class EmoteManager {
+	/** @var array<EmoteType> */
+	private array $emotes = [];
 
-    /**
-     * Load emote from the given array
-     *
-     * @param array{
-     *      array{
-     *          uuid: string,
-     *          title: string,
-     *          image: string
-     *      }
-     * } $emotes the array of emotes list
-     */
-    public function loadEmotes(array $emotes)
-    {
-        // TODO if your want to force load from github using a single command. so its should be empty first
-        $this->emotes = [];
+	public function __construct(array $emotes) {
+		$this->loadEmotes($emotes);
+	}
 
-        foreach ($emotes as $emote) {
-            extract($emote);
+	/**
+	 * Load emote from the given array.
+	 *
+	 * @param array{
+	 *      array{
+	 *          uuid: string,
+	 *          title: string,
+	 *          image: string
+	 *      }
+	 * } $emotes the array of emotes list
+	 */
+	public function loadEmotes(array $emotes) : void {
+		// TODO: if your want to force load from github using a single command. so its should be empty first
+		$this->emotes = [];
 
-            $originalTitle = $title;
-            $counter = 2;
+		foreach ($emotes as $emote) {
+			extract($emote);
 
-            while ($this->ensureUniqueTitle($title)) {
-                $title = $originalTitle . " " . $counter;
-                $counter++;
-            }
+			$originalTitle = $title;
+			$counter = 2;
 
-            $this->emotes[] = new EmoteType($uuid, $title, $image);
-        }
-    }
+			while ($this->ensureUniqueTitle($title)) {
+				$title = $originalTitle . ' ' . $counter;
+				++$counter;
+			}
 
-    /**
-     * Ensure none of the title are the same
-     *
-     * @param string $title The title that will be checked
-     *
-     * @return bool Returns `true` when the title is the same as the one listed and `false` when the title is Unique
-     */
-    public function ensureUniqueTitle(string $title)
-    {
-        foreach ($this->emotes as $emote) {
-            if ($emote->getTitle() === $title) {
-                return true;
-            }
-        }
+			$this->emotes[] = new EmoteType($uuid, $title, $image);
+		}
+	}
 
-        return false;
-    }
+	/**
+	 * Ensure none of the title are the same.
+	 *
+	 * @param string $title The title that will be checked
+	 *
+	 * @return bool Returns `true` when the title is the same as the one listed and `false` when the title is Unique
+	 */
+	public function ensureUniqueTitle(string $title) {
+		foreach ($this->emotes as $emote) {
+			if ($emote->getTitle() === $title) {
+				return true;
+			}
+		}
 
-    /**
-     * Get an emote by its uuid
-     *
-     * @param string $uuid the UUID of the emote
-     *
-     * @return EmoteType|null returns `EmoteType` class when the uuid exists and `null` if the UUID doesn`t exists
-     */
-    public function getEmote(string $uuid): ?EmoteType
-    {
-        foreach ($this->emotes as $emote) {
-            if ($emote->getUuid() === $uuid) {
-                return $emote;
-            }
-        }
+		return false;
+	}
 
-        return null;
-    }
+	/**
+	 * Get an emote by its uuid.
+	 *
+	 * @param string $uuid the UUID of the emote
+	 *
+	 * @return EmoteType|null returns `EmoteType` class when the uuid exists and `null` if the UUID doesn`t exists
+	 */
+	public function getEmote(string $uuid) : ?EmoteType {
+		foreach ($this->emotes as $emote) {
+			if ($emote->getUuid() === $uuid) {
+				return $emote;
+			}
+		}
 
-    /**
-     * Return all emotes.
-     *
-     * @return EmoteType[] Returns all of the `EmoteType`
-     */
-    public function getAll(): array
-    {
-        return $this->emotes;
-    }
+		return null;
+	}
+
+	/**
+	 * Return all emotes.
+	 *
+	 * @return array<EmoteType> Returns all of the `EmoteType`
+	 */
+	public function getAll() : array {
+		return $this->emotes;
+	}
 }

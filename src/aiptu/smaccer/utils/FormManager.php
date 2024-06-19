@@ -576,7 +576,7 @@ final class FormManager {
 			return;
 		}
 
-		$actionEmoteOptions = array_merge([new EmoteType("", "None", "")], Smaccer::getInstance()->getEmoteManager()->getAll());
+		$actionEmoteOptions = array_merge([new EmoteType('', 'None', '')], Smaccer::getInstance()->getEmoteManager()->getAll());
 		$defaultActionEmote = $npc->getActionEmoteId();
 		$currentActionEmote = $defaultActionEmote === null ? 'None' : $defaultActionEmote->getTitle();
 
@@ -629,7 +629,7 @@ final class FormManager {
 			return;
 		}
 
-		$emoteOptions = array_merge([new EmoteType("", "None", "")], Smaccer::getInstance()->getEmoteManager()->getAll());
+		$emoteOptions = array_merge([new EmoteType('', 'None', '')], Smaccer::getInstance()->getEmoteManager()->getAll());
 		$defaultEmote = $npc->getEmoteId();
 		$currentEmote = $defaultEmote === null ? 'None' : $defaultEmote->getTitle();
 
@@ -661,19 +661,21 @@ final class FormManager {
 					if ($buttonText === 'Previous Page') {
 						self::sendEditEmoteForm($player, $npc, $page - 1);
 						return;
-					} elseif ($buttonText === 'Next Page') {
+					}
+
+					if ($buttonText === 'Next Page') {
 						self::sendEditEmoteForm($player, $npc, $page + 1);
 						return;
-					} else {
-						if ($buttonText !== 'None') {
-							$emote = $emoteOptions[$start + $buttonValue];
-							$npc->setEmoteId($emote);
-						} else {
-							$npc->setEmoteId(null);
-						}
-
-						$player->sendMessage(TextFormat::GREEN . "Emote updated for NPC {$npc->getName()}.");
 					}
+
+					if ($buttonText !== 'None') {
+						$emote = $emoteOptions[$start + $buttonValue];
+						$npc->setEmoteId($emote);
+					} else {
+						$npc->setEmoteId(null);
+					}
+
+					$player->sendMessage(TextFormat::GREEN . "Emote updated for NPC {$npc->getName()}.");
 				}
 			)
 		);

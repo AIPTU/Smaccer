@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace aiptu\smaccer\tasks;
 
 use aiptu\smaccer\entity\emote\EmoteManager;
@@ -10,33 +12,36 @@ use pocketmine\utils\InternetException;
 use RuntimeException;
 
 class LoadEmotesTask extends AsyncTask {
+	public function __construct(
+		private string $cachedFilePath
+	) {}
 
-    public function __construct(
-        private string $cachedFilePath
-    ) {}
+	public function onRun() : void {
+		$currentCommitId = EmoteUtils::getCurrentCommitId();
+		$cachedFile = EmoteUtils::getEmotesFromCache($this->cachedFilePath);
 
-    public function onRun() : void {
-        $currentCommitId = EmoteUtils::getCurrentCommitId();
-        $cachedFile = EmoteUtils::getEmotesFromCache($this->cachedFilePath);
+		if ($currentCommitId instanceof InternetException) {
+			throw new RuntimeException('Failed to fetch current commit ID');
+		}
 
-        if($currentCommitId instanceof InternetException) throw new RuntimeException("Failed to fetch current commit ID");
+		if ($cachedFile === null || $cachedFile['commit_id'] !== $currentCommitId) {
+			$emotes = EmoteUtils::getEmotes();
+			EmoteUtils::saveEmoteToCache($this->cachedFilePath, $currentCommitId, $emotes);
 
-        if(is_null($cachedFile) || $cachedFile["commit_id"] !== $currentCommitId) {
-            $emotes = EmoteUtils::getEmotes();
-            EmoteUtils::saveEmoteToCache($this->cachedFilePath, $currentCommitId, $emotes);
+			if ($emotes instanceof InternetException) {
+				throw new RuntimeException('Failed to fetch emote list');
+			}
 
-            if($emotes instanceof InternetException) throw new RuntimeException("Failed to fetch emote list");
+			$this->setResult($emotes);
+			return;
+		}
 
-            $this->setResult($emotes);
-            return;
-        }
+		$this->setResult($cachedFile['emotes']);
+	}
 
-        $this->setResult($cachedFile["emotes"]);
-    }
+	public function onCompletion() : void {
+		$result = $this->getResult();
 
-    public function onCompletion() : void {
-        $result = $this->getResult();
-
-        Smaccer::getInstance()->setEmoteManager(new EmoteManager($result));
+		Smaccer::getInstance()->setEmoteManager(new EmoteManager($result));
 	}
 }

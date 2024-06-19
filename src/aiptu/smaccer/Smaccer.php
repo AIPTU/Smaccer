@@ -207,7 +207,7 @@ class Smaccer extends PluginBase {
 		return $this->emoteManager;
 	}
 
-	public function setEmoteManager(EmoteManager $emoteManager) {
+	public function setEmoteManager(EmoteManager $emoteManager) : void {
 		$this->emoteManager = $emoteManager;
 	}
 }
