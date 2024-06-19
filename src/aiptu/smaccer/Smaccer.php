@@ -15,8 +15,11 @@ namespace aiptu\smaccer;
 
 use aiptu\libsounds\SoundBuilder;
 use aiptu\smaccer\command\SmaccerCommand;
+use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
+use aiptu\smaccer\tasks\LoadEmotesTask;
+use aiptu\smaccer\utils\EmoteUtils;
 use CortexPE\Commando\PacketHooker;
 use forms\BaseForm;
 use InvalidArgumentException;
@@ -39,6 +42,7 @@ class Smaccer extends PluginBase {
 	private const CONFIG_VERSION = 1.0;
 
 	private NPCDefaultSettings $npcDefaultSettings;
+	private EmoteManager $emoteManager;
 
 	protected function onEnable() : void {
 		self::setInstance($this);
@@ -71,6 +75,8 @@ class Smaccer extends PluginBase {
 			$this->getLogger()->error('An error occurred while loading the configuration: ' . $e->getMessage());
 			throw new DisablePluginException();
 		}
+
+		$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask(EmoteUtils::getEmoteCachePath()));
 
 		$this->getServer()->getCommandMap()->register('Smaccer', new SmaccerCommand($this, 'smaccer', 'Smaccer commands.'));
 
@@ -195,5 +201,13 @@ class Smaccer extends PluginBase {
 
 	public function getDefaultSettings() : NPCDefaultSettings {
 		return $this->npcDefaultSettings;
+	}
+
+	public function getEmoteManager() : EmoteManager {
+		return $this->emoteManager;
+	}
+
+	public function setEmoteManager(EmoteManager $emoteManager) {
+		$this->emoteManager = $emoteManager;
 	}
 }

@@ -15,7 +15,7 @@ namespace aiptu\smaccer\entity;
 
 use aiptu\libsounds\SoundInstance;
 use aiptu\smaccer\entity\command\CommandHandler;
-use aiptu\smaccer\entity\emote\EmoteTypes;
+use aiptu\smaccer\entity\emote\EmoteType;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
@@ -57,8 +57,8 @@ class HumanSmaccer extends Human {
 	protected CommandHandler $commandHandler;
 	protected bool $rotateToPlayers = true;
 	protected bool $slapBack = true;
-	protected ?EmoteTypes $actionEmoteId = null;
-	protected ?EmoteTypes $emoteId = null;
+	protected ?EmoteType $actionEmoteId = null;
+	protected ?EmoteType $emoteId = null;
 
 	protected array $emoteCooldowns = [];
 	protected array $actionEmoteCooldowns = [];
@@ -89,8 +89,8 @@ class HumanSmaccer extends Human {
 
 		$this->setSlapBack((bool) $nbt->getByte(EntityTag::SLAP_BACK, 1));
 
-		$this->actionEmoteId = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? EmoteTypes::fromUUID($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
-		$this->emoteId = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? EmoteTypes::fromUUID($nbt->getString(EntityTag::EMOTE)) : null;
+		$this->actionEmoteId = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
+		$this->emoteId = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::EMOTE)) : null;
 	}
 
 	public function saveNBT() : CompoundTag {
@@ -105,11 +105,11 @@ class HumanSmaccer extends Human {
 		$nbt->setByte(EntityTag::SLAP_BACK, (int) $this->slapBack);
 
 		if ($this->actionEmoteId !== null) {
-			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmoteId->value);
+			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmoteId->getUuid());
 		}
 
 		if ($this->emoteId !== null) {
-			$nbt->setString(EntityTag::EMOTE, $this->emoteId->value);
+			$nbt->setString(EntityTag::EMOTE, $this->emoteId->getUuid());
 		}
 
 		$commands = array_map(function ($commandData) {
@@ -154,19 +154,19 @@ class HumanSmaccer extends Human {
 		}
 	}
 
-	public function setActionEmoteId(?EmoteTypes $actionEmoteId) : void {
+	public function setActionEmoteId(?EmoteType $actionEmoteId) : void {
 		$this->actionEmoteId = $actionEmoteId;
 	}
 
-	public function getActionEmoteId() : ?EmoteTypes {
+	public function getActionEmoteId() : ?EmoteType {
 		return $this->actionEmoteId;
 	}
 
-	public function setEmoteId(?EmoteTypes $emoteId) : void {
+	public function setEmoteId(?EmoteType $emoteId) : void {
 		$this->emoteId = $emoteId;
 	}
 
-	public function getEmoteId() : ?EmoteTypes {
+	public function getEmoteId() : ?EmoteType {
 		return $this->emoteId;
 	}
 
@@ -192,12 +192,12 @@ class HumanSmaccer extends Human {
 		$entityWorld->addParticle($particle2Pos, $particle2);
 
 		if ($this->emoteId !== null && Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
-			if ($this->handleEmoteCooldown($this->emoteId->value)) {
-				$this->broadcastEmote($this->emoteId->value);
+			if ($this->handleEmoteCooldown($this->emoteId->getUuid())) {
+				$this->broadcastEmote($this->emoteId->getUuid());
 				$hasUpdate = true;
 			}
 		} elseif ($this->emoteId !== null) {
-			$this->broadcastEmote($this->emoteId->value);
+			$this->broadcastEmote($this->emoteId->getUuid());
 			$hasUpdate = true;
 		}
 
@@ -256,12 +256,12 @@ class HumanSmaccer extends Human {
 		}
 
 		if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
-			if ($this->actionEmoteId !== null && $this->handleActionEmoteCooldown($this->actionEmoteId->value)) {
-				$this->broadcastEmote($this->actionEmoteId->value, [$player]);
+			if ($this->actionEmoteId !== null && $this->handleActionEmoteCooldown($this->actionEmoteId->getUuid())) {
+				$this->broadcastEmote($this->actionEmoteId->getUuid(), [$player]);
 			}
 		} else {
 			if ($this->actionEmoteId !== null) {
-				$this->broadcastEmote($this->actionEmoteId->value, [$player]);
+				$this->broadcastEmote($this->actionEmoteId->getUuid(), [$player]);
 			}
 		}
 
