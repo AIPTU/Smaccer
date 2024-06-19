@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace aiptu\smaccer\utils;
 
 use aiptu\smaccer\entity\emote\EmoteType;
-use aiptu\smaccer\entity\emote\EmoteTypes;
 use aiptu\smaccer\entity\EntityAgeable;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
@@ -577,7 +576,7 @@ final class FormManager {
 			return;
 		}
 
-		$actionEmoteOptions = array_merge([new EmoteType("", "None", "")], Smaccer::getInstance()->getEmoteManager()->getAllEmotes());
+		$actionEmoteOptions = array_merge([new EmoteType("", "None", "")], Smaccer::getInstance()->getEmoteManager()->getAll());
 		$defaultActionEmote = $npc->getActionEmoteId();
 		$currentActionEmote = $defaultActionEmote === null ? 'None' : $defaultActionEmote->getTitle();
 
@@ -630,7 +629,7 @@ final class FormManager {
 			return;
 		}
 
-		$emoteOptions = array_merge([new EmoteType("", "None", "")], Smaccer::getInstance()->getEmoteManager()->getAllEmotes());
+		$emoteOptions = array_merge([new EmoteType("", "None", "")], Smaccer::getInstance()->getEmoteManager()->getAll());
 		$defaultEmote = $npc->getEmoteId();
 		$currentEmote = $defaultEmote === null ? 'None' : $defaultEmote->getTitle();
 

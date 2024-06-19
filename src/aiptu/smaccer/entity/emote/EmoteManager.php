@@ -84,7 +84,7 @@ class EmoteManager
      *
      * @return EmoteType[] Returns all of the `EmoteType`
      */
-    public function getAllEmotes(): array
+    public function getAll(): array
     {
         return $this->emotes;
     }
