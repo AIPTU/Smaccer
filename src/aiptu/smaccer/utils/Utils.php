@@ -14,12 +14,20 @@ declare(strict_types=1);
 namespace aiptu\smaccer\utils;
 
 use InvalidArgumentException;
+use pocketmine\scheduler\BulkCurlTask;
+use pocketmine\scheduler\BulkCurlTaskOperation;
+use pocketmine\Server;
+use pocketmine\utils\InternetException;
+use pocketmine\utils\InternetRequestResult;
 use function array_filter;
 use function array_map;
+use function filter_var;
 use function implode;
+use function preg_match;
 use function preg_replace;
 use function preg_split;
 use function str_replace;
+use const FILTER_VALIDATE_URL;
 use const PREG_SPLIT_NO_EMPTY;
 
 class Utils {
@@ -54,5 +62,30 @@ class Utils {
 		$result = 'smaccer:' . $namespace;
 
 		return [$classNameWithoutSuffix, $result];
+	}
+
+	public static function fetchAsync(string $url, callable $callback) : void {
+		/**
+		 * @param array<InternetRequestResult> $results
+		 */
+		$bulkCurlTaskCallback = function (array $results) use ($callback) : void {
+			if (isset($results[0]) && !$results[0] instanceof InternetException) {
+				$callback($results[0]);
+			} else {
+				$callback(null);
+			}
+		};
+		$task = new BulkCurlTask([
+			new BulkCurlTaskOperation($url),
+		], $bulkCurlTaskCallback);
+		Server::getInstance()->getAsyncPool()->submitTask($task);
+	}
+
+	public static function isValidUrl(string $url) : bool {
+		return filter_var($url, FILTER_VALIDATE_URL) !== false;
+	}
+
+	public static function isPngUrl(string $url) : bool {
+		return preg_match('/^https?:\/\/.+\.(png)$/i', $url) === 1;
 	}
 }

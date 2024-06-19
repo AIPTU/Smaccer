@@ -280,7 +280,7 @@ final class FormManager {
 				0 => self::sendEditNPCForm($player, $npc),
 				1 => self::sendEditCommandsForm($player, $npc),
 				2 => self::handleEmoteSelection($player, $npc),
-				3 => $player->sendMessage('TODO'),
+				3 => self::sendEditSkinSettingsForm($player, $npc),
 				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
 			}
 		);
@@ -577,7 +577,7 @@ final class FormManager {
 		}
 
 		$actionEmoteOptions = array_merge(['None'], array_values(EmoteTypes::getAll()));
-		$defaultActionEmote = $npc->getActionEmoteId();
+		$defaultActionEmote = $npc->getActionEmote();
 		$currentActionEmote = $defaultActionEmote === null ? 'None' : $defaultActionEmote->name;
 
 		$start = $page * self::ITEMS_PER_PAGE;
@@ -609,9 +609,9 @@ final class FormManager {
 						self::sendEditActionEmoteForm($player, $npc, $page + 1);
 					} else {
 						if ($actionEmote !== 'None') {
-							$npc->setActionEmoteId(EmoteTypes::fromName($actionEmote));
+							$npc->setActionEmote(EmoteTypes::fromName($actionEmote));
 						} else {
-							$npc->setActionEmoteId(null);
+							$npc->setActionEmote(null);
 						}
 
 						$player->sendMessage(TextFormat::GREEN . "Action emote updated for NPC {$npc->getName()}.");
@@ -627,7 +627,7 @@ final class FormManager {
 		}
 
 		$emoteOptions = array_merge(['None'], array_values(EmoteTypes::getAll()));
-		$defaultEmote = $npc->getEmoteId();
+		$defaultEmote = $npc->getEmote();
 		$currentEmote = $defaultEmote === null ? 'None' : $defaultEmote->name;
 
 		$start = $page * self::ITEMS_PER_PAGE;
@@ -659,12 +659,140 @@ final class FormManager {
 						self::sendEditEmoteForm($player, $npc, $page + 1);
 					} else {
 						if ($emote !== 'None') {
-							$npc->setEmoteId(EmoteTypes::fromName($emote));
+							$npc->setEmote(EmoteTypes::fromName($emote));
 						} else {
-							$npc->setEmoteId(null);
+							$npc->setEmote(null);
 						}
 
 						$player->sendMessage(TextFormat::GREEN . "Emote updated for NPC {$npc->getName()}.");
+					}
+				}
+			)
+		);
+	}
+
+	public static function sendEditSkinSettingsForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$player->sendForm(
+			MenuForm::withOptions(
+				'Skin Settings',
+				'Select an option:',
+				[
+					'Edit Skin',
+					'Edit Cape',
+				],
+				fn (Player $player, Button $selected) => match ($selected->getValue()) {
+					0 => self::sendEditSkinForm($player, $npc),
+					1 => self::sendEditCapeForm($player, $npc),
+					default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+				}
+			)
+		);
+	}
+
+	public static function sendEditSkinForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$player->sendForm(
+			MenuForm::withOptions(
+				'Edit Skin',
+				'Select an option:',
+				[
+					'Change Skin from Player',
+					'Change Skin from URL',
+				],
+				fn (Player $player, Button $selected) => match ($selected->getValue()) {
+					0 => self::sendChangeSkinFromPlayerForm($player, $npc),
+					1 => self::sendChangeSkinFromURLForm($player, $npc),
+					default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+				}
+			)
+		);
+	}
+
+	public static function sendChangeSkinFromPlayerForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$server = Smaccer::getInstance()->getServer();
+		$onlinePlayers = $server->getOnlinePlayers();
+		$playerNames = array_map(fn ($player) => $player->getName(), $onlinePlayers);
+
+		$player->sendForm(
+			MenuForm::withOptions(
+				'Change Skin from Player',
+				'Select a player:',
+				$playerNames,
+				function (Player $player, Button $selected) use ($server, $npc) : void {
+					$selectedPlayerName = $selected->text;
+					$selectedPlayer = $server->getPlayerExact($selectedPlayerName);
+
+					if ($selectedPlayer !== null) {
+						$npc->setSkin($selectedPlayer->getSkin());
+						$npc->sendSkin();
+						$player->sendMessage(TextFormat::GREEN . "Skin updated for NPC {$npc->getName()} from player {$selectedPlayerName}.");
+					} else {
+						$player->sendMessage(TextFormat::RED . 'Player not found.');
+					}
+				}
+			)
+		);
+	}
+
+	public static function sendChangeSkinFromURLForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$formElements = [
+			new Input('Enter skin URL', 'https://example.com/skin.png'),
+		];
+
+		$player->sendForm(
+			new CustomForm(
+				'Change Skin from URL',
+				$formElements,
+				function (Player $player, CustomFormResponse $response) use ($npc) : void {
+					$url = $response->getInput()->getValue();
+
+					try {
+						SkinUtils::skinFromURL($url, $npc);
+						$player->sendMessage(TextFormat::GREEN . "Skin updated for NPC {$npc->getName()} from URL.");
+					} catch (\Throwable $e) {
+						$player->sendMessage(TextFormat::RED . $e->getMessage());
+					}
+				}
+			)
+		);
+	}
+
+	public static function sendEditCapeForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$formElements = [
+			new Input('Enter cape URL', 'https://example.com/cape.png'),
+		];
+
+		$player->sendForm(
+			new CustomForm(
+				'Change Cape from URL',
+				$formElements,
+				function (Player $player, CustomFormResponse $response) use ($npc) : void {
+					$url = $response->getInput()->getValue();
+
+					try {
+						SkinUtils::capeFromURL($url, $npc);
+						$player->sendMessage(TextFormat::GREEN . "Cape updated for NPC {$npc->getName()} from URL.");
+					} catch (\Throwable $e) {
+						$player->sendMessage(TextFormat::RED . 'Failed to update cape: ' . $e->getMessage());
 					}
 				}
 			)

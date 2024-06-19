@@ -22,7 +22,7 @@ class NPCData {
 	private bool $baby = false;
 	private bool $rotationEnabled = true;
 	private bool $nametagVisible = true;
-	private EntityVisibility $visibility;
+	private EntityVisibility $visibility = EntityVisibility::VISIBLE_TO_EVERYONE;
 	private bool $slapBack = false;
 	private ?string $skinData = null;
 	private ?EmoteTypes $actionEmote = null;
