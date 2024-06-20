@@ -57,8 +57,7 @@ class HumanSmaccer extends Human {
 	protected CommandHandler $commandHandler;
 	protected bool $rotateToPlayers = true;
 	protected bool $slapBack = true;
-protected ?EmoteType $actionEmote = null;
-
+	protected ?EmoteType $actionEmote = null;
 	protected ?EmoteType $emote = null;
 
 	protected array $emoteCooldowns = [];
@@ -90,7 +89,7 @@ protected ?EmoteType $actionEmote = null;
 
 		$this->setSlapBack((bool) $nbt->getByte(EntityTag::SLAP_BACK, 1));
 
-$this->actionEmote = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
+		$this->actionEmote = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
 
 		$this->emote = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::EMOTE)) : null;
 	}
@@ -106,25 +105,13 @@ $this->actionEmote = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag 
 
 		$nbt->setByte(EntityTag::SLAP_BACK, (int) $this->slapBack);
 
-		
-if ($this->actionEmote !== null) {
-
-			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmote->getUuid());		}
+		if ($this->actionEmote !== null) {
+			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmote->getUuid());
+		}
 
 		if ($this->emote !== null) {
-
 			$nbt->setString(EntityTag::EMOTE, $this->emote->getUuid());
-
 		}
-	
-
-	
-
-	
-
-	
-
-	
 
 		$commands = array_map(function ($commandData) {
 			$commandTag = CompoundTag::create();
@@ -168,10 +155,9 @@ if ($this->actionEmote !== null) {
 		}
 	}
 
-
 	public function setActionEmote(?EmoteType $actionEmote) : void {
 		$this->actionEmote = $actionEmote;
-  $this->saveNBT();
+		$this->saveNBT();
 	}
 
 	public function getActionEmote() : ?EmoteType {
@@ -180,10 +166,12 @@ if ($this->actionEmote !== null) {
 
 	public function setEmote(?EmoteType $emote) : void {
 		$this->emote = $emote;
-    $this->saveNBT();
-}
+		$this->saveNBT();
+	}
 
 	public function getEmote() : ?EmoteType {
+		return $this->emote;
+	}
 
 	protected function entityBaseTick(int $tickDiff = 1) : bool {
 		$hasUpdate = parent::entityBaseTick($tickDiff);
@@ -270,37 +258,15 @@ if ($this->actionEmote !== null) {
 			$this->broadcastAnimation(new ArmSwingAnimation($this));
 		}
 
-		
-
-	
-if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
-
-			if ($this->actionEmote !== null && $this->handleActionEmoteCooldown($this->actionEmote->getUuid())) {				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
-
-			}
-
-		} else {
-
-			if ($this->actionEmote !== null) {
-
+		if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
+			if ($this->actionEmote !== null && $this->handleActionEmoteCooldown($this->actionEmote->getUuid())) {
 				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
-
 			}
-
+		} else {
+			if ($this->actionEmote !== null) {
+				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
+			}
 		}
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
 
 		return true;
 	}
