@@ -47,6 +47,7 @@ use function is_a;
 use function is_bool;
 use function is_string;
 use function min;
+use function ucfirst;
 
 final class FormManager {
 	private const ITEMS_PER_PAGE = 10;
@@ -281,6 +282,9 @@ final class FormManager {
 				1 => self::sendEditCommandsForm($player, $npc),
 				2 => self::handleEmoteSelection($player, $npc),
 				3 => self::sendEditSkinSettingsForm($player, $npc),
+				4 => self::sendArmorSettingsForm($player, $npc),
+				5 => self::equipHeldItem($player, $npc),
+				6 => self::equipOffHandItem($player, $npc),
 				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
 			}
 		);
@@ -289,6 +293,9 @@ final class FormManager {
 			$form->appendOptions(
 				'Emote Settings',
 				'Skin Settings',
+				'Armor Settings',
+				'Equip Held Item',
+				'Equip Off-Hand Item',
 			);
 		}
 
@@ -805,6 +812,110 @@ final class FormManager {
 				}
 			)
 		);
+	}
+
+	public static function sendArmorSettingsForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			$player->sendMessage(TextFormat::RED . 'This NPC cannot wear armor.');
+			return;
+		}
+
+		$form = MenuForm::withOptions(
+			'Armor Settings',
+			'Choose an armor option:',
+			[
+				'Equip All Armor',
+				'Equip Helmet',
+				'Equip Chestplate',
+				'Equip Leggings',
+				'Equip Boots',
+			],
+			fn (Player $player, Button $selected) => match ($selected->getValue()) {
+				0 => self::equipAllArmor($player, $npc),
+				1 => self::equipArmorPiece($player, $npc, 'helmet'),
+				2 => self::equipArmorPiece($player, $npc, 'chestplate'),
+				3 => self::equipArmorPiece($player, $npc, 'leggings'),
+				4 => self::equipArmorPiece($player, $npc, 'boots'),
+				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+			}
+		);
+
+		$player->sendForm($form);
+	}
+
+	public static function equipAllArmor(Player $player, HumanSmaccer $npc) : void {
+		$armorInventory = $player->getArmorInventory();
+
+		$npc->setHelmet($armorInventory->getHelmet());
+		$npc->setChestplate($armorInventory->getChestplate());
+		$npc->setLeggings($armorInventory->getLeggings());
+		$npc->setBoots($armorInventory->getBoots());
+
+		$player->sendMessage(TextFormat::GREEN . "All armor equipped to NPC {$npc->getName()}.");
+	}
+
+	public static function equipArmorPiece(Player $player, HumanSmaccer $npc, string $piece) : void {
+		$armorInventory = $player->getArmorInventory();
+		$armorPiece = null;
+
+		switch ($piece) {
+			case 'helmet':
+				$armorPiece = $armorInventory->getHelmet();
+				break;
+			case 'chestplate':
+				$armorPiece = $armorInventory->getChestplate();
+				break;
+			case 'leggings':
+				$armorPiece = $armorInventory->getLeggings();
+				break;
+			case 'boots':
+				$armorPiece = $armorInventory->getBoots();
+				break;
+		}
+
+		if ($armorPiece === null) {
+			$player->sendMessage(TextFormat::RED . 'Invalid armor piece specified.');
+			return;
+		}
+
+		switch ($piece) {
+			case 'helmet':
+				$npc->setHelmet($armorPiece);
+				break;
+			case 'chestplate':
+				$npc->setChestplate($armorPiece);
+				break;
+			case 'leggings':
+				$npc->setLeggings($armorPiece);
+				break;
+			case 'boots':
+				$npc->setBoots($armorPiece);
+				break;
+		}
+
+		$player->sendMessage(TextFormat::GREEN . ucfirst($piece) . " equipped to NPC {$npc->getName()}.");
+	}
+
+	public static function equipHeldItem(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$item = $player->getInventory()->getItemInHand();
+		$npc->setItemInHand($item);
+
+		$player->sendMessage(TextFormat::GREEN . "Held item equipped to NPC {$npc->getName()}.");
+	}
+
+	public static function equipOffHandItem(Player $player, Entity $npc) : void {
+		if (!$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$item = $player->getOffHandInventory()->getItem(0);
+		$npc->setOffHandItem($item);
+
+		$player->sendMessage(TextFormat::GREEN . "Off-hand item equipped to NPC {$npc->getName()}.");
 	}
 
 	public static function sendNPCListForm(Player $player) : void {

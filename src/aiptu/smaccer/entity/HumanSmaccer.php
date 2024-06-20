@@ -86,11 +86,8 @@ class HumanSmaccer extends Human {
 		$this->setNameTagAlwaysVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
 		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
 		$this->setVisibility(EntityVisibility::fromInt($nbt->getInt(EntityTag::VISIBILITY, EntityVisibility::VISIBLE_TO_EVERYONE->value)));
-
 		$this->setSlapBack((bool) $nbt->getByte(EntityTag::SLAP_BACK, 1));
-
 		$this->actionEmote = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
-
 		$this->emote = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::EMOTE)) : null;
 	}
 
@@ -102,7 +99,6 @@ class HumanSmaccer extends Human {
 		$nbt->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $this->rotateToPlayers);
 		$nbt->setByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible());
 		$nbt->setInt(EntityTag::VISIBILITY, $this->visibility->value);
-
 		$nbt->setByte(EntityTag::SLAP_BACK, (int) $this->slapBack);
 
 		if ($this->actionEmote !== null) {
