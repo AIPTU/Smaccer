@@ -57,7 +57,8 @@ class HumanSmaccer extends Human {
 	protected CommandHandler $commandHandler;
 	protected bool $rotateToPlayers = true;
 	protected bool $slapBack = true;
-	protected ?EmoteType $actionEmote = null;
+protected ?EmoteType $actionEmote = null;
+
 	protected ?EmoteType $emote = null;
 
 	protected array $emoteCooldowns = [];
@@ -89,7 +90,8 @@ class HumanSmaccer extends Human {
 
 		$this->setSlapBack((bool) $nbt->getByte(EntityTag::SLAP_BACK, 1));
 
-		$this->actionEmote = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
+$this->actionEmote = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
+
 		$this->emote = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::EMOTE)) : null;
 	}
 
@@ -104,13 +106,25 @@ class HumanSmaccer extends Human {
 
 		$nbt->setByte(EntityTag::SLAP_BACK, (int) $this->slapBack);
 
-		if ($this->actionEmote !== null) {
-			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmote->getUuid());
-		}
+		
+if ($this->actionEmote !== null) {
+
+			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmote->getUuid());		}
 
 		if ($this->emote !== null) {
+
 			$nbt->setString(EntityTag::EMOTE, $this->emote->getUuid());
+
 		}
+	
+
+	
+
+	
+
+	
+
+	
 
 		$commands = array_map(function ($commandData) {
 			$commandTag = CompoundTag::create();
@@ -154,8 +168,10 @@ class HumanSmaccer extends Human {
 		}
 	}
 
+
 	public function setActionEmote(?EmoteType $actionEmote) : void {
 		$this->actionEmote = $actionEmote;
+  $this->saveNBT();
 	}
 
 	public function getActionEmote() : ?EmoteType {
@@ -164,11 +180,10 @@ class HumanSmaccer extends Human {
 
 	public function setEmote(?EmoteType $emote) : void {
 		$this->emote = $emote;
-	}
+    $this->saveNBT();
+}
 
 	public function getEmote() : ?EmoteType {
-		return $this->emote;
-	}
 
 	protected function entityBaseTick(int $tickDiff = 1) : bool {
 		$hasUpdate = parent::entityBaseTick($tickDiff);
@@ -255,15 +270,37 @@ class HumanSmaccer extends Human {
 			$this->broadcastAnimation(new ArmSwingAnimation($this));
 		}
 
-		if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
-			if ($this->actionEmote !== null && $this->handleActionEmoteCooldown($this->actionEmote->getUuid())) {
-				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
+		
+
+	
+if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
+
+			if ($this->actionEmote !== null && $this->handleActionEmoteCooldown($this->actionEmote->getUuid())) {				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
+
 			}
+
 		} else {
+
 			if ($this->actionEmote !== null) {
+
 				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
+
 			}
+
 		}
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
 
 		return true;
 	}
@@ -441,5 +478,27 @@ class HumanSmaccer extends Human {
 
 	public function getItemInHand() : Item {
 		return $this->getInventory()->getItemInHand();
+	}
+
+	public function changeSkin(string $skinData) : void {
+		$this->setSkin(new Skin(
+			$this->getSkin()->getSkinId(),
+			$skinData,
+			$this->getSkin()->getCapeData(),
+			$this->getSkin()->getGeometryName(),
+			$this->getSkin()->getGeometryData()
+		));
+		$this->sendSkin();
+	}
+
+	public function changeCape(string $capeData) : void {
+		$this->setSkin(new Skin(
+			$this->getSkin()->getSkinId(),
+			$this->getSkin()->getSkinData(),
+			$capeData,
+			$this->getSkin()->getGeometryName(),
+			$this->getSkin()->getGeometryData()
+		));
+		$this->sendSkin();
 	}
 }
