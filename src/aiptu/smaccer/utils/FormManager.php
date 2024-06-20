@@ -584,7 +584,7 @@ final class FormManager {
 		$end = min($start + self::ITEMS_PER_PAGE, count($actionEmoteOptions));
 
 		$buttons = array_map(function (EmoteType $emote) {
-			$image = $emote !== 'None' ? $emote->getImage() : null;
+			$image = $emote->getTitle() !== 'None' ? $emote->getImage() : null;
 			return $image !== null ? new Button($emote->getTitle(), Image::url($image)) : new Button($emote->getTitle());
 		}, array_slice($actionEmoteOptions, $start, self::ITEMS_PER_PAGE));
 
@@ -637,7 +637,7 @@ final class FormManager {
 		$end = min($start + self::ITEMS_PER_PAGE, count($emoteOptions));
 
 		$buttons = array_map(function (EmoteType $emote) {
-			$image = $emote !== 'None' ? $emote->getImage() : null;
+			$image = $emote->getTitle() !== 'None' ? $emote->getImage() : null;
 			return $image !== null ? new Button($emote->getTitle(), Image::url($image)) : new Button($emote->getTitle());
 		}, array_slice($emoteOptions, $start, self::ITEMS_PER_PAGE));
 

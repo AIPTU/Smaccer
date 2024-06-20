@@ -388,15 +388,13 @@ class SmaccerHandler {
 			$entity->setSlapBack($slapBack);
 
 			if ($actionEmote !== null) {
-				$entity->setActionEmoteId($actionEmote);
+				$entity->setActionEmote($actionEmote);
 			}
 
 			if ($emote !== null) {
-				$entity->setEmoteId($emote);
+				$entity->setEmote($emote);
 			}
 		}
-
-		$entity->spawnToAll();
 
 		$entity->setVisibility($visibility);
 
