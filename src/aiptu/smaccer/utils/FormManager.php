@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\utils;
 
-use aiptu\smaccer\entity\emote\EmoteTypes;
+use aiptu\smaccer\entity\emote\EmoteType;
 use aiptu\smaccer\entity\EntityAgeable;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
@@ -576,16 +576,16 @@ final class FormManager {
 			return;
 		}
 
-		$actionEmoteOptions = array_merge(['None'], array_values(EmoteTypes::getAll()));
+		$actionEmoteOptions = array_merge([new EmoteType('', 'None', '')], Smaccer::getInstance()->getEmoteManager()->getAll());
 		$defaultActionEmote = $npc->getActionEmote();
-		$currentActionEmote = $defaultActionEmote === null ? 'None' : $defaultActionEmote->name;
+		$currentActionEmote = $defaultActionEmote === null ? 'None' : $defaultActionEmote->getTitle();
 
 		$start = $page * self::ITEMS_PER_PAGE;
 		$end = min($start + self::ITEMS_PER_PAGE, count($actionEmoteOptions));
 
-		$buttons = array_map(function ($emote) {
-			$image = $emote !== 'None' ? EmoteTypes::imageFromName($emote) : null;
-			return $image !== null ? new Button($emote, Image::url($image)) : new Button($emote);
+		$buttons = array_map(function (EmoteType $emote) {
+			$image = $emote->getTitle() !== 'None' ? $emote->getImage() : null;
+			return $image !== null ? new Button($emote->getTitle(), Image::url($image)) : new Button($emote->getTitle());
 		}, array_slice($actionEmoteOptions, $start, self::ITEMS_PER_PAGE));
 
 		if ($page > 0) {
@@ -601,15 +601,19 @@ final class FormManager {
 				'Action Emote',
 				'Current action emote: ' . $currentActionEmote,
 				$buttons,
-				function (Player $player, Button $selected) use ($npc, $page) : void {
-					$actionEmote = $selected->text;
-					if ($actionEmote === 'Previous Page') {
+				function (Player $player, Button $selected) use ($npc, $page, $actionEmoteOptions, $start) : void {
+					$buttonText = $selected->text;
+					$buttonValue = $selected->getValue();
+
+					if ($buttonText === 'Previous Page') {
 						self::sendEditActionEmoteForm($player, $npc, $page - 1);
-					} elseif ($actionEmote === 'Next Page') {
+					} elseif ($buttonText === 'Next Page') {
 						self::sendEditActionEmoteForm($player, $npc, $page + 1);
 					} else {
-						if ($actionEmote !== 'None') {
-							$npc->setActionEmote(EmoteTypes::fromName($actionEmote));
+						if ($buttonText !== 'None') {
+							$actionEmote = $actionEmoteOptions[$start + $buttonValue];
+
+							$npc->setActionEmote($actionEmote);
 						} else {
 							$npc->setActionEmote(null);
 						}
@@ -626,16 +630,16 @@ final class FormManager {
 			return;
 		}
 
-		$emoteOptions = array_merge(['None'], array_values(EmoteTypes::getAll()));
+		$emoteOptions = array_merge([new EmoteType('', 'None', '')], Smaccer::getInstance()->getEmoteManager()->getAll());
 		$defaultEmote = $npc->getEmote();
-		$currentEmote = $defaultEmote === null ? 'None' : $defaultEmote->name;
+		$currentEmote = $defaultEmote === null ? 'None' : $defaultEmote->getTitle();
 
 		$start = $page * self::ITEMS_PER_PAGE;
 		$end = min($start + self::ITEMS_PER_PAGE, count($emoteOptions));
 
-		$buttons = array_map(function ($emote) {
-			$image = $emote !== 'None' ? EmoteTypes::imageFromName($emote) : null;
-			return $image !== null ? new Button($emote, Image::url($image)) : new Button($emote);
+		$buttons = array_map(function (EmoteType $emote) {
+			$image = $emote->getTitle() !== 'None' ? $emote->getImage() : null;
+			return $image !== null ? new Button($emote->getTitle(), Image::url($image)) : new Button($emote->getTitle());
 		}, array_slice($emoteOptions, $start, self::ITEMS_PER_PAGE));
 
 		if ($page > 0) {
@@ -651,15 +655,19 @@ final class FormManager {
 				'Emote',
 				'Current emote: ' . $currentEmote,
 				$buttons,
-				function (Player $player, Button $selected) use ($npc, $page) : void {
-					$emote = $selected->text;
-					if ($emote === 'Previous Page') {
+				function (Player $player, Button $selected) use ($npc, $page, $emoteOptions, $start) : void {
+					$buttonText = $selected->text;
+					$buttonValue = $selected->getValue();
+
+					if ($buttonText === 'Previous Page') {
 						self::sendEditEmoteForm($player, $npc, $page - 1);
-					} elseif ($emote === 'Next Page') {
+					} elseif ($buttonText === 'Next Page') {
 						self::sendEditEmoteForm($player, $npc, $page + 1);
 					} else {
-						if ($emote !== 'None') {
-							$npc->setEmote(EmoteTypes::fromName($emote));
+						if ($buttonText !== 'None') {
+							$emote = $emoteOptions[$start + $buttonValue];
+
+							$npc->setEmote($emote);
 						} else {
 							$npc->setEmote(null);
 						}

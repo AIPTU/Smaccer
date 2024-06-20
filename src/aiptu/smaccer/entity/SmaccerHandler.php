@@ -356,11 +356,11 @@ class SmaccerHandler {
 			$nbt->setByte(EntityTag::SLAP_BACK, (int) $slapBack);
 
 			if ($actionEmote !== null) {
-				$nbt->setString(EntityTag::ACTION_EMOTE, $actionEmote->value);
+				$nbt->setString(EntityTag::ACTION_EMOTE, $actionEmote->getUuid());
 			}
 
 			if ($emote !== null) {
-				$nbt->setString(EntityTag::EMOTE, $emote->value);
+				$nbt->setString(EntityTag::EMOTE, $emote->getUuid());
 			}
 		}
 
