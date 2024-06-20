@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\utils;
 
-use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\utils\promise\Promise;
+use aiptu\smaccer\utils\promise\PromiseResolver;
 use pocketmine\entity\Skin;
 use pocketmine\utils\Filesystem;
 use Symfony\Component\Filesystem\Path;
@@ -30,75 +31,95 @@ use function unlink;
 
 class SkinUtils {
 	/**
-	 * Downloads a skin from a URL and applies it to a HumanSmaccer entity.
+	 * Downloads a skin from a URL and returns the skin bytes in a promise.
 	 *
-	 * @param string       $url   the URL of the PNG skin
-	 * @param HumanSmaccer $human the HumanSmaccer entity to apply the skin to
+	 * @param string $url the URL of the PNG skin
+	 *
+	 * @return Promise<string> a promise that resolves to the skin bytes
 	 *
 	 * @throws \InvalidArgumentException if the URL is invalid or not a PNG
-	 * @throws \RuntimeException if there is an error downloading or processing the skin
 	 */
-	public static function skinFromURL(string $url, HumanSmaccer $human) : void {
-		self::validateUrl($url);
-		self::validatePngUrl($url);
+	public static function skinFromURL(string $url) : Promise {
+		$resolver = new PromiseResolver();
 
-		Utils::fetchAsync($url, function ($result) use ($human) : void {
-			if ($result === null) {
-				throw new \RuntimeException('Failed to download skin.');
-			}
+		try {
+			self::validateUrl($url);
+			self::validatePngUrl($url);
 
-			$skinData = $result->getBody();
-			$filePath = self::saveSkinToFile($skinData);
+			Utils::fetchAsync($url, function ($result) use ($resolver) : void {
+				if ($result === null) {
+					$resolver->reject(new \RuntimeException('Failed to download skin.'));
+					return;
+				}
 
-			$image = imagecreatefrompng($filePath);
-			if ($image === false) {
+				$skinData = $result->getBody();
+				$filePath = self::saveSkinToFile($skinData);
+
+				$image = imagecreatefrompng($filePath);
+				if ($image === false) {
+					self::cleanupFile($filePath);
+					$resolver->reject(new \RuntimeException('The file is not a valid PNG skin.'));
+					return;
+				}
+
+				$skinBytes = self::extractSkinBytes($image);
+				imagedestroy($image);
+
 				self::cleanupFile($filePath);
-				throw new \RuntimeException('The file is not a valid PNG skin.');
-			}
 
-			$skinBytes = self::extractSkinBytes($image);
-			imagedestroy($image);
+				$resolver->resolve($skinBytes);
+			});
+		} catch (\Throwable $e) {
+			$resolver->reject($e);
+		}
 
-			$human->changeSkin($skinBytes);
-
-			self::cleanupFile($filePath);
-		});
+		return $resolver->getPromise();
 	}
 
 	/**
-	 * Downloads a cape from a URL and applies it to a HumanSmaccer entity.
+	 * Downloads a cape from a URL and returns the cape bytes in a promise.
 	 *
-	 * @param string       $url   the URL of the PNG cape
-	 * @param HumanSmaccer $human the HumanSmaccer entity to apply the cape to
+	 * @param string $url the URL of the PNG cape
+	 *
+	 * @return Promise<string> a promise that resolves to the cape bytes
 	 *
 	 * @throws \InvalidArgumentException if the URL is invalid or not a PNG
-	 * @throws \RuntimeException if there is an error downloading or processing the cape
 	 */
-	public static function capeFromURL(string $url, HumanSmaccer $human) : void {
-		self::validateUrl($url);
-		self::validatePngUrl($url);
+	public static function capeFromURL(string $url) : Promise {
+		$resolver = new PromiseResolver();
 
-		Utils::fetchAsync($url, function ($result) use ($human) : void {
-			if ($result === null) {
-				throw new \RuntimeException('Failed to download cape.');
-			}
+		try {
+			self::validateUrl($url);
+			self::validatePngUrl($url);
 
-			$capeData = $result->getBody();
-			$filePath = self::saveSkinToFile($capeData);
+			Utils::fetchAsync($url, function ($result) use ($resolver) : void {
+				if ($result === null) {
+					$resolver->reject(new \RuntimeException('Failed to download cape.'));
+					return;
+				}
 
-			$image = imagecreatefrompng($filePath);
-			if ($image === false) {
+				$capeData = $result->getBody();
+				$filePath = self::saveSkinToFile($capeData);
+
+				$image = imagecreatefrompng($filePath);
+				if ($image === false) {
+					self::cleanupFile($filePath);
+					$resolver->reject(new \RuntimeException('The file is not a valid PNG cape.'));
+					return;
+				}
+
+				$capeBytes = self::extractCapeBytes($image);
+				imagedestroy($image);
+
 				self::cleanupFile($filePath);
-				throw new \RuntimeException('The file is not a valid PNG cape.');
-			}
 
-			$capeBytes = self::extractCapeBytes($image);
-			imagedestroy($image);
+				$resolver->resolve($capeBytes);
+			});
+		} catch (\Throwable $e) {
+			$resolver->reject($e);
+		}
 
-			$human->changeCape($capeBytes);
-
-			self::cleanupFile($filePath);
-		});
+		return $resolver->getPromise();
 	}
 
 	/**

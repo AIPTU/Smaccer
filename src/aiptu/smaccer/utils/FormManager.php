@@ -776,12 +776,15 @@ final class FormManager {
 				function (Player $player, CustomFormResponse $response) use ($npc) : void {
 					$url = $response->getInput()->getValue();
 
-					try {
-						SkinUtils::skinFromURL($url, $npc);
-						$player->sendMessage(TextFormat::GREEN . "Skin updated for NPC {$npc->getName()} from URL.");
-					} catch (\Throwable $e) {
-						$player->sendMessage(TextFormat::RED . $e->getMessage());
-					}
+					SkinUtils::skinFromURL($url)->onCompletion(
+						function (string $skinBytes) use ($player, $npc) : void {
+							$npc->changeSkin($skinBytes);
+							$player->sendMessage(TextFormat::GREEN . "Skin updated for NPC {$npc->getName()} from URL.");
+						},
+						function (\Throwable $e) use ($player) : void {
+							$player->sendMessage(TextFormat::RED . 'Failed to update skin from URL: ' . $e->getMessage());
+						}
+					);
 				}
 			)
 		);
@@ -803,12 +806,15 @@ final class FormManager {
 				function (Player $player, CustomFormResponse $response) use ($npc) : void {
 					$url = $response->getInput()->getValue();
 
-					try {
-						SkinUtils::capeFromURL($url, $npc);
-						$player->sendMessage(TextFormat::GREEN . "Cape updated for NPC {$npc->getName()} from URL.");
-					} catch (\Throwable $e) {
-						$player->sendMessage(TextFormat::RED . 'Failed to update cape: ' . $e->getMessage());
-					}
+					SkinUtils::capeFromURL($url)->onCompletion(
+						function (string $capeBytes) use ($player, $npc) : void {
+							$npc->changeCape($capeBytes);
+							$player->sendMessage(TextFormat::GREEN . "Cape updated for NPC {$npc->getName()} from URL.");
+						},
+						function (\Throwable $e) use ($player) : void {
+							$player->sendMessage(TextFormat::RED . 'Failed to update cape from URL: ' . $e->getMessage());
+						}
+					);
 				}
 			)
 		);
