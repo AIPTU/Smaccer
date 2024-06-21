@@ -45,14 +45,13 @@ class CommandHandler {
 	 * Adds a command and returns its ID. If the command already exists or the type is invalid, returns null.
 	 */
 	public function add(string $command, string $type) : ?int {
-		if (!in_array($type, [EntityTag::COMMAND_TYPE_PLAYER, EntityTag::COMMAND_TYPE_SERVER], true)) {
+		if (!$this->isValidType($type)) {
 			return null;
 		}
 
-		foreach ($this->commands as $id => $data) {
-			if ($data[self::KEY_COMMAND] === $command && $data[self::KEY_TYPE] === $type) {
-				return null;
-			}
+		$existingId = $this->getIdByCommandAndType($command, $type);
+		if ($existingId !== null) {
+			return null;
 		}
 
 		if (str_starts_with($command, '/')) {
@@ -73,18 +72,24 @@ class CommandHandler {
 			return false;
 		}
 
-		if (!in_array($newType, [EntityTag::COMMAND_TYPE_PLAYER, EntityTag::COMMAND_TYPE_SERVER], true)) {
+		if (!$this->isValidType($newType)) {
 			return false;
 		}
 
-		foreach ($this->commands as $existingId => $data) {
-			if ($existingId !== $id && $data[self::KEY_COMMAND] === $newCommand && $data[self::KEY_TYPE] === $newType) {
-				return false;
-			}
+		$existingId = $this->getIdByCommandAndType($newCommand, $newType);
+		if ($existingId !== null && $existingId !== $id) {
+			return false;
 		}
 
 		$this->commands[$id] = [self::KEY_COMMAND => $newCommand, self::KEY_TYPE => $newType];
 		return true;
+	}
+
+	/**
+	 * Checks if the given type is valid.
+	 */
+	public function isValidType(string $type) : bool {
+		return in_array($type, [EntityTag::COMMAND_TYPE_PLAYER, EntityTag::COMMAND_TYPE_SERVER], true);
 	}
 
 	/**

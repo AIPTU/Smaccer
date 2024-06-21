@@ -21,7 +21,6 @@ use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
-use pocketmine\color\Color;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\entity\animation\ArmSwingAnimation;
 use pocketmine\entity\Human;
@@ -40,14 +39,9 @@ use pocketmine\network\mcpe\protocol\EmotePacket;
 use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use pocketmine\world\particle\DustParticle;
 use function array_map;
-use function cos;
-use function deg2rad;
 use function microtime;
-use function mt_rand;
 use function round;
-use function sin;
 use function str_replace;
 use function strtolower;
 
@@ -63,10 +57,6 @@ class HumanSmaccer extends Human {
 	protected array $emoteCooldowns = [];
 	protected array $actionEmoteCooldowns = [];
 	protected array $commandCooldowns = [];
-
-	private const RADIUS = 0.8;
-	private const ANGLE_INCREMENT = 0.09;
-	private const PARTICLE_Y_MULTIPLIER = 2.0;
 
 	public function __construct(Location $location, Skin $skin, ?CompoundTag $nbt = null) {
 		if ($nbt instanceof CompoundTag) {
@@ -172,39 +162,21 @@ class HumanSmaccer extends Human {
 	protected function entityBaseTick(int $tickDiff = 1) : bool {
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
-		$entityPos = $this->getPosition();
-		$entityWorld = $entityPos->getWorld();
-		$entityScale = $this->getScale();
+		if ($this->emote !== null) {
+			$emoteUuid = $this->emote->getUuid();
 
-		$angle = $this->ticksLived / self::ANGLE_INCREMENT;
-		$offsetX = cos(deg2rad($angle)) * self::RADIUS;
-		$offsetZ = sin(deg2rad($angle)) * self::RADIUS;
-		$offsetY = self::PARTICLE_Y_MULTIPLIER * $entityScale;
-
-		$particle1Pos = $entityPos->add(-$offsetX, $offsetY, -$offsetZ);
-		$particle2Pos = $entityPos->add(-$offsetZ, $offsetY, -$offsetX);
-
-		$particle1 = new DustParticle($this->getRandomColor());
-		$particle2 = new DustParticle($this->getRandomColor());
-
-		$entityWorld->addParticle($particle1Pos, $particle1);
-		$entityWorld->addParticle($particle2Pos, $particle2);
-
-		if ($this->emote !== null && Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
-			if ($this->handleEmoteCooldown($this->emote->getUuid())) {
-				$this->broadcastEmote($this->emote->getUuid());
+			if (Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
+				if ($this->handleEmoteCooldown($emoteUuid)) {
+					$this->broadcastEmote($emoteUuid);
+					$hasUpdate = true;
+				}
+			} else {
+				$this->broadcastEmote($emoteUuid);
 				$hasUpdate = true;
 			}
-		} elseif ($this->emote !== null) {
-			$this->broadcastEmote($this->emote->getUuid());
-			$hasUpdate = true;
 		}
 
 		return $hasUpdate;
-	}
-
-	private function getRandomColor() : Color {
-		return new Color(mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255));
 	}
 
 	public function spawnTo(Player $player) : void {
@@ -254,13 +226,15 @@ class HumanSmaccer extends Human {
 			$this->broadcastAnimation(new ArmSwingAnimation($this));
 		}
 
-		if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
-			if ($this->actionEmote !== null && $this->handleActionEmoteCooldown($this->actionEmote->getUuid())) {
-				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
-			}
-		} else {
-			if ($this->actionEmote !== null) {
-				$this->broadcastEmote($this->actionEmote->getUuid(), [$player]);
+		if ($this->actionEmote !== null) {
+			$emoteUuid = $this->actionEmote->getUuid();
+
+			if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
+				if ($this->handleActionEmoteCooldown($emoteUuid)) {
+					$this->broadcastEmote($emoteUuid, [$player]);
+				}
+			} else {
+				$this->broadcastEmote($emoteUuid, [$player]);
 			}
 		}
 

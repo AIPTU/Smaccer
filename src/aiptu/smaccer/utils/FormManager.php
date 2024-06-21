@@ -433,8 +433,11 @@ final class FormManager {
 					$command = $response->getInput()->getValue();
 					$commandType = $response->getDropdown()->getSelectedOption();
 					$commandHandler = $npc->getCommandHandler();
-					$commandHandler->add($command, $commandType);
-					$player->sendMessage(TextFormat::GREEN . "Command added to NPC {$npc->getName()}.");
+					if ($commandHandler->add($command, $commandType) !== null) {
+						$player->sendMessage(TextFormat::GREEN . "Command added to NPC {$npc->getName()}.");
+					} else {
+						$player->sendMessage(TextFormat::RED . "Failed to add command for NPC {$npc->getName()}.");
+					}
 				}
 			)
 		);
@@ -515,8 +518,11 @@ final class FormManager {
 					$newCommand = $response->getInput()->getValue();
 					$newType = $response->getDropdown()->getSelectedOption();
 					$commandHandler = $npc->getCommandHandler();
-					$commandHandler->edit($commandId, $newCommand, $newType);
-					$player->sendMessage(TextFormat::GREEN . "Command updated for NPC {$npc->getName()}.");
+					if ($commandHandler->edit($commandId, $newCommand, $newType)) {
+						$player->sendMessage(TextFormat::GREEN . "Command updated for NPC {$npc->getName()}.");
+					} else {
+						$player->sendMessage(TextFormat::RED . "Failed to update command for NPC {$npc->getName()}.");
+					}
 				}
 			)
 		);
