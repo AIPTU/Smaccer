@@ -16,7 +16,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/Frago9876543210/forms"
+            "url": "https://github.com/AIPTU/forms"
         }
     ],
     "autoload": {

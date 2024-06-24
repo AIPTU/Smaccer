@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb0cef8947234a9f4fd1a0a40d8f06c3",
+    "content-hash": "f3e8bee39499cb5495b68b8bcc7435f9",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -130,39 +130,40 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Frago9876543210/forms.git",
-                "reference": "c2b22cae4acca23923a6438ca8d2f1be56f4d142"
+                "url": "https://github.com/AIPTU/forms.git",
+                "reference": "e646fdcd2024be2a4f2819a1d736757636412df8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Frago9876543210/forms/zipball/c2b22cae4acca23923a6438ca8d2f1be56f4d142",
-                "reference": "c2b22cae4acca23923a6438ca8d2f1be56f4d142",
+                "url": "https://api.github.com/repos/AIPTU/forms/zipball/e646fdcd2024be2a4f2819a1d736757636412df8",
+                "reference": "e646fdcd2024be2a4f2819a1d736757636412df8",
                 "shasum": ""
+            },
+            "require": {
+                "pocketmine/pocketmine-mp": "^5.0"
             },
             "require-dev": {
                 "phpstan/extension-installer": "^1.0",
                 "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-strict-rules": "^1.0",
-                "pocketmine/pocketmine-mp": "5.0.0"
+                "phpstan/phpstan-strict-rules": "^1.0"
             },
             "default-branch": true,
             "type": "library",
             "extra": {
                 "virion": {
-                    "spec": "3.0",
-                    "namespace-root": "forms"
+                    "namespace-root": "frago9876543210\\forms",
+                    "spec": "3.0"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "": "src/"
+                    "frago9876543210\\forms\\": "/src/frago9876543210/forms"
                 }
             },
             "support": {
-                "source": "https://github.com/Frago9876543210/forms/tree/master",
-                "issues": "https://github.com/Frago9876543210/forms/issues"
+                "source": "https://github.com/AIPTU/forms/tree/master"
             },
-            "time": "2024-04-14T19:05:15+00:00"
+            "time": "2024-06-24T06:26:03+00:00"
         },
         {
             "name": "muqsit/simple-packet-handler",

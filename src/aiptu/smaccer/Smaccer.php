@@ -20,7 +20,7 @@ use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
 use CortexPE\Commando\PacketHooker;
-use forms\BaseForm;
+use frago9876543210\forms\BaseForm;
 use InvalidArgumentException;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
