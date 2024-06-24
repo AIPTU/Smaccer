@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
 
-use aiptu\libsounds\SoundInstance;
 use aiptu\smaccer\entity\command\CommandHandler;
 use aiptu\smaccer\entity\emote\EmoteType;
 use aiptu\smaccer\entity\utils\EntityTag;
@@ -179,14 +178,6 @@ class HumanSmaccer extends Human {
 		return $hasUpdate;
 	}
 
-	public function spawnTo(Player $player) : void {
-		if ($this->visibility === EntityVisibility::INVISIBLE_TO_EVERYONE) {
-			return;
-		}
-
-		parent::spawnTo($player);
-	}
-
 	public function attack(EntityDamageEvent $source) : void {
 		if ($this->visibility === EntityVisibility::INVISIBLE_TO_EVERYONE || !($source instanceof EntityDamageByEntityEvent)) {
 			return;
@@ -228,9 +219,10 @@ class HumanSmaccer extends Human {
 
 		if ($this->actionEmote !== null) {
 			$emoteUuid = $this->actionEmote->getUuid();
+			$settings = Smaccer::getInstance()->getDefaultSettings();
 
-			if (Smaccer::getInstance()->getDefaultSettings()->isActionEmoteCooldownEnabled()) {
-				if ($this->handleActionEmoteCooldown($emoteUuid)) {
+			if ($settings->isActionEmoteCooldownEnabled()) {
+				if ($player->hasPermission(Permissions::BYPASS_COOLDOWN) || $this->handleActionEmoteCooldown($emoteUuid)) {
 					$this->broadcastEmote($emoteUuid, [$player]);
 				}
 			} else {
@@ -315,10 +307,6 @@ class HumanSmaccer extends Human {
 		NetworkBroadcastUtils::broadcastPackets($targets ?? $this->getViewers(), [
 			EmotePacket::create($this->getId(), $emote, '', '', EmotePacket::FLAG_MUTE_ANNOUNCEMENT),
 		]);
-	}
-
-	public function addSound(SoundInstance $soundInstance) : void {
-		$this->broadcastSound($soundInstance);
 	}
 
 	public function getCreatorId() : string {

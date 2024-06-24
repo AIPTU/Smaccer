@@ -38,7 +38,7 @@ class EditSubCommand extends BaseSubCommand {
 			throw new AssumptionFailedError(InGameRequiredConstraint::class . ' should have prevented this');
 		}
 
-		FormManager::sendNPCIdSelectionForm($sender, 'edit');
+		FormManager::sendNPCIdSelectionForm($sender, FormManager::ACTION_EDIT);
 	}
 
 	public function prepare() : void {

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
 
-use aiptu\libsounds\SoundInstance;
 use aiptu\smaccer\entity\command\CommandHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
@@ -45,7 +44,7 @@ abstract class EntitySmaccer extends Entity {
 	protected CommandHandler $commandHandler;
 	protected bool $rotateToPlayers = true;
 
-	private array $commandCooldowns = [];
+	protected array $commandCooldowns = [];
 
 	public function __construct(Location $location, ?CompoundTag $nbt = null) {
 		if ($nbt instanceof CompoundTag) {
@@ -113,14 +112,6 @@ abstract class EntitySmaccer extends Entity {
 				$this->despawnFromAll();
 				break;
 		}
-	}
-
-	public function spawnTo(Player $player) : void {
-		if ($this->visibility === EntityVisibility::INVISIBLE_TO_EVERYONE) {
-			return;
-		}
-
-		parent::spawnTo($player);
 	}
 
 	public function attack(EntityDamageEvent $source) : void {
@@ -209,10 +200,6 @@ abstract class EntitySmaccer extends Entity {
 			EntityTag::COMMAND_TYPE_PLAYER => $commandMap->dispatch($player, $command),
 			default => throw new \InvalidArgumentException("Invalid command type: {$type}")
 		};
-	}
-
-	public function addSound(SoundInstance $soundInstance) : void {
-		$this->broadcastSound($soundInstance);
 	}
 
 	public function getCreatorId() : string {

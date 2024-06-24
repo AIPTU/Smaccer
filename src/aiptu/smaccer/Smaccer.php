@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer;
 
-use aiptu\libsounds\SoundBuilder;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\entity\SmaccerHandler;
@@ -50,7 +49,6 @@ class Smaccer extends PluginBase {
 		$requiredVirions = [
 			'Commando' => PacketHooker::class,
 			'forms' => BaseForm::class,
-			'libsounds' => SoundBuilder::class,
 		];
 		$missingVirions = array_filter($requiredVirions, fn ($class) => !class_exists($class));
 
@@ -76,7 +74,7 @@ class Smaccer extends PluginBase {
 			throw new DisablePluginException();
 		}
 
-		$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask(EmoteUtils::getEmoteCachePath()));
+		$this->loadEmotes();
 
 		$this->getServer()->getCommandMap()->register('Smaccer', new SmaccerCommand($this, 'smaccer', 'Smaccer commands.'));
 
@@ -196,6 +194,21 @@ class Smaccer extends PluginBase {
 			}
 
 			$this->reloadConfig();
+		}
+	}
+
+	/**
+	 * Checks if emotes are already cached and loads them synchronously if available.
+	 * If not, it submits the LoadEmotesTask to the async task pool.
+	 */
+	private function loadEmotes() : void {
+		$cachedFile = EmoteUtils::getEmotesFromCache(EmoteUtils::getEmoteCachePath());
+		if ($cachedFile !== null) {
+			/** @var array{array{uuid: string, title: string, image: string}} $emotes */
+			$emotes = $cachedFile['emotes'];
+			$this->emoteManager = new EmoteManager($emotes);
+		} else {
+			$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask(EmoteUtils::getEmoteCachePath()));
 		}
 	}
 

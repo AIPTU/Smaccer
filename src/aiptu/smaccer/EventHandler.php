@@ -17,6 +17,7 @@ use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\utils\Queue;
+use pocketmine\event\entity\EntityEffectAddEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -68,6 +69,14 @@ class EventHandler implements Listener {
 
 				$entity->setRotation($yaw, $pitch);
 			}
+		}
+	}
+
+	public function onEffectAdd(EntityEffectAddEvent $event) : void {
+		$entity = $event->getEntity();
+
+		if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
+			$event->cancel();
 		}
 	}
 }

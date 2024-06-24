@@ -16,7 +16,7 @@ namespace aiptu\smaccer\entity;
 use aiptu\smaccer\entity\emote\EmoteType;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 
-class NPCData {
+final class NPCData {
 	private ?string $nameTag = null;
 	private float $scale = 1.0;
 	private bool $baby = false;
@@ -24,7 +24,6 @@ class NPCData {
 	private bool $nametagVisible = true;
 	private EntityVisibility $visibility = EntityVisibility::VISIBLE_TO_EVERYONE;
 	private bool $slapBack = false;
-	private ?string $skinData = null;
 	private ?EmoteType $actionEmote = null;
 	private ?EmoteType $emote = null;
 
@@ -92,15 +91,6 @@ class NPCData {
 
 	public function setSlapBack(bool $slapBack) : self {
 		$this->slapBack = $slapBack;
-		return $this;
-	}
-
-	public function getSkinData() : ?string {
-		return $this->skinData;
-	}
-
-	public function setSkinData(?string $skinData) : self {
-		$this->skinData = $skinData;
 		return $this;
 	}
 

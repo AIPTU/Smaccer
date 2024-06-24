@@ -50,7 +50,18 @@ use function min;
 use function ucfirst;
 
 final class FormManager {
-	private const ITEMS_PER_PAGE = 10;
+	public const ITEMS_PER_PAGE = 10;
+	public const ACTION_DELETE = 'delete';
+	public const ACTION_EDIT = 'edit';
+	public const TELEPORT_NPC_TO_PLAYER = 'npc_to_player';
+	public const TELEPORT_PLAYER_TO_NPC = 'player_to_npc';
+	public const ARMOR_ALL = 'all_armor';
+	public const ARMOR_HELMET = 'helmet';
+	public const ARMOR_CHESTPLATE = 'chestplate';
+	public const ARMOR_LEGGINGS = 'leggings';
+	public const ARMOR_BOOTS = 'boots';
+	public const PREVIOUS_PAGE = 'Previous Page';
+	public const NEXT_PAGE = 'Next Page';
 
 	public static function sendMainMenu(Player $player, callable $onSubmit) : void {
 		$form = MenuForm::withOptions(
@@ -58,8 +69,8 @@ final class FormManager {
 			'Choose an action:',
 			onSubmit: fn (Player $player, Button $selected) => match ($selected->getValue()) {
 				0 => self::sendEntitySelectionForm($player, 0, $onSubmit),
-				1 => self::sendNPCIdSelectionForm($player, 'delete'),
-				2 => self::sendNPCIdSelectionForm($player, 'edit'),
+				1 => self::sendNPCIdSelectionForm($player, self::ACTION_DELETE),
+				2 => self::sendNPCIdSelectionForm($player, self::ACTION_EDIT),
 				3 => self::sendNPCListForm($player),
 				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
 			}
@@ -94,11 +105,11 @@ final class FormManager {
 		);
 
 		if ($page > 0) {
-			$buttons[] = new Button('Previous Page', Image::path('textures/ui/arrowLeft.png'));
+			$buttons[] = new Button(self::PREVIOUS_PAGE, Image::path('textures/ui/arrowLeft.png'));
 		}
 
 		if ($end < count($entityTypes)) {
-			$buttons[] = new Button('Next Page', Image::path('textures/ui/arrowRight.png'));
+			$buttons[] = new Button(self::NEXT_PAGE, Image::path('textures/ui/arrowRight.png'));
 		}
 
 		$player->sendForm(
@@ -108,9 +119,9 @@ final class FormManager {
 				$buttons,
 				function (Player $player, Button $selected) use ($entityTypes, $page, $onEntitySelected) : void {
 					$selectedText = $selected->text;
-					if ($selectedText === 'Previous Page') {
+					if ($selectedText === self::PREVIOUS_PAGE) {
 						self::sendEntitySelectionForm($player, $page - 1, $onEntitySelected);
-					} elseif ($selectedText === 'Next Page') {
+					} elseif ($selectedText === self::NEXT_PAGE) {
 						self::sendEntitySelectionForm($player, $page + 1, $onEntitySelected);
 					} else {
 						$selectedEntityType = $entityTypes[array_search($selectedText, $entityTypes, true)];
@@ -229,8 +240,8 @@ final class FormManager {
 					}
 
 					$hasPermission = match ($action) {
-						'delete' => $player->hasPermission(Permissions::COMMAND_DELETE_OTHERS),
-						'edit' => $player->hasPermission(Permissions::COMMAND_EDIT_OTHERS),
+						self::ACTION_DELETE => $player->hasPermission(Permissions::COMMAND_DELETE_OTHERS),
+						self::ACTION_EDIT => $player->hasPermission(Permissions::COMMAND_EDIT_OTHERS),
 						default => false,
 					};
 
@@ -240,8 +251,8 @@ final class FormManager {
 					}
 
 					match ($action) {
-						'delete' => self::confirmDeleteNPC($player, $npc),
-						'edit' => self::sendEditMenuForm($player, $npc),
+						self::ACTION_DELETE => self::confirmDeleteNPC($player, $npc),
+						self::ACTION_EDIT => self::sendEditMenuForm($player, $npc),
 						default => $player->sendMessage(TextFormat::RED . 'Invalid action.'),
 					};
 				}
@@ -276,15 +287,19 @@ final class FormManager {
 			[
 				'General Settings',
 				'Commands',
+				'Teleport NPC to Player',
+				'Teleport Player to NPC',
 			],
 			fn (Player $player, Button $selected) => match ($selected->getValue()) {
 				0 => self::sendEditNPCForm($player, $npc),
 				1 => self::sendEditCommandsForm($player, $npc),
-				2 => self::handleEmoteSelection($player, $npc),
-				3 => self::sendEditSkinSettingsForm($player, $npc),
-				4 => self::sendArmorSettingsForm($player, $npc),
-				5 => self::equipHeldItem($player, $npc),
-				6 => self::equipOffHandItem($player, $npc),
+				2 => self::sendTeleportOptionsForm($player, $npc, self::TELEPORT_NPC_TO_PLAYER),
+				3 => self::sendTeleportOptionsForm($player, $npc, self::TELEPORT_PLAYER_TO_NPC),
+				4 => self::handleEmoteSelection($player, $npc),
+				5 => self::sendEditSkinSettingsForm($player, $npc),
+				6 => self::sendArmorSettingsForm($player, $npc),
+				7 => self::equipHeldItem($player, $npc),
+				8 => self::equipOffHandItem($player, $npc),
 				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
 			}
 		);
@@ -295,7 +310,7 @@ final class FormManager {
 				'Skin Settings',
 				'Armor Settings',
 				'Equip Held Item',
-				'Equip Off-Hand Item',
+				'Equip Off-Hand Item'
 			);
 		}
 
@@ -562,6 +577,39 @@ final class FormManager {
 		);
 	}
 
+	public static function sendTeleportOptionsForm(Player $player, Entity $npc, string $action) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$server = Smaccer::getInstance()->getServer();
+		$playerNames = array_map(fn ($player) => $player->getName(), $server->getOnlinePlayers());
+
+		$player->sendForm(
+			MenuForm::withOptions(
+				'Teleport Options',
+				'Select a player:',
+				$playerNames,
+				function (Player $player, Button $selected) use ($server, $npc, $action) : void {
+					$selectedPlayerName = $selected->text;
+					$selectedPlayer = $server->getPlayerExact($selectedPlayerName);
+
+					if ($selectedPlayer !== null) {
+						if ($action === self::TELEPORT_NPC_TO_PLAYER) {
+							$npc->teleport($selectedPlayer->getPosition());
+							$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been teleported to {$selectedPlayerName}'s location.");
+						} elseif ($action === self::TELEPORT_PLAYER_TO_NPC) {
+							$player->teleport($npc->getPosition());
+							$player->sendMessage(TextFormat::GREEN . "You have been teleported to NPC {$npc->getName()}'s location.");
+						}
+					} else {
+						$player->sendMessage(TextFormat::RED . 'Player not found.');
+					}
+				}
+			)
+		);
+	}
+
 	public static function handleEmoteSelection(Player $player, Entity $npc) : void {
 		if (!$npc instanceof HumanSmaccer) {
 			return;
@@ -602,11 +650,11 @@ final class FormManager {
 		}, array_slice($actionEmoteOptions, $start, self::ITEMS_PER_PAGE));
 
 		if ($page > 0) {
-			$buttons[] = new Button('Previous Page', Image::path('textures/ui/arrowLeft.png'));
+			$buttons[] = new Button(self::PREVIOUS_PAGE, Image::path('textures/ui/arrowLeft.png'));
 		}
 
 		if ($end < count($actionEmoteOptions)) {
-			$buttons[] = new Button('Next Page', Image::path('textures/ui/arrowRight.png'));
+			$buttons[] = new Button(self::NEXT_PAGE, Image::path('textures/ui/arrowRight.png'));
 		}
 
 		$player->sendForm(
@@ -618,9 +666,9 @@ final class FormManager {
 					$buttonText = $selected->text;
 					$buttonValue = $selected->getValue();
 
-					if ($buttonText === 'Previous Page') {
+					if ($buttonText === self::PREVIOUS_PAGE) {
 						self::sendEditActionEmoteForm($player, $npc, $page - 1);
-					} elseif ($buttonText === 'Next Page') {
+					} elseif ($buttonText === self::NEXT_PAGE) {
 						self::sendEditActionEmoteForm($player, $npc, $page + 1);
 					} else {
 						if ($buttonText !== 'None') {
@@ -656,11 +704,11 @@ final class FormManager {
 		}, array_slice($emoteOptions, $start, self::ITEMS_PER_PAGE));
 
 		if ($page > 0) {
-			$buttons[] = new Button('Previous Page', Image::path('textures/ui/arrowLeft.png'));
+			$buttons[] = new Button(self::PREVIOUS_PAGE, Image::path('textures/ui/arrowLeft.png'));
 		}
 
 		if ($end < count($emoteOptions)) {
-			$buttons[] = new Button('Next Page', Image::path('textures/ui/arrowRight.png'));
+			$buttons[] = new Button(self::NEXT_PAGE, Image::path('textures/ui/arrowRight.png'));
 		}
 
 		$player->sendForm(
@@ -672,9 +720,9 @@ final class FormManager {
 					$buttonText = $selected->text;
 					$buttonValue = $selected->getValue();
 
-					if ($buttonText === 'Previous Page') {
+					if ($buttonText === self::PREVIOUS_PAGE) {
 						self::sendEditEmoteForm($player, $npc, $page - 1);
-					} elseif ($buttonText === 'Next Page') {
+					} elseif ($buttonText === self::NEXT_PAGE) {
 						self::sendEditEmoteForm($player, $npc, $page + 1);
 					} else {
 						if ($buttonText !== 'None') {
@@ -843,11 +891,11 @@ final class FormManager {
 				'Equip Boots',
 			],
 			fn (Player $player, Button $selected) => match ($selected->getValue()) {
-				0 => self::equipAllArmor($player, $npc),
-				1 => self::equipArmorPiece($player, $npc, 'helmet'),
-				2 => self::equipArmorPiece($player, $npc, 'chestplate'),
-				3 => self::equipArmorPiece($player, $npc, 'leggings'),
-				4 => self::equipArmorPiece($player, $npc, 'boots'),
+				0 => self::equipArmorPiece($player, $npc, self::ARMOR_ALL),
+				1 => self::equipArmorPiece($player, $npc, self::ARMOR_HELMET),
+				2 => self::equipArmorPiece($player, $npc, self::ARMOR_CHESTPLATE),
+				3 => self::equipArmorPiece($player, $npc, self::ARMOR_LEGGINGS),
+				4 => self::equipArmorPiece($player, $npc, self::ARMOR_BOOTS),
 				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
 			}
 		);
@@ -855,54 +903,30 @@ final class FormManager {
 		$player->sendForm($form);
 	}
 
-	public static function equipAllArmor(Player $player, HumanSmaccer $npc) : void {
-		$armorInventory = $player->getArmorInventory();
-
-		$npc->setHelmet($armorInventory->getHelmet());
-		$npc->setChestplate($armorInventory->getChestplate());
-		$npc->setLeggings($armorInventory->getLeggings());
-		$npc->setBoots($armorInventory->getBoots());
-
-		$player->sendMessage(TextFormat::GREEN . "All armor equipped to NPC {$npc->getName()}.");
-	}
-
 	public static function equipArmorPiece(Player $player, HumanSmaccer $npc, string $piece) : void {
 		$armorInventory = $player->getArmorInventory();
-		$armorPiece = null;
 
 		switch ($piece) {
-			case 'helmet':
-				$armorPiece = $armorInventory->getHelmet();
+			case self::ARMOR_HELMET:
+				$npc->setHelmet($player);
 				break;
-			case 'chestplate':
-				$armorPiece = $armorInventory->getChestplate();
+			case self::ARMOR_CHESTPLATE:
+				$npc->setChestplate($player);
 				break;
-			case 'leggings':
-				$armorPiece = $armorInventory->getLeggings();
+			case self::ARMOR_LEGGINGS:
+				$npc->setLeggings($player);
 				break;
-			case 'boots':
-				$armorPiece = $armorInventory->getBoots();
+			case self::ARMOR_BOOTS:
+				$npc->setBoots($player);
 				break;
-		}
+			case self::ARMOR_ALL:
+				$npc->setArmor($player);
 
-		if ($armorPiece === null) {
-			$player->sendMessage(TextFormat::RED . 'Invalid armor piece specified.');
-			return;
-		}
-
-		switch ($piece) {
-			case 'helmet':
-				$npc->setHelmet($armorPiece);
-				break;
-			case 'chestplate':
-				$npc->setChestplate($armorPiece);
-				break;
-			case 'leggings':
-				$npc->setLeggings($armorPiece);
-				break;
-			case 'boots':
-				$npc->setBoots($armorPiece);
-				break;
+				$player->sendMessage(TextFormat::GREEN . "All armor equipped to NPC {$npc->getName()}.");
+				return;
+			default:
+				$player->sendMessage(TextFormat::RED . 'Invalid armor piece specified.');
+				return;
 		}
 
 		$player->sendMessage(TextFormat::GREEN . ucfirst($piece) . " equipped to NPC {$npc->getName()}.");

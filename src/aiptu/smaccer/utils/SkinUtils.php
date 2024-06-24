@@ -23,6 +23,8 @@ use function chr;
 use function imagecolorat;
 use function imagecreatefrompng;
 use function imagedestroy;
+use function imageistruecolor;
+use function imagepalettetotruecolor;
 use function imagesx;
 use function imagesy;
 use function is_file;
@@ -30,6 +32,9 @@ use function uniqid;
 use function unlink;
 
 class SkinUtils {
+	private const SKIN = 'skin';
+	private const CAPE = 'cape';
+
 	/**
 	 * Downloads a skin from a URL and returns the skin bytes in a promise.
 	 *
@@ -55,18 +60,7 @@ class SkinUtils {
 				$skinData = $result->getBody();
 				$filePath = self::saveSkinToFile($skinData);
 
-				$image = imagecreatefrompng($filePath);
-				if ($image === false) {
-					self::cleanupFile($filePath);
-					$resolver->reject(new \RuntimeException('The file is not a valid PNG skin.'));
-					return;
-				}
-
-				$skinBytes = self::extractSkinBytes($image);
-				imagedestroy($image);
-
-				self::cleanupFile($filePath);
-
+				$skinBytes = self::skinFromFile($filePath);
 				$resolver->resolve($skinBytes);
 			});
 		} catch (\Throwable $e) {
@@ -101,18 +95,7 @@ class SkinUtils {
 				$capeData = $result->getBody();
 				$filePath = self::saveSkinToFile($capeData);
 
-				$image = imagecreatefrompng($filePath);
-				if ($image === false) {
-					self::cleanupFile($filePath);
-					$resolver->reject(new \RuntimeException('The file is not a valid PNG cape.'));
-					return;
-				}
-
-				$capeBytes = self::extractCapeBytes($image);
-				imagedestroy($image);
-
-				self::cleanupFile($filePath);
-
+				$capeBytes = self::capeFromFile($filePath);
 				$resolver->resolve($capeBytes);
 			});
 		} catch (\Throwable $e) {
@@ -120,6 +103,50 @@ class SkinUtils {
 		}
 
 		return $resolver->getPromise();
+	}
+
+	/**
+	 * Processes a skin from a file path and returns the skin bytes.
+	 *
+	 * @param string $filePath the file path of the PNG skin
+	 *
+	 * @return string the skin bytes
+	 *
+	 * @throws \RuntimeException if the file is not a valid PNG skin
+	 */
+	public static function skinFromFile(string $filePath) : string {
+		return self::processPngFile($filePath, self::SKIN);
+	}
+
+	/**
+	 * Processes a cape from a file path and returns the cape bytes.
+	 *
+	 * @param string $filePath the file path of the PNG cape
+	 *
+	 * @return string the cape bytes
+	 *
+	 * @throws \RuntimeException if the file is not a valid PNG cape
+	 */
+	public static function capeFromFile(string $filePath) : string {
+		return self::processPngFile($filePath, self::CAPE);
+	}
+
+	private static function processPngFile(string $filePath, string $type) : string {
+		$image = imagecreatefrompng($filePath);
+		if ($image === false) {
+			self::cleanupFile($filePath);
+			throw new \RuntimeException("The file is not a valid PNG {$type}.");
+		}
+
+		if (!imageistruecolor($image)) {
+			imagepalettetotruecolor($image);
+		}
+
+		$bytes = ($type === self::SKIN) ? self::extractSkinBytes($image) : self::extractCapeBytes($image);
+		imagedestroy($image);
+		self::cleanupFile($filePath);
+
+		return $bytes;
 	}
 
 	/**

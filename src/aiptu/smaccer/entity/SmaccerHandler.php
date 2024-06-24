@@ -118,7 +118,6 @@ use function is_a;
 use function is_subclass_of;
 use function str_replace;
 use function strtolower;
-use const PHP_EOL;
 
 class SmaccerHandler {
 	use SingletonTrait;
@@ -294,7 +293,7 @@ class SmaccerHandler {
 		$vars = [
 			'{player}' => $player->getName(),
 			'{display_name}' => $player->getDisplayName(),
-			'{line}' => PHP_EOL,
+			'{line}' => "\n",
 		];
 
 		return TextFormat::colorize(str_replace(array_keys($vars), array_values($vars), $nametag));
@@ -342,12 +341,12 @@ class SmaccerHandler {
 
 		if (is_a($entityClass, HumanSmaccer::class, true)) {
 			$skin = $player->getSkin();
-			$skinData = $npcData->getSkinData();
+
 			$nbt->setTag(
 				'Skin',
 				CompoundTag::create()
 					->setString('Name', $skin->getSkinId())
-					->setByteArray('Data', $skinData ?? $skin->getSkinData())
+					->setByteArray('Data', $skin->getSkinData())
 					->setByteArray('CapeData', $skin->getCapeData())
 					->setString('GeometryName', $skin->getGeometryName())
 					->setByteArray('GeometryData', $skin->getGeometryData())
