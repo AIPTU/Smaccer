@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command;
 
+use aiptu\smaccer\command\subcommand\AboutSubCommand;
 use aiptu\smaccer\command\subcommand\CreateSubCommand;
 use aiptu\smaccer\command\subcommand\DeleteSubCommand;
 use aiptu\smaccer\command\subcommand\EditSubCommand;
 use aiptu\smaccer\command\subcommand\IdSubCommand;
 use aiptu\smaccer\command\subcommand\ListSubCommand;
 use aiptu\smaccer\command\subcommand\MoveSubCommand;
+use aiptu\smaccer\command\subcommand\ReloadSubCommand;
 use aiptu\smaccer\command\subcommand\TeleportSubCommand;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\FormManager;
@@ -61,6 +63,7 @@ class SmaccerCommand extends BaseCommand {
 		$this->addConstraint(new InGameRequiredConstraint($this));
 
 		$this->setPermissions([
+			Permissions::COMMAND_ABOUT,
 			Permissions::COMMAND_CREATE_SELF,
 			Permissions::COMMAND_CREATE_OTHERS,
 			Permissions::COMMAND_DELETE_SELF,
@@ -71,6 +74,8 @@ class SmaccerCommand extends BaseCommand {
 			Permissions::COMMAND_LIST,
 			Permissions::COMMAND_MOVE_SELF,
 			Permissions::COMMAND_MOVE_OTHERS,
+			Permissions::COMMAND_RELOAD_CONFIG,
+			Permissions::COMMAND_RELOAD_EMOTES,
 			Permissions::COMMAND_TELEPORT_SELF,
 			Permissions::COMMAND_TELEPORT_OTHERS,
 		]);
@@ -78,12 +83,14 @@ class SmaccerCommand extends BaseCommand {
 		$plugin = $this->getOwningPlugin();
 		assert($plugin instanceof Smaccer);
 
+		$this->registerSubCommand(new AboutSubCommand($plugin, 'about', 'Display plugin information', ['version', 'ver']));
 		$this->registerSubCommand(new CreateSubCommand($plugin, 'create', 'Create an NPC', ['add', 'spawn']));
 		$this->registerSubCommand(new DeleteSubCommand($plugin, 'delete', 'Delete an NPC', ['remove', 'despawn']));
 		$this->registerSubCommand(new EditSubCommand($plugin, 'edit', 'Edit an NPC'));
 		$this->registerSubCommand(new IdSubCommand($plugin, 'id', 'Check an NPC id'));
 		$this->registerSubCommand(new ListSubCommand($plugin, 'list', 'Get a list of NPCs in the world'));
 		$this->registerSubCommand(new MoveSubCommand($plugin, 'move', 'Move an NPC to a player', ['mv']));
+		$this->registerSubCommand(new ReloadSubCommand($plugin, 'reload', 'Reloads the configuration or emotes'));
 		$this->registerSubCommand(new TeleportSubCommand($plugin, 'teleport', 'Teleport to an NPC', ['tp']));
 	}
 }
