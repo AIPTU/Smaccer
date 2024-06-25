@@ -15,10 +15,10 @@ namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_d673f4353f168492\CortexPE\Commando\args\IntegerArgument;
-use aiptu\smaccer\libs\_d673f4353f168492\CortexPE\Commando\args\TargetPlayerArgument;
-use aiptu\smaccer\libs\_d673f4353f168492\CortexPE\Commando\BaseSubCommand;
-use aiptu\smaccer\libs\_d673f4353f168492\CortexPE\Commando\constraint\InGameRequiredConstraint;
+use aiptu\smaccer\libs\_a276e1887a7e3880\CortexPE\Commando\args\IntegerArgument;
+use aiptu\smaccer\libs\_a276e1887a7e3880\CortexPE\Commando\args\TargetPlayerArgument;
+use aiptu\smaccer\libs\_a276e1887a7e3880\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_a276e1887a7e3880\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;

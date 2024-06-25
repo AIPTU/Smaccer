@@ -13,27 +13,27 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\argument;
 
-use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\libs\_a276e1887a7e3880\CortexPE\Commando\args\StringEnumArgument;
 use pocketmine\command\CommandSender;
-use function array_keys;
-use function array_map;
 
-class EntityTypeArgument extends StringEnumArgument {
-	public function getEnumValues() : array {
-		$names = array_keys(SmaccerHandler::getInstance()->getRegisteredNPC());
-		return array_map('strtolower', $names);
-	}
+class ReloadTypeArgument extends StringEnumArgument {
+	public const CONFIG = 'config';
+	public const EMOTES = 'emotes';
+
+	protected const VALUES = [
+		'config' => self::CONFIG,
+		'emotes' => self::EMOTES,
+	];
 
 	public function getTypeName() : string {
-		return 'entity';
+		return 'reload';
 	}
 
 	public function getEnumName() : string {
-		return 'entityType';
+		return 'reloadType';
 	}
 
 	public function parse(string $argument, CommandSender $sender) : string {
-		return $argument;
+		return (string) $this->getValue($argument);
 	}
 }

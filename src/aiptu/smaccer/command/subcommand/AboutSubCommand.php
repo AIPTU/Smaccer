@@ -13,19 +13,16 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
-use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\libs\_a276e1887a7e3880\CortexPE\Commando\BaseSubCommand;
-use aiptu\smaccer\libs\_a276e1887a7e3880\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
-use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\TextFormat;
 use function implode;
+use function sprintf;
 
-class ListSubCommand extends BaseSubCommand {
+class AboutSubCommand extends BaseSubCommand {
 	/** @param list<string> $aliases */
 	public function __construct(
 		PluginBase $plugin,
@@ -37,30 +34,31 @@ class ListSubCommand extends BaseSubCommand {
 	}
 
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		if (!$sender instanceof Player) {
-			throw new AssumptionFailedError(InGameRequiredConstraint::class . ' should have prevented this');
-		}
-
 		/** @var Smaccer $plugin */
 		$plugin = $this->plugin;
 
-		$entityData = SmaccerHandler::getInstance()->getEntitiesInfo(null, true);
-		$totalEntityCount = $entityData['count'];
-		$entities = $entityData['infoList'];
+		$info = [
+			'Name' => $plugin->getFullName(),
+			'Plugin API Version(s)' => implode(', ', $plugin->getDescription()->getCompatibleApis()),
+			'Author(s)' => implode(', ', $plugin->getDescription()->getAuthors()),
+		];
 
-		if ($totalEntityCount > 0) {
-			$message = TextFormat::RED . 'NPC List and Locations: (' . $totalEntityCount . ')';
-			$message .= "\n" . TextFormat::WHITE . '- ' . implode("\n - ", $entities);
-		} else {
-			$message = TextFormat::RED . 'No NPCs found in any world.';
+		$sender->sendMessage(TextFormat::GREEN . 'Plugin Information:');
+		foreach ($info as $label => $value) {
+			$this->sendFormattedMessage($sender, $label, $value);
 		}
+	}
 
-		$sender->sendMessage($message);
+	private function sendFormattedMessage(CommandSender $sender, string $label, string $value) : void {
+		$sender->sendMessage(sprintf(
+			'%s| %s | %s |',
+			TextFormat::GREEN,
+			TextFormat::WHITE . $label,
+			TextFormat::GREEN . $value . TextFormat::RESET
+		));
 	}
 
 	public function prepare() : void {
-		$this->addConstraint(new InGameRequiredConstraint($this));
-
-		$this->setPermission(Permissions::COMMAND_LIST);
+		$this->setPermission(Permissions::COMMAND_ABOUT);
 	}
 }

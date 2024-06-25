@@ -7,6 +7,9 @@ permissions:
   smaccer.bypass.cooldown:
     description: Allows players to bypass cooldown.
     default: op
+  smaccer.command.about:
+    description: Allows players to displays information about the plugin (/smaccer about).
+    default: op
   smaccer.command.create.self:
     description: Allows players to create their own entities (/smaccer create).
     default: op
@@ -36,6 +39,12 @@ permissions:
     default: op
   smaccer.command.move.others:
     description: Allows players to move an entity to another player (/smaccer move).
+    default: op
+  smaccer.command.reload.config:
+    description: Allows players to reload the configuration (/smaccer reload).
+    default: op
+  smaccer.command.reload.emotes:
+    description: Allows players to teleport to reload the emotes (/smaccer reload).
     default: op
   smaccer.command.teleport.self:
     description: Allows players to teleport to an entity (/smaccer teleport).
