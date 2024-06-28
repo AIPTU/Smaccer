@@ -132,7 +132,14 @@ abstract class EntitySmaccer extends Entity {
 					return;
 				}
 
-				SmaccerHandler::getInstance()->despawnNPC($damager, $this);
+				SmaccerHandler::getInstance()->despawnNPC($damager, $this)->onCompletion(
+					function (bool $success) use ($damager, $npcId) : void {
+						$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $this->getName() . ' with ID ' . $npcId . ' despawned successfully.');
+					},
+					function (\Throwable $e) use ($damager) : void {
+						$damager->sendMessage(TextFormat::RED . 'Failed to despawn npc: ' . $e->getMessage());
+					}
+				);
 				Queue::removeFromQueue($playerName, Queue::ACTION_DELETE);
 			}
 		}

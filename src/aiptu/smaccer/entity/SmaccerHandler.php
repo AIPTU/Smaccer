@@ -96,6 +96,8 @@ use aiptu\smaccer\entity\npc\ZombieVillagerSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerV2Smaccer;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\utils\promise\Promise;
+use aiptu\smaccer\utils\promise\PromiseResolver;
 use aiptu\smaccer\utils\Utils;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
@@ -299,13 +301,19 @@ class SmaccerHandler {
 		return TextFormat::colorize(str_replace(array_keys($vars), array_values($vars), $nametag));
 	}
 
+	/**
+	 * @return Promise<Entity>
+	 */
 	public function spawnNPC(
 		string $type,
 		Player $player,
 		NPCData $npcData,
 		?Location $customPos = null,
 		?Vector3 $motion = null
-	) : ?Entity {
+	) : Promise {
+		$resolver = new PromiseResolver();
+		$promise = $resolver->getPromise();
+
 		$pos = $customPos ?? $player->getLocation();
 		$yaw = $pos->getYaw();
 		$pitch = $pos->getPitch();
@@ -324,8 +332,8 @@ class SmaccerHandler {
 
 		$entityClass = $this->getNPC($type);
 		if ($entityClass === null) {
-			$player->sendMessage(TextFormat::RED . "Invalid NPC type: {$type}");
-			return null;
+			$resolver->reject(new \InvalidArgumentException("Invalid NPC type: {$type}"));
+			return $promise;
 		}
 
 		$nbt = $this->createBaseNBT($pos, $motion, $yaw, $pitch);
@@ -365,8 +373,8 @@ class SmaccerHandler {
 
 		$entity = $this->createEntity($type, $pos, $nbt);
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			$player->sendMessage(TextFormat::RED . "Failed to create NPC entity: {$type}");
-			return null;
+			$resolver->reject(new \RuntimeException("Failed to create NPC entity: {$type}"));
+			return $promise;
 		}
 
 		if ($nameTag !== null) {
@@ -400,23 +408,84 @@ class SmaccerHandler {
 		$entityId = $entity->getId();
 		$this->playerNPCs[$playerId][$entityId] = $entity;
 
-		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entityId);
-		return $entity;
+		$resolver->resolve($entity);
+		return $promise;
 	}
 
-	public function despawnNPC(Player $player, Entity $entity) : bool {
-		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			return false;
-		}
-
-		$entity->flagForDespawn();
+	/**
+	 * @return Promise<bool>
+	 */
+	public function despawnNPC(Player $player, Entity $entity) : Promise {
+		$resolver = new PromiseResolver();
+		$promise = $resolver->getPromise();
 
 		$playerId = $player->getUniqueId()->getBytes();
 		$entityId = $entity->getId();
+
+		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
+			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
+			return $promise;
+		}
+
+		$entity->flagForDespawn();
 		unset($this->playerNPCs[$playerId][$entityId]);
 
-		$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $entityId . ' despawned successfully.');
-		return true;
+		$resolver->resolve(true);
+		return $promise;
+	}
+
+	/**
+	 * @return Promise<bool>
+	 */
+	public function editNPC(Player $player, Entity $entity, NPCData $npcData) : Promise {
+		$resolver = new PromiseResolver();
+		$promise = $resolver->getPromise();
+
+		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
+			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
+			return $promise;
+		}
+
+		$nameTag = $npcData->getNameTag();
+		$scale = $npcData->getScale();
+		$rotationEnabled = $npcData->isRotationEnabled();
+		$nametagVisible = $npcData->isNametagVisible();
+		$visibility = $npcData->getVisibility();
+		$isBaby = $npcData->isBaby();
+		$slapBack = $npcData->getSlapBack();
+		$actionEmote = $npcData->getActionEmote();
+		$emote = $npcData->getEmote();
+
+		if ($nameTag !== null) {
+			$nameTag = $this->applyNametag($nameTag, $player);
+			$entity->setNameTag($nameTag);
+		}
+
+		$entity->setScale($scale);
+		$entity->setRotateToPlayers($rotationEnabled);
+		$entity->setNameTagAlwaysVisible($nametagVisible);
+		$entity->setNameTagVisible($nametagVisible);
+
+		if ($entity instanceof EntityAgeable) {
+			$entity->setBaby($isBaby);
+		}
+
+		if ($entity instanceof HumanSmaccer) {
+			$entity->setSlapBack($slapBack);
+
+			if ($actionEmote !== null) {
+				$entity->setActionEmote($actionEmote);
+			}
+
+			if ($emote !== null) {
+				$entity->setEmote($emote);
+			}
+		}
+
+		$entity->setVisibility($visibility);
+
+		$resolver->resolve(true);
+		return $promise;
 	}
 
 	public function getEntitiesInfo(?Player $player = null, bool $collectInfo = false) : array {

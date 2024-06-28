@@ -27,6 +27,7 @@ use CortexPE\Commando\args\TargetPlayerArgument;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
+use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
@@ -83,16 +84,23 @@ class CreateSubCommand extends BaseSubCommand {
 			->setScale($scale)
 			->setBaby($isBaby);
 
-		$npc = SmaccerHandler::getInstance()->spawnNPC(
-			$entityType,
-			$target,
-			$npcData
-		);
-		if ($npc instanceof EntitySmaccer || $npc instanceof HumanSmaccer) {
-			if ($sender !== $target) {
-				$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' created successfully! ID: ' . $npc->getId() . 'for ' . $target->getName());
+		SmaccerHandler::getInstance()->spawnNPC($entityType, $target, $npcData)->onCompletion(
+			function (Entity $entity) use ($sender, $target) : void {
+				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
+					$npcName = $entity->getName();
+					$npcId = $entity->getId();
+
+					if ($sender !== $target) {
+						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId . 'for ' . $target->getName());
+					} else {
+						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId);
+					}
+				}
+			},
+			function (\Throwable $e) use ($sender) : void {
+				$sender->sendMessage(TextFormat::RED . 'Failed to spawn npc: ' . $e->getMessage());
 			}
-		}
+		);
 	}
 
 	public function prepare() : void {
