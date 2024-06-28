@@ -22,16 +22,16 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\CustomForm;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\CustomFormResponse;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\Dropdown;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\Input;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\StepSlider;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\Toggle;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\menu\Button;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\menu\Image;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\MenuForm;
-use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\ModalForm;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\CustomForm;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\CustomFormResponse;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\element\Dropdown;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\element\Input;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\element\StepSlider;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\element\Toggle;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\menu\Button;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\menu\Image;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\MenuForm;
+use aiptu\smaccer\libs\_1df1f03472a5c54e\frago9876543210\forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -619,10 +619,10 @@ final class FormManager {
 
 					if ($selectedPlayer !== null) {
 						if ($action === self::TELEPORT_NPC_TO_PLAYER) {
-							$npc->teleport($selectedPlayer->getPosition());
+							$npc->teleport($selectedPlayer->getLocation());
 							$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been teleported to {$selectedPlayerName}'s location.");
 						} elseif ($action === self::TELEPORT_PLAYER_TO_NPC) {
-							$player->teleport($npc->getPosition());
+							$player->teleport($npc->getLocation());
 							$player->sendMessage(TextFormat::GREEN . "You have been teleported to NPC {$npc->getName()}'s location.");
 						}
 					} else {
