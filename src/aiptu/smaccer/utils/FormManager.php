@@ -22,16 +22,16 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\CustomForm;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\CustomFormResponse;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\element\Dropdown;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\element\Input;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\element\StepSlider;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\element\Toggle;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\menu\Button;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\menu\Image;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\MenuForm;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\frago9876543210\forms\ModalForm;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\CustomForm;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\CustomFormResponse;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\Dropdown;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\Input;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\StepSlider;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\element\Toggle;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\menu\Button;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\menu\Image;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\MenuForm;
+use aiptu\smaccer\libs\_eb8a71981100de70\frago9876543210\forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -220,7 +220,16 @@ final class FormManager {
 			}
 		}
 
-		SmaccerHandler::getInstance()->spawnNPC($entityType, $player, $npcData);
+		SmaccerHandler::getInstance()->spawnNPC($entityType, $player, $npcData)->onCompletion(
+			function (Entity $entity) use ($player) : void {
+				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
+					$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getId());
+				}
+			},
+			function (\Throwable $e) use ($player) : void {
+				$player->sendMessage(TextFormat::RED . 'Failed to spawn npc: ' . $e->getMessage());
+			}
+		);
 	}
 
 	public static function sendNPCIdSelectionForm(Player $player, string $action) : void {
@@ -270,7 +279,14 @@ final class FormManager {
 				'Confirm Deletion',
 				"Are you sure you want to delete NPC: {$npc->getName()}?",
 				function (Player $player) use ($npc) : void {
-					SmaccerHandler::getInstance()->despawnNPC($player, $npc);
+					SmaccerHandler::getInstance()->despawnNPC($player, $npc)->onCompletion(
+						function (bool $success) use ($player, $npc) : void {
+							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getId() . ' despawned successfully.');
+						},
+						function (\Throwable $e) use ($player) : void {
+							$player->sendMessage(TextFormat::RED . 'Failed to despawn npc: ' . $e->getMessage());
+						}
+					);
 				}
 			)
 		);
@@ -369,30 +385,37 @@ final class FormManager {
 
 					$visibilityEnum = EntityVisibility::fromString($visibility);
 
-					$npc->setNameTag($nameTag);
-					$npc->setScale($scale);
-					$npc->setRotateToPlayers($rotationEnabled);
-					$npc->setNameTagVisible($nameTagVisible);
-					$npc->setNameTagAlwaysVisible($nameTagVisible);
-					$npc->setVisibility($visibilityEnum);
+					$npcData = NPCData::create()
+						->setNameTag($nameTag)
+						->setScale($scale)
+						->setRotationEnabled($rotationEnabled)
+						->setNametagVisible($nameTagVisible)
+						->setVisibility($visibilityEnum);
 
 					$index = 5;
 
 					if ($npc instanceof EntityAgeable && isset($values[$index])) {
 						$isBaby = (bool) $values[$index];
-						$npc->setBaby($isBaby);
+						$npcData->setBaby($isBaby);
 						++$index;
 					}
 
 					if ($npc instanceof HumanSmaccer) {
 						if (isset($values[$index])) {
 							$enableSlapback = (bool) $values[$index];
-							$npc->setSlapBack($enableSlapback);
+							$npcData->setSlapBack($enableSlapback);
 							++$index;
 						}
 					}
 
-					$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been updated.");
+					SmaccerHandler::getInstance()->editNPC($player, $npc, $npcData)->onCompletion(
+						function (bool $success) use ($player, $npc) : void {
+							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' updated successfully!');
+						},
+						function (\Throwable $e) use ($player) : void {
+							$player->sendMessage(TextFormat::RED . 'Failed to edit NPC: ' . $e->getMessage());
+						}
+					);
 				}
 			)
 		);

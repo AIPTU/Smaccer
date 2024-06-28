@@ -20,13 +20,14 @@ use aiptu\smaccer\entity\NPCData;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\CortexPE\Commando\args\BooleanArgument;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\CortexPE\Commando\args\FloatArgument;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\CortexPE\Commando\args\RawStringArgument;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\CortexPE\Commando\args\TargetPlayerArgument;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\CortexPE\Commando\BaseSubCommand;
-use aiptu\smaccer\libs\_01c66c6f01e5c316\CortexPE\Commando\constraint\InGameRequiredConstraint;
+use aiptu\smaccer\libs\_eb8a71981100de70\CortexPE\Commando\args\BooleanArgument;
+use aiptu\smaccer\libs\_eb8a71981100de70\CortexPE\Commando\args\FloatArgument;
+use aiptu\smaccer\libs\_eb8a71981100de70\CortexPE\Commando\args\RawStringArgument;
+use aiptu\smaccer\libs\_eb8a71981100de70\CortexPE\Commando\args\TargetPlayerArgument;
+use aiptu\smaccer\libs\_eb8a71981100de70\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_eb8a71981100de70\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
+use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
@@ -83,16 +84,23 @@ class CreateSubCommand extends BaseSubCommand {
 			->setScale($scale)
 			->setBaby($isBaby);
 
-		$npc = SmaccerHandler::getInstance()->spawnNPC(
-			$entityType,
-			$target,
-			$npcData
-		);
-		if ($npc instanceof EntitySmaccer || $npc instanceof HumanSmaccer) {
-			if ($sender !== $target) {
-				$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' created successfully! ID: ' . $npc->getId() . 'for ' . $target->getName());
+		SmaccerHandler::getInstance()->spawnNPC($entityType, $target, $npcData)->onCompletion(
+			function (Entity $entity) use ($sender, $target) : void {
+				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
+					$npcName = $entity->getName();
+					$npcId = $entity->getId();
+
+					if ($sender !== $target) {
+						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId . 'for ' . $target->getName());
+					} else {
+						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId);
+					}
+				}
+			},
+			function (\Throwable $e) use ($sender) : void {
+				$sender->sendMessage(TextFormat::RED . 'Failed to spawn npc: ' . $e->getMessage());
 			}
-		}
+		);
 	}
 
 	public function prepare() : void {
