@@ -619,10 +619,10 @@ final class FormManager {
 
 					if ($selectedPlayer !== null) {
 						if ($action === self::TELEPORT_NPC_TO_PLAYER) {
-							$npc->teleport($selectedPlayer->getPosition());
+							$npc->teleport($selectedPlayer->getLocation());
 							$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been teleported to {$selectedPlayerName}'s location.");
 						} elseif ($action === self::TELEPORT_PLAYER_TO_NPC) {
-							$player->teleport($npc->getPosition());
+							$player->teleport($npc->getLocation());
 							$player->sendMessage(TextFormat::GREEN . "You have been teleported to NPC {$npc->getName()}'s location.");
 						}
 					} else {
