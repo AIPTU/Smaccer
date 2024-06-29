@@ -122,6 +122,11 @@ npc-default-settings:
 
 - Currently none planned. You can contribute or suggest for new features.
 
+# Credits
+
+- [Bedrock-Emotes by TwistedAsylumMC](https://github.com/TwistedAsylumMC/Bedrock-Emotes) for providing the emotes.
+- [CPlot by ColinHDev](https://github.com/ColinHDev/CPlot) for implementing promises.
+
 # Additional Notes
 
 - If you find bugs or want to give suggestions, please visit [here](https://github.com/AIPTU/Smaccer/issues).
