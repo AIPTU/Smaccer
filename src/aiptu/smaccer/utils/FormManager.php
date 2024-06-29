@@ -22,16 +22,16 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\CustomForm;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\CustomFormResponse;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\element\Dropdown;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\element\Input;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\element\StepSlider;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\element\Toggle;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\menu\Button;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\menu\Image;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\MenuForm;
-use aiptu\smaccer\libs\_1b9682a00420d337\frago9876543210\forms\ModalForm;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\CustomForm;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\CustomFormResponse;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\element\Dropdown;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\element\Input;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\element\StepSlider;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\element\Toggle;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\menu\Button;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\menu\Image;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\MenuForm;
+use aiptu\smaccer\libs\_a1b5f6dbee9ee5a7\frago9876543210\forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -470,8 +470,8 @@ final class FormManager {
 				function (Player $player, CustomFormResponse $response) use ($npc) : void {
 					$command = $response->getInput()->getValue();
 					$commandType = $response->getDropdown()->getSelectedOption();
-					$commandHandler = $npc->getCommandHandler();
-					if ($commandHandler->add($command, $commandType) !== null) {
+
+					if ($npc->addCommand($command, $commandType) !== null) {
 						$player->sendMessage(TextFormat::GREEN . "Command added to NPC {$npc->getName()}.");
 					} else {
 						$player->sendMessage(TextFormat::RED . "Failed to add command for NPC {$npc->getName()}.");
@@ -486,8 +486,7 @@ final class FormManager {
 			return;
 		}
 
-		$commandHandler = $npc->getCommandHandler();
-		$commands = $commandHandler->getAll();
+		$commands = $npc->getCommands();
 
 		$buttons = array_map(
 			fn ($id, $data) => new Button("Command: {$data['command']} (Type: {$data['type']})"),
@@ -555,8 +554,8 @@ final class FormManager {
 				function (Player $player, CustomFormResponse $response) use ($npc, $commandId) : void {
 					$newCommand = $response->getInput()->getValue();
 					$newType = $response->getDropdown()->getSelectedOption();
-					$commandHandler = $npc->getCommandHandler();
-					if ($commandHandler->edit($commandId, $newCommand, $newType)) {
+
+					if ($npc->editCommand($commandId, $newCommand, $newType)) {
 						$player->sendMessage(TextFormat::GREEN . "Command updated for NPC {$npc->getName()}.");
 					} else {
 						$player->sendMessage(TextFormat::RED . "Failed to update command for NPC {$npc->getName()}.");
@@ -576,7 +575,7 @@ final class FormManager {
 				'Confirm Remove Command',
 				"Are you sure you want to remove this command from NPC: {$npc->getName()}?",
 				function (Player $player) use ($npc, $commandId) : void {
-					$npc->getCommandHandler()->removeById($commandId);
+					$npc->removeCommandById($commandId);
 					$player->sendMessage(TextFormat::GREEN . "Command removed from NPC {$npc->getName()}.");
 				}
 			)
@@ -593,7 +592,7 @@ final class FormManager {
 				'Confirm Clear Commands',
 				"Are you sure you want to clear all commands from NPC: {$npc->getName()}?",
 				function (Player $player) use ($npc) : void {
-					$npc->getCommandHandler()->clearAll();
+					$npc->clearCommands();
 					$player->sendMessage(TextFormat::GREEN . "All commands cleared from NPC {$npc->getName()}.");
 				}
 			)
