@@ -118,16 +118,16 @@ npc-default-settings:
 <img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image3.jpg" alt="" width="350" height="250">
 <img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image4.jpg" alt="" width="350" height="250">
 
-# Upcoming Features
+## Upcoming Features
 
 - Currently none planned. You can contribute or suggest for new features.
 
-# Credits
+## Credits
 
 - [Bedrock-Emotes by TwistedAsylumMC](https://github.com/TwistedAsylumMC/Bedrock-Emotes) for providing the emotes.
 - [CPlot by ColinHDev](https://github.com/ColinHDev/CPlot) for implementing promises.
 
-# Additional Notes
+## Additional Notes
 
 - If you find bugs or want to give suggestions, please visit [here](https://github.com/AIPTU/Smaccer/issues).
 - We accept all contributions! If you want to contribute, please make a pull request in [here](https://github.com/AIPTU/Smaccer/pulls).
