@@ -103,4 +103,24 @@ trait CommandTrait {
 	public function getCommandHandler() : CommandHandler {
 		return $this->commandHandler;
 	}
+
+	public function addCommand(string $command, string $type) : ?int {
+		return $this->commandHandler->add($command, $type);
+	}
+
+	public function editCommand(int $id, string $newCommand, string $newType) : bool {
+		return $this->commandHandler->edit($id, $newCommand, $newType);
+	}
+
+	public function getCommands() : array {
+		return $this->commandHandler->getAll();
+	}
+
+	public function removeCommandById(int $id) : bool {
+		return $this->commandHandler->removeById($id);
+	}
+
+	public function clearCommands() : void {
+		$this->commandHandler->clearAll();
+	}
 }
