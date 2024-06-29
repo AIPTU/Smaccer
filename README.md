@@ -111,6 +111,13 @@ npc-default-settings:
 
 ```
 
+## Images
+
+<img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image1.jpg" alt="" width="400" height="200">
+<img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image2.jpg" alt="" width="400" height="200">
+<img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image3.jpg" alt="" width="350" height="250">
+<img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image4.jpg" alt="" width="350" height="250">
+
 # Upcoming Features
 
 - Currently none planned. You can contribute or suggest for new features.
