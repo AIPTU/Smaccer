@@ -15,12 +15,20 @@ namespace aiptu\smaccer;
 
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
+use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
+use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
+use pocketmine\entity\animation\ArmSwingAnimation;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityEffectAddEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerEntityInteractEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\player\Player;
+use pocketmine\utils\TextFormat;
 use function atan2;
 use function rad2deg;
 use function sqrt;
@@ -77,6 +85,76 @@ class EventHandler implements Listener {
 
 		if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
 			$event->cancel();
+		}
+	}
+
+	public function onAttack(EntityDamageEvent $event) : void {
+		if ($event instanceof EntityDamageByEntityEvent) {
+			$damager = $event->getDamager();
+			$entity = $event->getEntity();
+
+			if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
+				if ($entity->getVisibility() === EntityVisibility::INVISIBLE_TO_EVERYONE) {
+					return;
+				}
+
+				if ($damager instanceof Player) {
+					$npcId = $entity->getId();
+					$playerName = $damager->getName();
+					if (Queue::isInQueue($playerName, Queue::ACTION_RETRIEVE)) {
+						$damager->sendMessage(TextFormat::GREEN . 'NPC Entity ID: ' . $npcId);
+						Queue::removeFromQueue($playerName, Queue::ACTION_RETRIEVE);
+					} elseif (Queue::isInQueue($playerName, Queue::ACTION_DELETE)) {
+						if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
+							$damager->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
+							return;
+						}
+
+						SmaccerHandler::getInstance()->despawnNPC($damager, $entity)->onCompletion(
+							function (bool $success) use ($damager, $npcId, $entity) : void {
+								$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
+							},
+							function (\Throwable $e) use ($damager) : void {
+								$damager->sendMessage(TextFormat::RED . 'Failed to despawn npc: ' . $e->getMessage());
+							}
+						);
+						Queue::removeFromQueue($playerName, Queue::ACTION_DELETE);
+					}
+				}
+
+				$event->cancel();
+			}
+		}
+	}
+
+	public function onInteract(PlayerEntityInteractEvent $event) : void {
+		$player = $event->getPlayer();
+		$entity = $event->getEntity();
+
+		if (($entity instanceof HumanSmaccer || $entity instanceof EntitySmaccer)
+			&& $entity->getVisibility() !== EntityVisibility::INVISIBLE_TO_EVERYONE) {
+			if ($entity->canExecuteCommands($player)) {
+				$entity->executeCommands($player);
+			}
+
+			if ($entity instanceof HumanSmaccer) {
+				if ($entity->canSlapBack()) {
+					$entity->broadcastAnimation(new ArmSwingAnimation($entity));
+				}
+
+				if ($entity->getActionEmote() !== null) {
+					$emoteUuid = $entity->getActionEmote()->getUuid();
+					$settings = Smaccer::getInstance()->getDefaultSettings();
+
+					if ($settings->isActionEmoteCooldownEnabled()) {
+						if ($player->hasPermission(Permissions::BYPASS_COOLDOWN) || $entity->handleActionEmoteCooldown($emoteUuid)) {
+							$entity->broadcastEmote($emoteUuid, [$player]);
+						}
+					} else {
+						$entity->broadcastEmote($emoteUuid, [$player]);
+					}
+				}
+			}
 		}
 	}
 }
