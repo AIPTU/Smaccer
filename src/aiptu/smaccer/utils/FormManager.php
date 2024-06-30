@@ -22,16 +22,16 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\CustomForm;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\CustomFormResponse;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\element\Dropdown;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\element\Input;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\element\StepSlider;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\element\Toggle;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\menu\Button;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\menu\Image;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\MenuForm;
-use aiptu\smaccer\libs\_14c58a4551eb4962\frago9876543210\forms\ModalForm;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\CustomForm;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\CustomFormResponse;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\element\Dropdown;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\element\Input;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\element\StepSlider;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\element\Toggle;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\menu\Button;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\menu\Image;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\MenuForm;
+use aiptu\smaccer\libs\_35d19134b669793e\frago9876543210\forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -279,7 +279,7 @@ final class FormManager {
 				'Confirm Deletion',
 				"Are you sure you want to delete NPC: {$npc->getName()}?",
 				function (Player $player) use ($npc) : void {
-					SmaccerHandler::getInstance()->despawnNPC($player, $npc)->onCompletion(
+					SmaccerHandler::getInstance()->despawnNPC($npc->getCreatorId(), $npc)->onCompletion(
 						function (bool $success) use ($player, $npc) : void {
 							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getId() . ' despawned successfully.');
 						},

@@ -19,25 +19,25 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 
 trait CreatorTrait {
-	protected string $creator;
+	protected string $creatorId;
 
 	public function initializeCreator(CompoundTag $nbt) : void {
-		$this->creator = $nbt->getString(EntityTag::CREATOR);
+		$this->creatorId = $nbt->getString(EntityTag::CREATOR);
 	}
 
 	public function saveCreator(CompoundTag $nbt) : void {
-		$nbt->setString(EntityTag::CREATOR, $this->creator);
+		$nbt->setString(EntityTag::CREATOR, $this->creatorId);
 	}
 
 	public function getCreatorId() : string {
-		return $this->creator;
+		return $this->creatorId;
 	}
 
 	public function getCreator() : ?Player {
-		return Server::getInstance()->getPlayerByRawUUID($this->creator);
+		return Server::getInstance()->getPlayerByRawUUID($this->creatorId);
 	}
 
 	public function isOwnedBy(Player $player) : bool {
-		return $player->getUniqueId()->getBytes() === $this->creator;
+		return $player->getUniqueId()->getBytes() === $this->creatorId;
 	}
 }

@@ -415,11 +415,10 @@ class SmaccerHandler {
 	/**
 	 * @return Promise<bool>
 	 */
-	public function despawnNPC(Player $player, Entity $entity) : Promise {
+	public function despawnNPC(string $creatorId, Entity $entity) : Promise {
 		$resolver = new PromiseResolver();
 		$promise = $resolver->getPromise();
 
-		$playerId = $player->getUniqueId()->getBytes();
 		$entityId = $entity->getId();
 
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
@@ -428,7 +427,7 @@ class SmaccerHandler {
 		}
 
 		$entity->flagForDespawn();
-		unset($this->playerNPCs[$playerId][$entityId]);
+		unset($this->playerNPCs[$creatorId][$entityId]);
 
 		$resolver->resolve(true);
 		return $promise;
