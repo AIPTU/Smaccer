@@ -110,7 +110,7 @@ class EventHandler implements Listener {
 							return;
 						}
 
-						SmaccerHandler::getInstance()->despawnNPC($damager, $entity)->onCompletion(
+						SmaccerHandler::getInstance()->despawnNPC($entity->getCreatorId(), $entity)->onCompletion(
 							function (bool $success) use ($damager, $npcId, $entity) : void {
 								$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
 							},

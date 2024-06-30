@@ -279,7 +279,7 @@ final class FormManager {
 				'Confirm Deletion',
 				"Are you sure you want to delete NPC: {$npc->getName()}?",
 				function (Player $player) use ($npc) : void {
-					SmaccerHandler::getInstance()->despawnNPC($player, $npc)->onCompletion(
+					SmaccerHandler::getInstance()->despawnNPC($npc->getCreatorId(), $npc)->onCompletion(
 						function (bool $success) use ($player, $npc) : void {
 							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getId() . ' despawned successfully.');
 						},
