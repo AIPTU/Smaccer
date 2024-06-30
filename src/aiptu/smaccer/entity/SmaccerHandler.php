@@ -95,6 +95,9 @@ use aiptu\smaccer\entity\npc\ZombieSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerV2Smaccer;
 use aiptu\smaccer\entity\utils\EntityTag;
+use aiptu\smaccer\event\NPCDespawnEvent;
+use aiptu\smaccer\event\NPCSpawnEvent;
+use aiptu\smaccer\event\NPCUpdateEvent;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\promise\Promise;
 use aiptu\smaccer\utils\promise\PromiseResolver;
@@ -408,6 +411,8 @@ class SmaccerHandler {
 		$entityId = $entity->getId();
 		$this->playerNPCs[$playerId][$entityId] = $entity;
 
+		(new NPCSpawnEvent($entity))->call();
+
 		$resolver->resolve($entity);
 		return $promise;
 	}
@@ -425,6 +430,8 @@ class SmaccerHandler {
 			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
 			return $promise;
 		}
+
+		(new NPCDespawnEvent($entity))->call();
 
 		$entity->flagForDespawn();
 		unset($this->playerNPCs[$creatorId][$entityId]);
@@ -445,15 +452,22 @@ class SmaccerHandler {
 			return $promise;
 		}
 
-		$nameTag = $npcData->getNameTag();
-		$scale = $npcData->getScale();
-		$rotationEnabled = $npcData->isRotationEnabled();
-		$nametagVisible = $npcData->isNametagVisible();
-		$visibility = $npcData->getVisibility();
-		$isBaby = $npcData->isBaby();
-		$slapBack = $npcData->getSlapBack();
-		$actionEmote = $npcData->getActionEmote();
-		$emote = $npcData->getEmote();
+		$ev = new NPCUpdateEvent($entity, $npcData);
+		$ev->call();
+		if ($ev->isCancelled()) {
+			$resolver->reject(new \RuntimeException('NPC update event was cancelled'));
+			return $promise;
+		}
+
+		$nameTag = $ev->getNPCData()->getNameTag();
+		$scale = $ev->getNPCData()->getScale();
+		$rotationEnabled = $ev->getNPCData()->isRotationEnabled();
+		$nametagVisible = $ev->getNPCData()->isNametagVisible();
+		$visibility = $ev->getNPCData()->getVisibility();
+		$isBaby = $ev->getNPCData()->isBaby();
+		$slapBack = $ev->getNPCData()->getSlapBack();
+		$actionEmote = $ev->getNPCData()->getActionEmote();
+		$emote = $ev->getNPCData()->getEmote();
 
 		if ($nameTag !== null) {
 			$nameTag = $this->applyNametag($nameTag, $player);

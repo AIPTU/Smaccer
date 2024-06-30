@@ -17,6 +17,8 @@ use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
+use aiptu\smaccer\event\NPCAttackEvent;
+use aiptu\smaccer\event\NPCInteractEvent;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
 use pocketmine\entity\animation\ArmSwingAnimation;
@@ -99,6 +101,13 @@ class EventHandler implements Listener {
 				}
 
 				if ($damager instanceof Player) {
+					$npcAttackEvent = new NPCAttackEvent($damager, $entity);
+					$npcAttackEvent->call();
+					if ($npcAttackEvent->isCancelled()) {
+						$event->cancel();
+						return;
+					}
+
 					$npcId = $entity->getId();
 					$playerName = $damager->getName();
 					if (Queue::isInQueue($playerName, Queue::ACTION_RETRIEVE)) {
@@ -133,6 +142,12 @@ class EventHandler implements Listener {
 
 		if (($entity instanceof HumanSmaccer || $entity instanceof EntitySmaccer)
 			&& $entity->getVisibility() !== EntityVisibility::INVISIBLE_TO_EVERYONE) {
+			$npcInteractEvent = new NPCInteractEvent($player, $entity);
+			$npcInteractEvent->call();
+			if ($npcInteractEvent->isCancelled()) {
+				return;
+			}
+
 			if ($entity->canExecuteCommands($player)) {
 				$entity->executeCommands($player);
 			}
@@ -155,6 +170,8 @@ class EventHandler implements Listener {
 					}
 				}
 			}
+
+			$event->cancel();
 		}
 	}
 }
