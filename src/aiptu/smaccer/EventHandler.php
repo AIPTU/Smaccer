@@ -162,11 +162,11 @@ class EventHandler implements Listener {
 					$settings = Smaccer::getInstance()->getDefaultSettings();
 
 					if ($settings->isActionEmoteCooldownEnabled()) {
-						if ($player->hasPermission(Permissions::BYPASS_COOLDOWN) || $entity->handleActionEmoteCooldown($emoteUuid)) {
-							$entity->broadcastEmote($emoteUuid, [$player]);
+						if ($player->hasPermission(Permissions::BYPASS_COOLDOWN) || $entity->canPerformActionEmote($emoteUuid)) {
+							$entity->performActionEmote($emoteUuid, [$player]);
 						}
 					} else {
-						$entity->broadcastEmote($emoteUuid, [$player]);
+						$entity->performActionEmote($emoteUuid, [$player]);
 					}
 				}
 			}

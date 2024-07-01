@@ -15,6 +15,8 @@ namespace aiptu\smaccer\entity\trait;
 
 use aiptu\smaccer\entity\emote\EmoteType;
 use aiptu\smaccer\entity\utils\EntityTag;
+use aiptu\smaccer\event\NPCPerformActionEmoteEvent;
+use aiptu\smaccer\event\NPCPerformEmoteEvent;
 use aiptu\smaccer\Smaccer;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
@@ -29,19 +31,24 @@ trait EmoteTrait {
 	protected array $emoteCooldowns = [];
 	protected array $actionEmoteCooldowns = [];
 
+	private function initializeEmoteFromNBT(CompoundTag $nbt, string $tag) : ?EmoteType {
+		return $nbt->getTag($tag) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString($tag)) : null;
+	}
+
+	private function saveEmoteToNBT(CompoundTag $nbt, ?EmoteType $emote, string $tag) : void {
+		if ($emote !== null) {
+			$nbt->setString($tag, $emote->getUuid());
+		}
+	}
+
 	public function initializeEmote(CompoundTag $nbt) : void {
-		$this->actionEmote = $nbt->getTag(EntityTag::ACTION_EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::ACTION_EMOTE)) : null;
-		$this->emote = $nbt->getTag(EntityTag::EMOTE) instanceof StringTag ? Smaccer::getInstance()->getEmoteManager()->getEmote($nbt->getString(EntityTag::EMOTE)) : null;
+		$this->actionEmote = $this->initializeEmoteFromNBT($nbt, EntityTag::ACTION_EMOTE);
+		$this->emote = $this->initializeEmoteFromNBT($nbt, EntityTag::EMOTE);
 	}
 
 	public function saveEmote(CompoundTag $nbt) : void {
-		if ($this->actionEmote !== null) {
-			$nbt->setString(EntityTag::ACTION_EMOTE, $this->actionEmote->getUuid());
-		}
-
-		if ($this->emote !== null) {
-			$nbt->setString(EntityTag::EMOTE, $this->emote->getUuid());
-		}
+		$this->saveEmoteToNBT($nbt, $this->actionEmote, EntityTag::ACTION_EMOTE);
+		$this->saveEmoteToNBT($nbt, $this->emote, EntityTag::EMOTE);
 	}
 
 	public function setActionEmote(?EmoteType $actionEmote) : void {
@@ -62,7 +69,7 @@ trait EmoteTrait {
 		return $this->emote;
 	}
 
-	public function handleEmoteCooldown(string $emote) : bool {
+	public function canPerformEmote(string $emote) : bool {
 		$currentTime = microtime(true);
 		if (isset($this->emoteCooldowns[$emote]) && ($currentTime - $this->emoteCooldowns[$emote]) < Smaccer::getInstance()->getDefaultSettings()->getEmoteCooldownValue()) {
 			return false;
@@ -72,7 +79,7 @@ trait EmoteTrait {
 		return true;
 	}
 
-	public function handleActionEmoteCooldown(string $actionEmote) : bool {
+	public function canPerformActionEmote(string $actionEmote) : bool {
 		$currentTime = microtime(true);
 		if (isset($this->actionEmoteCooldowns[$actionEmote]) && ($currentTime - $this->actionEmoteCooldowns[$actionEmote]) < Smaccer::getInstance()->getDefaultSettings()->getActionEmoteCooldownValue()) {
 			return false;
@@ -82,7 +89,37 @@ trait EmoteTrait {
 		return true;
 	}
 
-	public function broadcastEmote(string $emote, ?array $targets = null) : void {
+	public function performEmote(string $emote, ?array $targets = null) : void {
+		$emoteType = Smaccer::getInstance()->getEmoteManager()->getEmote($emote);
+		if ($emoteType === null) {
+			return;
+		}
+
+		$event = new NPCPerformEmoteEvent($this, $emoteType);
+		$event->call();
+		if ($event->isCancelled()) {
+			return;
+		}
+
+		$this->broadcastEmote($event->getEmote()->getUuid(), $targets);
+	}
+
+	public function performActionEmote(string $actionEmote, ?array $targets = null) : void {
+		$actionEmoteType = Smaccer::getInstance()->getEmoteManager()->getEmote($actionEmote);
+		if ($actionEmoteType === null) {
+			return;
+		}
+
+		$event = new NPCPerformActionEmoteEvent($this, $actionEmoteType);
+		$event->call();
+		if ($event->isCancelled()) {
+			return;
+		}
+
+		$this->broadcastEmote($event->getActionEmote()->getUuid(), $targets);
+	}
+
+	private function broadcastEmote(string $emote, ?array $targets = null) : void {
 		NetworkBroadcastUtils::broadcastPackets($targets ?? $this->getViewers(), [
 			EmotePacket::create($this->getId(), $emote, '', '', EmotePacket::FLAG_MUTE_ANNOUNCEMENT),
 		]);
