@@ -14,11 +14,15 @@ declare(strict_types=1);
 namespace aiptu\smaccer\event;
 
 use pocketmine\entity\Entity;
+use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
 use pocketmine\event\entity\EntityEvent;
 
 /**
  * @phpstan-extends EntityEvent<Entity>
  */
-class NPCSpawnEvent extends EntityEvent {
+class NPCSpawnEvent extends EntityEvent implements Cancellable {
+	use CancellableTrait;
+
 	public function __construct(protected Entity $entity) {}
 }

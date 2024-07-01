@@ -408,10 +408,15 @@ class SmaccerHandler {
 
 		$entity->setVisibility($visibility);
 
+		$ev = new NPCSpawnEvent($entity);
+		$ev->call();
+		if ($ev->isCancelled()) {
+			$resolver->reject(new \RuntimeException('NPC spawn event was cancelled'));
+			return $promise;
+		}
+
 		$entityId = $entity->getId();
 		$this->playerNPCs[$playerId][$entityId] = $entity;
-
-		(new NPCSpawnEvent($entity))->call();
 
 		$resolver->resolve($entity);
 		return $promise;
@@ -431,7 +436,12 @@ class SmaccerHandler {
 			return $promise;
 		}
 
-		(new NPCDespawnEvent($entity))->call();
+		$ev = new NPCDespawnEvent($entity);
+		$ev->call();
+		if ($ev->isCancelled()) {
+			$resolver->reject(new \RuntimeException('NPC despawn event was cancelled'));
+			return $promise;
+		}
 
 		$entity->flagForDespawn();
 		unset($this->playerNPCs[$creatorId][$entityId]);
