@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace aiptu\smaccer\entity\trait;
 
 use aiptu\smaccer\entity\utils\EntityTag;
+use aiptu\smaccer\event\NPCSlapBackActionEvent;
+use pocketmine\entity\animation\ArmSwingAnimation;
 use pocketmine\nbt\tag\CompoundTag;
 
 trait SlapBackTrait {
@@ -33,5 +35,18 @@ trait SlapBackTrait {
 
 	public function canSlapBack() : bool {
 		return $this->slapBack;
+	}
+
+	public function slapBack() : void {
+		$event = new NPCSlapBackActionEvent($this, $this->slapBack);
+		$event->call();
+		if ($event->isCancelled()) {
+			return;
+		}
+
+		$slapBack = $event->canSlapBack();
+		if ($slapBack) {
+			$this->broadcastAnimation(new ArmSwingAnimation($this));
+		}
 	}
 }

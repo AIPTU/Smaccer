@@ -85,12 +85,12 @@ class HumanSmaccer extends Human {
 			$emoteUuid = $this->getEmote()->getUuid();
 
 			if (Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
-				if ($this->handleEmoteCooldown($emoteUuid)) {
-					$this->broadcastEmote($emoteUuid);
+				if ($this->canPerformEmote($emoteUuid)) {
+					$this->performEmote($emoteUuid);
 					$hasUpdate = true;
 				}
 			} else {
-				$this->broadcastEmote($emoteUuid);
+				$this->performEmote($emoteUuid);
 				$hasUpdate = true;
 			}
 		}

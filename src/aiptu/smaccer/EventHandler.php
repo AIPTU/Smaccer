@@ -21,7 +21,6 @@ use aiptu\smaccer\event\NPCAttackEvent;
 use aiptu\smaccer\event\NPCInteractEvent;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
-use pocketmine\entity\animation\ArmSwingAnimation;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityEffectAddEvent;
@@ -153,20 +152,18 @@ class EventHandler implements Listener {
 			}
 
 			if ($entity instanceof HumanSmaccer) {
-				if ($entity->canSlapBack()) {
-					$entity->broadcastAnimation(new ArmSwingAnimation($entity));
-				}
+				$entity->slapBack();
 
 				if ($entity->getActionEmote() !== null) {
 					$emoteUuid = $entity->getActionEmote()->getUuid();
 					$settings = Smaccer::getInstance()->getDefaultSettings();
 
 					if ($settings->isActionEmoteCooldownEnabled()) {
-						if ($player->hasPermission(Permissions::BYPASS_COOLDOWN) || $entity->handleActionEmoteCooldown($emoteUuid)) {
-							$entity->broadcastEmote($emoteUuid, [$player]);
+						if ($player->hasPermission(Permissions::BYPASS_COOLDOWN) || $entity->canPerformActionEmote($emoteUuid)) {
+							$entity->performActionEmote($emoteUuid, [$player]);
 						}
 					} else {
-						$entity->broadcastEmote($emoteUuid, [$player]);
+						$entity->performActionEmote($emoteUuid, [$player]);
 					}
 				}
 			}
