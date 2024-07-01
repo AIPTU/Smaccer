@@ -15,6 +15,7 @@ namespace aiptu\smaccer\entity\trait;
 
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
+use aiptu\smaccer\event\NPCVisibilityChangeEvent;
 use pocketmine\nbt\tag\CompoundTag;
 
 trait VisibilityTrait {
@@ -33,9 +34,17 @@ trait VisibilityTrait {
 	}
 
 	public function setVisibility(EntityVisibility $visibility) : void {
-		$this->visibility = $visibility;
+		if ($this->visibility !== $visibility) {
+			$event = new NPCVisibilityChangeEvent($this, $this->visibility, $visibility);
+			$event->call();
+			if ($event->isCancelled()) {
+				return;
+			}
 
-		switch ($visibility) {
+			$this->visibility = $event->getNewVisibility();
+		}
+
+		switch ($this->visibility) {
 			case EntityVisibility::VISIBLE_TO_EVERYONE:
 				$this->spawnToAll();
 				break;
