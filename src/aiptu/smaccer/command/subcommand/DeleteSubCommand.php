@@ -50,7 +50,7 @@ class DeleteSubCommand extends BaseSubCommand {
 		if ($npcId === null) {
 			try {
 				if (Queue::addToQueue($playerName, Queue::ACTION_DELETE)) {
-					$sender->sendMessage(TextFormat::GREEN . 'You are in a queue, hit the entity to delete it');
+					$sender->sendMessage(TextFormat::GREEN . 'You are in a queue, hit the entity to delete it. Type "cancel" to quit the queue.');
 				} else {
 					$sender->sendMessage(TextFormat::RED . "You've been in a queue!");
 				}

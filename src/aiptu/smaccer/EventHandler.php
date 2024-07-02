@@ -25,6 +25,7 @@ use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityEffectAddEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerEntityInteractEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -33,8 +34,27 @@ use pocketmine\utils\TextFormat;
 use function atan2;
 use function rad2deg;
 use function sqrt;
+use function str_starts_with;
+use function strtolower;
+use function trim;
 
 class EventHandler implements Listener {
+	public function onChat(PlayerChatEvent $event) : void {
+		$player = $event->getPlayer();
+		$message = trim($event->getMessage());
+
+		if (str_starts_with(strtolower($message), 'cancel')) {
+			$playerName = $player->getName();
+
+			if (Queue::isInAnyQueue($playerName)) {
+				Queue::removeFromAllQueues($playerName);
+				$player->sendMessage(TextFormat::GREEN . 'You have successfully left the queue.');
+			}
+
+			$event->cancel();
+		}
+	}
+
 	public function onQuit(PlayerQuitEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerName = $player->getName();

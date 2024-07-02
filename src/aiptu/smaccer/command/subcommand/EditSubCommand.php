@@ -13,14 +13,20 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
+use aiptu\smaccer\entity\EntitySmaccer;
+use aiptu\smaccer\entity\HumanSmaccer;
+use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\FormManager;
 use aiptu\smaccer\utils\Permissions;
+use aiptu\smaccer\utils\Queue;
+use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
+use pocketmine\utils\TextFormat;
 
 class EditSubCommand extends BaseSubCommand {
 	/** @param list<string> $aliases */
@@ -38,7 +44,38 @@ class EditSubCommand extends BaseSubCommand {
 			throw new AssumptionFailedError(InGameRequiredConstraint::class . ' should have prevented this');
 		}
 
-		FormManager::sendNPCIdSelectionForm($sender, FormManager::ACTION_EDIT);
+		$npcId = $args['npcId'] ?? null;
+		$playerName = $sender->getName();
+
+		if ($npcId === null) {
+			try {
+				if (Queue::addToQueue($playerName, Queue::ACTION_EDIT)) {
+					$sender->sendMessage(TextFormat::GREEN . 'You are in a queue, hit the entity to edit it. Type "cancel" to quit the queue.');
+				} else {
+					$sender->sendMessage(TextFormat::RED . 'You are already in the queue!');
+				}
+			} catch (\InvalidArgumentException $e) {
+				$sender->sendMessage(TextFormat::RED . $e->getMessage());
+			}
+
+			return;
+		}
+
+		/** @var Smaccer $plugin */
+		$plugin = $this->plugin;
+		$entity = $plugin->getServer()->getWorldManager()->findEntity($npcId);
+
+		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
+			$sender->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');
+			return;
+		}
+
+		if (!$entity->isOwnedBy($sender) && !$sender->hasPermission(Permissions::COMMAND_EDIT_OTHERS)) {
+			$sender->sendMessage(TextFormat::RED . "You don't have permission to edit this entity!");
+			return;
+		}
+
+		FormManager::sendEditMenuForm($sender, $entity);
 	}
 
 	public function prepare() : void {
@@ -48,5 +85,7 @@ class EditSubCommand extends BaseSubCommand {
 			Permissions::COMMAND_EDIT_SELF,
 			Permissions::COMMAND_EDIT_OTHERS,
 		]);
+
+		$this->registerArgument(0, new IntegerArgument('npcId', true));
 	}
 }
