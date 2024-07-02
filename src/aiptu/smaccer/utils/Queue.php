@@ -91,4 +91,19 @@ class Queue {
 
 		return false;
 	}
+
+	public static function getCurrentAction(string $playerName) : ?string {
+		$playerName = strtolower($playerName);
+		if (!self::isInAnyQueue($playerName)) {
+			return null;
+		}
+
+		foreach (self::$validActions as $action) {
+			if (self::isInQueue($playerName, $action)) {
+				return $action;
+			}
+		}
+
+		return null;
+	}
 }

@@ -19,6 +19,7 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\event\NPCAttackEvent;
 use aiptu\smaccer\event\NPCInteractEvent;
+use aiptu\smaccer\utils\FormManager;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -110,49 +111,72 @@ class EventHandler implements Listener {
 	}
 
 	public function onAttack(EntityDamageEvent $event) : void {
-		if ($event instanceof EntityDamageByEntityEvent) {
-			$damager = $event->getDamager();
-			$entity = $event->getEntity();
-
-			if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
-				if ($entity->getVisibility() === EntityVisibility::INVISIBLE_TO_EVERYONE) {
-					return;
-				}
-
-				if ($damager instanceof Player) {
-					$npcAttackEvent = new NPCAttackEvent($damager, $entity);
-					$npcAttackEvent->call();
-					if ($npcAttackEvent->isCancelled()) {
-						$event->cancel();
-						return;
-					}
-
-					$npcId = $entity->getId();
-					$playerName = $damager->getName();
-					if (Queue::isInQueue($playerName, Queue::ACTION_RETRIEVE)) {
-						$damager->sendMessage(TextFormat::GREEN . 'NPC Entity ID: ' . $npcId);
-						Queue::removeFromQueue($playerName, Queue::ACTION_RETRIEVE);
-					} elseif (Queue::isInQueue($playerName, Queue::ACTION_DELETE)) {
-						if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
-							$damager->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
-							return;
-						}
-
-						SmaccerHandler::getInstance()->despawnNPC($entity->getCreatorId(), $entity)->onCompletion(
-							function (bool $success) use ($damager, $npcId, $entity) : void {
-								$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
-							},
-							function (\Throwable $e) use ($damager) : void {
-								$damager->sendMessage(TextFormat::RED . 'Failed to despawn npc: ' . $e->getMessage());
-							}
-						);
-						Queue::removeFromQueue($playerName, Queue::ACTION_DELETE);
-					}
-				}
-
-				$event->cancel();
-			}
+		if (!$event instanceof EntityDamageByEntityEvent) {
+			return;
 		}
+
+		$damager = $event->getDamager();
+		$entity = $event->getEntity();
+
+		if (!($entity instanceof HumanSmaccer || $entity instanceof EntitySmaccer)) {
+			return;
+		}
+
+		if ($entity->getVisibility() === EntityVisibility::INVISIBLE_TO_EVERYONE) {
+			return;
+		}
+
+		if (!$damager instanceof Player) {
+			return;
+		}
+
+		$npcAttackEvent = new NPCAttackEvent($damager, $entity);
+		$npcAttackEvent->call();
+		if ($npcAttackEvent->isCancelled()) {
+			$event->cancel();
+			return;
+		}
+
+		$npcId = $entity->getId();
+		$playerName = $damager->getName();
+		$action = Queue::getCurrentAction($playerName);
+
+		if ($action === null) {
+			$event->cancel();
+			return;
+		}
+
+		switch ($action) {
+			case Queue::ACTION_EDIT:
+				if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_EDIT_OTHERS)) {
+					$damager->sendMessage(TextFormat::RED . "You don't have permission to edit this entity!");
+					break;
+				}
+
+				FormManager::sendEditMenuForm($damager, $entity);
+				break;
+			case Queue::ACTION_DELETE:
+				if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
+					$damager->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
+					break;
+				}
+
+				SmaccerHandler::getInstance()->despawnNPC($entity->getCreatorId(), $entity)->onCompletion(
+					function (bool $success) use ($damager, $npcId, $entity) : void {
+						$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
+					},
+					function (\Throwable $e) use ($damager) : void {
+						$damager->sendMessage(TextFormat::RED . 'Failed to despawn NPC: ' . $e->getMessage());
+					}
+				);
+				break;
+			case Queue::ACTION_RETRIEVE:
+				$damager->sendMessage(TextFormat::GREEN . 'NPC Entity ID: ' . $npcId);
+				break;
+		}
+
+		Queue::removeFromQueue($playerName, $action);
+		$event->cancel();
 	}
 
 	public function onInteract(PlayerEntityInteractEvent $event) : void {
