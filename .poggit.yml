@@ -5,6 +5,4 @@ projects:
   Smaccer:
     path: ""
     icon: "icon.png"
-    lint:
-      phpstan: false
 ...
