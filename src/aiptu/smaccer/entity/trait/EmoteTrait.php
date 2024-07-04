@@ -124,4 +124,24 @@ trait EmoteTrait {
 			EmotePacket::create($this->getId(), $emote, '', '', EmotePacket::FLAG_MUTE_ANNOUNCEMENT),
 		]);
 	}
+
+	protected function entityBaseTick(int $tickDiff = 1) : bool {
+		$hasUpdate = parent::entityBaseTick($tickDiff);
+
+		if ($this->getEmote() !== null) {
+			$emoteUuid = $this->getEmote()->getUuid();
+
+			if (Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
+				if ($this->canPerformEmote($emoteUuid)) {
+					$this->performEmote($emoteUuid);
+					$hasUpdate = true;
+				}
+			} else {
+				$this->performEmote($emoteUuid);
+				$hasUpdate = true;
+			}
+		}
+
+		return $hasUpdate;
+	}
 }

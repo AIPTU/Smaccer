@@ -22,7 +22,6 @@ use aiptu\smaccer\entity\trait\SkinTrait;
 use aiptu\smaccer\entity\trait\SlapBackTrait;
 use aiptu\smaccer\entity\trait\VisibilityTrait;
 use aiptu\smaccer\entity\utils\EntityTag;
-use aiptu\smaccer\Smaccer;
 use pocketmine\entity\Human;
 use pocketmine\entity\Location;
 use pocketmine\entity\Skin;
@@ -76,25 +75,5 @@ class HumanSmaccer extends Human {
 
 	public function getName() : string {
 		return $this->nameTag !== '' ? $this->nameTag : 'Human';
-	}
-
-	protected function entityBaseTick(int $tickDiff = 1) : bool {
-		$hasUpdate = parent::entityBaseTick($tickDiff);
-
-		if ($this->getEmote() !== null) {
-			$emoteUuid = $this->getEmote()->getUuid();
-
-			if (Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
-				if ($this->canPerformEmote($emoteUuid)) {
-					$this->performEmote($emoteUuid);
-					$hasUpdate = true;
-				}
-			} else {
-				$this->performEmote($emoteUuid);
-				$hasUpdate = true;
-			}
-		}
-
-		return $hasUpdate;
 	}
 }
