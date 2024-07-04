@@ -4,5 +4,5 @@ branches:
 projects:
   Smaccer:
     path: ""
-    icon: "icon.png"
+    icon: icon.png
 ...
