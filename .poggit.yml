@@ -4,7 +4,7 @@ branches:
 projects:
   Smaccer:
     path: ""
-    icon: icon.png
+    icon: "icon.png"
     lint:
       phpstan: false
 ...
