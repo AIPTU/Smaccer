@@ -17,6 +17,7 @@ use aiptu\smaccer\entity\trait\CommandTrait;
 use aiptu\smaccer\entity\trait\CreatorTrait;
 use aiptu\smaccer\entity\trait\EmoteTrait;
 use aiptu\smaccer\entity\trait\InventoryTrait;
+use aiptu\smaccer\entity\trait\NametagTrait;
 use aiptu\smaccer\entity\trait\RotationTrait;
 use aiptu\smaccer\entity\trait\SkinTrait;
 use aiptu\smaccer\entity\trait\SlapBackTrait;
@@ -29,6 +30,7 @@ use pocketmine\nbt\tag\CompoundTag;
 
 class HumanSmaccer extends Human {
 	use CreatorTrait;
+	use NametagTrait;
 	use RotationTrait;
 	use VisibilityTrait;
 	use SlapBackTrait;
@@ -74,6 +76,6 @@ class HumanSmaccer extends Human {
 	}
 
 	public function getName() : string {
-		return $this->nameTag !== '' ? $this->nameTag : 'Human';
+		return 'Human';
 	}
 }

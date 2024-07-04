@@ -91,7 +91,7 @@ class CreateSubCommand extends BaseSubCommand {
 					$npcId = $entity->getId();
 
 					if ($sender !== $target) {
-						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId . 'for ' . $target->getName());
+						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId . ' for: ' . $target->getName());
 					} else {
 						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId);
 					}

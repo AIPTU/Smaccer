@@ -15,6 +15,7 @@ namespace aiptu\smaccer\entity;
 
 use aiptu\smaccer\entity\trait\CommandTrait;
 use aiptu\smaccer\entity\trait\CreatorTrait;
+use aiptu\smaccer\entity\trait\NametagTrait;
 use aiptu\smaccer\entity\trait\RotationTrait;
 use aiptu\smaccer\entity\trait\VisibilityTrait;
 use aiptu\smaccer\entity\utils\EntityTag;
@@ -25,6 +26,7 @@ use pocketmine\nbt\tag\CompoundTag;
 
 abstract class EntitySmaccer extends Entity {
 	use CreatorTrait;
+	use NametagTrait;
 	use RotationTrait;
 	use VisibilityTrait;
 	use CommandTrait;

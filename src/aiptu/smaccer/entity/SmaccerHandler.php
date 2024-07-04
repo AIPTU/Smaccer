@@ -116,12 +116,9 @@ use pocketmine\player\Player;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
 use pocketmine\world\World;
-use function array_keys;
 use function array_merge;
-use function array_values;
 use function is_a;
 use function is_subclass_of;
-use function str_replace;
 use function strtolower;
 
 class SmaccerHandler {
@@ -294,16 +291,6 @@ class SmaccerHandler {
 			]));
 	}
 
-	private function applyNametag(string $nametag, Player $player) : string {
-		$vars = [
-			'{player}' => $player->getName(),
-			'{display_name}' => $player->getDisplayName(),
-			'{line}' => "\n",
-		];
-
-		return TextFormat::colorize(str_replace(array_keys($vars), array_values($vars), $nametag));
-	}
-
 	/**
 	 * @return Promise<Entity>
 	 */
@@ -381,8 +368,7 @@ class SmaccerHandler {
 		}
 
 		if ($nameTag !== null) {
-			$nameTag = $this->applyNametag($nameTag, $player);
-			$entity->setNameTag($nameTag);
+			$entity->setNameTag($entity->applyNametag($nameTag, $player));
 		}
 
 		$entity->setScale($scale);
@@ -407,6 +393,7 @@ class SmaccerHandler {
 		}
 
 		$entity->setVisibility($visibility);
+		$entity->sendData($entity->getViewers());
 
 		$ev = new NPCSpawnEvent($entity);
 		$ev->call();
@@ -480,8 +467,7 @@ class SmaccerHandler {
 		$emote = $ev->getNPCData()->getEmote();
 
 		if ($nameTag !== null) {
-			$nameTag = $this->applyNametag($nameTag, $player);
-			$entity->setNameTag($nameTag);
+			$entity->setNameTag($entity->applyNametag($nameTag, $player));
 		}
 
 		$entity->setScale($scale);
@@ -506,6 +492,7 @@ class SmaccerHandler {
 		}
 
 		$entity->setVisibility($visibility);
+		$entity->sendData($entity->getViewers());
 
 		$resolver->resolve(true);
 		return $promise;
