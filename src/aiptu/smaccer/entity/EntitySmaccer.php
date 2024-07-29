@@ -48,6 +48,7 @@ abstract class EntitySmaccer extends Entity {
 		$this->setNameTagAlwaysVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
 		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
 		$this->initializeVisibility($nbt);
+		$this->setHasGravity((bool) $nbt->getByte(EntityTag::GRAVITY, 1));
 
 		$this->setNoClientPredictions();
 	}
@@ -56,11 +57,12 @@ abstract class EntitySmaccer extends Entity {
 		$nbt = parent::saveNBT();
 
 		$this->saveCreator($nbt);
+		$this->saveCommand($nbt);
 		$nbt->setFloat(EntityTag::SCALE, $this->scale);
 		$this->saveRotation($nbt);
 		$nbt->setByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible());
 		$this->saveVisibility($nbt);
-		$this->saveCommand($nbt);
+		$nbt->setByte(EntityTag::GRAVITY, (int) $this->hasGravity());
 
 		return $nbt;
 	}

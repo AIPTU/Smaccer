@@ -319,6 +319,7 @@ class SmaccerHandler {
 		$slapBack = $npcData->getSlapBack();
 		$actionEmote = $npcData->getActionEmote();
 		$emote = $npcData->getEmote();
+		$gravityEnabled = $npcData->hasGravity();
 
 		$entityClass = $this->getNPC($type);
 		if ($entityClass === null) {
@@ -331,7 +332,8 @@ class SmaccerHandler {
 			->setFloat(EntityTag::SCALE, $scale)
 			->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $rotationEnabled)
 			->setByte(EntityTag::NAMETAG_VISIBLE, (int) $nametagVisible)
-			->setInt(EntityTag::VISIBILITY, $visibility->value);
+			->setInt(EntityTag::VISIBILITY, $visibility->value)
+			->setByte(EntityTag::GRAVITY, (int) $gravityEnabled);
 
 		if (is_a($entityClass, EntityAgeable::class, true)) {
 			$nbt->setByte(EntityTag::BABY, (int) $isBaby);
@@ -393,6 +395,7 @@ class SmaccerHandler {
 		}
 
 		$entity->setVisibility($visibility);
+		$entity->setHasGravity($gravityEnabled);
 		$entity->sendData($entity->getViewers());
 
 		$ev = new NPCSpawnEvent($entity);
@@ -465,6 +468,7 @@ class SmaccerHandler {
 		$slapBack = $ev->getNPCData()->getSlapBack();
 		$actionEmote = $ev->getNPCData()->getActionEmote();
 		$emote = $ev->getNPCData()->getEmote();
+		$gravityEnabled = $npcData->hasGravity();
 
 		if ($nameTag !== null) {
 			$entity->setNameTag($entity->applyNametag($nameTag, $player));
@@ -492,6 +496,7 @@ class SmaccerHandler {
 		}
 
 		$entity->setVisibility($visibility);
+		$entity->setHasGravity($gravityEnabled);
 		$entity->sendData($entity->getViewers());
 
 		$resolver->resolve(true);

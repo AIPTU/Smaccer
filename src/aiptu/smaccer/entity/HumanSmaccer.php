@@ -58,19 +58,21 @@ class HumanSmaccer extends Human {
 		$this->initializeVisibility($nbt);
 		$this->initializeSlapBack($nbt);
 		$this->initializeEmote($nbt);
+		$this->setHasGravity((bool) $nbt->getByte(EntityTag::GRAVITY, 1));
 	}
 
 	public function saveNBT() : CompoundTag {
 		$nbt = parent::saveNBT();
 
 		$this->saveCreator($nbt);
+		$this->saveCommand($nbt);
 		$nbt->setFloat(EntityTag::SCALE, $this->scale);
 		$this->saveRotation($nbt);
 		$nbt->setByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible());
 		$this->saveVisibility($nbt);
 		$this->saveEmote($nbt);
 		$this->saveSlapBack($nbt);
-		$this->saveCommand($nbt);
+		$nbt->setByte(EntityTag::GRAVITY, (int) $this->hasGravity());
 
 		return $nbt;
 	}

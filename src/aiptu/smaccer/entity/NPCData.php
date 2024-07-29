@@ -26,6 +26,7 @@ final class NPCData {
 	private bool $slapBack = false;
 	private ?EmoteType $actionEmote = null;
 	private ?EmoteType $emote = null;
+	private bool $gravityEnabled = true;
 
 	public static function create() : self {
 		return new self();
@@ -109,6 +110,15 @@ final class NPCData {
 
 	public function setEmote(?EmoteType $emote) : self {
 		$this->emote = $emote;
+		return $this;
+	}
+
+	public function hasGravity() : bool {
+		return $this->gravityEnabled;
+	}
+
+	public function setHasGravity(bool $gravityEnabled) : self {
+		$this->gravityEnabled = $gravityEnabled;
 		return $this;
 	}
 }
