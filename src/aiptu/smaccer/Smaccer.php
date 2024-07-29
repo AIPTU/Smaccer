@@ -19,19 +19,15 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
-use aiptu\smaccer\libs\_3e3b82f8ccbc5731\CortexPE\Commando\PacketHooker;
-use aiptu\smaccer\libs\_3e3b82f8ccbc5731\frago9876543210\forms\BaseForm;
+use aiptu\smaccer\libs\_f7908ef52021ba4c\CortexPE\Commando\PacketHooker;
 use InvalidArgumentException;
-use aiptu\smaccer\libs\_3e3b82f8ccbc5731\JackMD\UpdateNotifier\UpdateNotifier;
+use aiptu\smaccer\libs\_f7908ef52021ba4c\JackMD\UpdateNotifier\UpdateNotifier;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
-use function array_filter;
-use function class_exists;
-use function count;
 use function is_bool;
 use function is_int;
 use function is_numeric;
@@ -47,21 +43,6 @@ class Smaccer extends PluginBase {
 
 	protected function onEnable() : void {
 		self::setInstance($this);
-
-		$requiredVirions = [
-			'Commando' => PacketHooker::class,
-			'forms' => BaseForm::class,
-		];
-		$missingVirions = array_filter($requiredVirions, fn ($class) => !class_exists($class));
-
-		if (count($missingVirions) > 0) {
-			foreach ($missingVirions as $virionName => $virionClass) {
-				$this->getLogger()->error("Required virion '{$virionName}' (class: {$virionClass}) not found.");
-			}
-
-			$this->getLogger()->error('Disabling plugin due to missing virions.');
-			throw new DisablePluginException();
-		}
 
 		SmaccerHandler::getInstance()->registerAll();
 
