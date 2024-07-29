@@ -19,9 +19,10 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
-use aiptu\smaccer\libs\_29591ff14ffa853c\CortexPE\Commando\PacketHooker;
-use aiptu\smaccer\libs\_29591ff14ffa853c\frago9876543210\forms\BaseForm;
+use aiptu\smaccer\libs\_3e3b82f8ccbc5731\CortexPE\Commando\PacketHooker;
+use aiptu\smaccer\libs\_3e3b82f8ccbc5731\frago9876543210\forms\BaseForm;
 use InvalidArgumentException;
+use aiptu\smaccer\libs\_3e3b82f8ccbc5731\JackMD\UpdateNotifier\UpdateNotifier;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
@@ -40,6 +41,7 @@ class Smaccer extends PluginBase {
 
 	private const CONFIG_VERSION = 1.1;
 
+	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;
 	private EmoteManager $emoteManager;
 
@@ -79,18 +81,29 @@ class Smaccer extends PluginBase {
 		$this->getServer()->getCommandMap()->register('Smaccer', new SmaccerCommand($this, 'smaccer', 'Smaccer commands.'));
 
 		$this->getServer()->getPluginManager()->registerEvents(new EventHandler(), $this);
+
+		if ($this->updateNotifierEnabled) {
+			UpdateNotifier::checkUpdate($this->getDescription()->getName(), $this->getDescription()->getVersion());
+		}
 	}
 
 	/**
 	 * Loads and validates the plugin configuration from the `config.yml` file.
 	 * If the configuration is invalid, an exception will be thrown.
 	 *
-	 * @throws \InvalidArgumentException when the configuration is invalid
+	 * @throws InvalidArgumentException when the configuration is invalid
 	 */
 	private function loadConfig() : void {
 		$this->checkConfig();
 
 		$config = $this->getConfig();
+
+		$updateNotifierEnabled = $config->get('update_notifier');
+		if (!is_bool($updateNotifierEnabled)) {
+			throw new InvalidArgumentException('Invalid or missing "update_notifier" value in the configuration. Please provide a boolean (true/false) value.');
+		}
+
+		$this->updateNotifierEnabled = $updateNotifierEnabled;
 
 		/**
 		 * @var array{
