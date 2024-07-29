@@ -28,6 +28,7 @@ class NPCDefaultSettings {
 		private float $emoteCooldownValue,
 		private bool $actionEmoteCooldownEnabled,
 		private float $actionEmoteCooldownValue,
+		private bool $gravityEnabled,
 	) {}
 
 	public function isCommandCooldownEnabled() : bool {
@@ -72,5 +73,9 @@ class NPCDefaultSettings {
 
 	public function getActionEmoteCooldownValue() : float {
 		return $this->actionEmoteCooldownValue;
+	}
+
+	public function isGravityEnabled() : bool {
+		return $this->gravityEnabled;
 	}
 }

@@ -38,7 +38,7 @@ use function is_numeric;
 class Smaccer extends PluginBase {
 	use SingletonTrait;
 
-	private const CONFIG_VERSION = 1.0;
+	private const CONFIG_VERSION = 1.1;
 
 	private NPCDefaultSettings $npcDefaultSettings;
 	private EmoteManager $emoteManager;
@@ -157,6 +157,11 @@ class Smaccer extends PluginBase {
 
 		$actionEmoteCooldownValue = (float) $actionEmoteCooldownValue;
 
+		$gravityEnabled = $npcSettings['gravity']['enabled'] ?? null;
+		if (!isset($gravityEnabled) || !is_bool($gravityEnabled)) {
+			throw new InvalidArgumentException("Invalid gravity settings. 'enabled' must be a boolean.");
+		}
+
 		$this->npcDefaultSettings = new NPCDefaultSettings(
 			$commandCooldownEnabled,
 			$commandCooldownValue,
@@ -168,7 +173,8 @@ class Smaccer extends PluginBase {
 			$emoteCooldownEnabled,
 			$emoteCooldownValue,
 			$actionEmoteCooldownEnabled,
-			$actionEmoteCooldownValue
+			$actionEmoteCooldownValue,
+			$gravityEnabled
 		);
 	}
 

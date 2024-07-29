@@ -142,6 +142,7 @@ final class FormManager {
 		$rotationEnabled = $settings->isRotationEnabled();
 		$nametagVisible = $settings->isNametagVisible();
 		$defaultVisibility = $settings->getEntityVisibility()->value;
+		$gravityEnabled = $settings->isGravityEnabled();
 
 		$formElements = [
 			new Input('Enter NPC name tag', 'NPC Name', ''),
@@ -149,6 +150,7 @@ final class FormManager {
 			new Toggle('Enable rotation?', $rotationEnabled),
 			new Toggle('Set name tag visible', $nametagVisible),
 			new StepSlider('Select visibility', array_values(EntityVisibility::getAll()), $defaultVisibility),
+			new Toggle('Enable gravity?', $gravityEnabled),
 		];
 
 		if (is_a($entityClass, EntityAgeable::class, true)) {
@@ -183,8 +185,9 @@ final class FormManager {
 		$rotationEnabled = $values[2];
 		$nameTagVisible = $values[3];
 		$visibility = $values[4];
+		$gravityEnabled = $values[5];
 
-		if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility)) {
+		if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility) || !is_bool($gravityEnabled)) {
 			$player->sendMessage(TextFormat::RED . 'Invalid form values.');
 			return;
 		}
@@ -202,9 +205,10 @@ final class FormManager {
 			->setScale($scale)
 			->setRotationEnabled($rotationEnabled)
 			->setNametagVisible($nameTagVisible)
-			->setVisibility($visibilityEnum);
+			->setVisibility($visibilityEnum)
+			->setHasGravity($gravityEnabled);
 
-		$index = 5;
+		$index = 6;
 
 		if (is_a($entityClass, EntityAgeable::class, true) && isset($values[$index])) {
 			$isBaby = (bool) $values[$index];
@@ -349,6 +353,7 @@ final class FormManager {
 			new Toggle('Enable rotation?', $npc->canRotateToPlayers()),
 			new Toggle('Set name tag visible', $npc->isNameTagVisible()),
 			new StepSlider('Select visibility', $visibilityValues, $defaultVisibilityIndex !== false ? (int) $defaultVisibilityIndex : $defaultVisibility),
+			new Toggle('Enable gravity?', $npc->hasGravity()),
 		];
 
 		if ($npc instanceof EntityAgeable) {
@@ -371,8 +376,9 @@ final class FormManager {
 					$rotationEnabled = $values[2];
 					$nameTagVisible = $values[3];
 					$visibility = $values[4];
+					$gravityEnabled = $values[5];
 
-					if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility)) {
+					if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility) || !is_bool($gravityEnabled)) {
 						$player->sendMessage(TextFormat::RED . 'Invalid form values.');
 						return;
 					}
@@ -390,9 +396,10 @@ final class FormManager {
 						->setScale($scale)
 						->setRotationEnabled($rotationEnabled)
 						->setNametagVisible($nameTagVisible)
-						->setVisibility($visibilityEnum);
+						->setVisibility($visibilityEnum)
+						->setHasGravity($gravityEnabled);
 
-					$index = 5;
+					$index = 6;
 
 					if ($npc instanceof EntityAgeable && isset($values[$index])) {
 						$isBaby = (bool) $values[$index];

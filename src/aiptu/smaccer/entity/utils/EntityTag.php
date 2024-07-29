@@ -26,4 +26,5 @@ class EntityTag {
 	public const SLAP_BACK = 'SlapBack';
 	public const ACTION_EMOTE = 'ActionEmote';
 	public const EMOTE = 'Emote';
+	public const GRAVITY = 'Gravity';
 }
