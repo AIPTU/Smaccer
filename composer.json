@@ -5,6 +5,7 @@
     "type": "project",
     "require": {
         "frago9876543210/forms": "dev-master",
+        "ifera-mc/update-notifier": "dev-master",
         "paroxity/commando": "^3.2",
         "pocketmine/pocketmine-mp": "^5.15"
     },
@@ -12,6 +13,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/AIPTU/forms"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ifera-mc/UpdateNotifier.git"
         }
     ],
     "autoload": {

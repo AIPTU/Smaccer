@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "18b374b3595a8f9d27f102ed479d796a",
+    "content-hash": "b82ce5176493d6801e3d436e2b2d0c58",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -164,6 +164,59 @@
                 "source": "https://github.com/AIPTU/forms/tree/master"
             },
             "time": "2024-07-29T11:46:02+00:00"
+        },
+        {
+            "name": "ifera-mc/update-notifier",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ifera-mc/UpdateNotifier.git",
+                "reference": "dbbd0515ee2c450f7d1d54e9305cd0e2d3ef2981"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ifera-mc/UpdateNotifier/zipball/dbbd0515ee2c450f7d1d54e9305cd0e2d3ef2981",
+                "reference": "dbbd0515ee2c450f7d1d54e9305cd0e2d3ef2981",
+                "shasum": ""
+            },
+            "require": {
+                "pocketmine/pocketmine-mp": "^4.0.0 || ^5.0.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.0",
+                    "namespace-root": "JackMD\\UpdateNotifier"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "license": [
+                "LGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "JackMD",
+                    "email": "jackmtaylor.jmt@gmail.com"
+                },
+                {
+                    "name": "Ifera",
+                    "email": "contact@tayyab.dev"
+                },
+                {
+                    "name": "Sandertv",
+                    "email": "st.ten.veldhuis@gmail.com"
+                }
+            ],
+            "description": "A handy virion for PocketMine-MP plugin developers that checks if a new release for a plugin is available on Poggit. If so then it notifies the user about the new release.",
+            "support": {
+                "source": "https://github.com/ifera-mc/UpdateNotifier/tree/master"
+            },
+            "time": "2024-05-12T07:20:47+00:00"
         },
         {
             "name": "muqsit/simple-packet-handler",
@@ -1381,7 +1434,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "frago9876543210/forms": 20
+        "frago9876543210/forms": 20,
+        "ifera-mc/update-notifier": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

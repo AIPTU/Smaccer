@@ -3,6 +3,9 @@
 # Do not change this (Only for internal use)!
 config-version: 1.1
 
+# Enable or disable the auto update checker notifier.
+update_notifier: true
+
 # Default settings for NPCs.
 npc-default-settings:
   # Cooldown settings for NPC commands.
