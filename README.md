@@ -56,7 +56,10 @@ Smaccer offers a customizable configuration to tailor the NPC settings to your p
 # Smaccer Configuration
 
 # Do not change this (Only for internal use)!
-config-version: 1.0
+config-version: 1.1
+
+# Enable or disable the auto update checker notifier.
+update_notifier: true
 
 # Default settings for NPCs.
 npc-default-settings:
@@ -108,6 +111,11 @@ npc-default-settings:
   actionEmoteCooldown:
     enabled: true
     value: 5
+
+  # Gravity settings for NPCs.
+  # - enabled: Whether gravity is enabled or not.
+  gravity:
+    enabled: true
 
 ```
 
