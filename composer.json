@@ -7,7 +7,7 @@
         "frago9876543210/forms": "dev-master",
         "ifera-mc/update-notifier": "dev-master",
         "paroxity/commando": "^3.2",
-        "pocketmine/pocketmine-mp": "^5.15"
+        "pocketmine/pocketmine-mp": "^5.16"
     },
     "repositories": [
         {
