@@ -49,8 +49,6 @@ abstract class EntitySmaccer extends Entity {
 		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
 		$this->initializeVisibility($nbt);
 		$this->setHasGravity((bool) $nbt->getByte(EntityTag::GRAVITY, 1));
-
-		$this->setNoClientPredictions();
 	}
 
 	public function saveNBT() : CompoundTag {
@@ -74,10 +72,18 @@ abstract class EntitySmaccer extends Entity {
 	abstract public function getName() : string;
 
 	protected function getInitialDragMultiplier() : float {
-		return 0.00;
+		return 0.02;
 	}
 
 	protected function getInitialGravity() : float {
-		return 0.00;
+		return 0.08;
+	}
+
+	public function setHasGravity(bool $v = true) : void{
+		parent::setHasGravity($v);
+
+		$this->networkPropertiesDirty = true;
+
+		$this->setForceMovementUpdate();
 	}
 }

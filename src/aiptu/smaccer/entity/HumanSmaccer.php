@@ -80,4 +80,12 @@ class HumanSmaccer extends Human {
 	public function getName() : string {
 		return 'Human';
 	}
+
+	public function setHasGravity(bool $v = true) : void {
+		parent::setHasGravity($v);
+
+		$this->networkPropertiesDirty = true;
+
+		$this->setForceMovementUpdate();
+	}
 }
