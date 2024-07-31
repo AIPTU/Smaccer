@@ -171,12 +171,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ifera-mc/UpdateNotifier.git",
-                "reference": "dbbd0515ee2c450f7d1d54e9305cd0e2d3ef2981"
+                "reference": "da9a187fedc0811afb0a0b264b31f933fe4e6a43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ifera-mc/UpdateNotifier/zipball/dbbd0515ee2c450f7d1d54e9305cd0e2d3ef2981",
-                "reference": "dbbd0515ee2c450f7d1d54e9305cd0e2d3ef2981",
+                "url": "https://api.github.com/repos/ifera-mc/UpdateNotifier/zipball/da9a187fedc0811afb0a0b264b31f933fe4e6a43",
+                "reference": "da9a187fedc0811afb0a0b264b31f933fe4e6a43",
                 "shasum": ""
             },
             "require": {
@@ -216,7 +216,7 @@
             "support": {
                 "source": "https://github.com/ifera-mc/UpdateNotifier/tree/master"
             },
-            "time": "2024-05-12T07:20:47+00:00"
+            "time": "2024-07-29T20:17:07+00:00"
         },
         {
             "name": "muqsit/simple-packet-handler",
