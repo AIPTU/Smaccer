@@ -28,6 +28,7 @@ use pocketmine\utils\SingletonTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
+use Throwable;
 use function is_bool;
 use function is_int;
 use function is_numeric;
@@ -35,7 +36,7 @@ use function is_numeric;
 class Smaccer extends PluginBase {
 	use SingletonTrait;
 
-	private const CONFIG_VERSION = 1.1;
+	private const float CONFIG_VERSION = 1.1;
 
 	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;
@@ -52,7 +53,7 @@ class Smaccer extends PluginBase {
 
 		try {
 			$this->loadConfig();
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 			$this->getLogger()->error('An error occurred while loading the configuration: ' . $e->getMessage());
 			throw new DisablePluginException();
 		}

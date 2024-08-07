@@ -13,14 +13,15 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\utils;
 
+use InvalidArgumentException;
 use function count;
 use function in_array;
 use function strtolower;
 
 class Queue {
-	public const ACTION_EDIT = 'edit';
-	public const ACTION_DELETE = 'delete';
-	public const ACTION_RETRIEVE = 'retrieve';
+	public const string ACTION_EDIT = 'edit';
+	public const string ACTION_DELETE = 'delete';
+	public const string ACTION_RETRIEVE = 'retrieve';
 
 	private static array $queues = [];
 	private static array $validActions = [self::ACTION_EDIT, self::ACTION_DELETE, self::ACTION_RETRIEVE];
@@ -32,12 +33,12 @@ class Queue {
 	public static function addToQueue(string $playerName, string $action) : bool {
 		$playerName = strtolower($playerName);
 		if (!self::isValidAction($action)) {
-			throw new \InvalidArgumentException("Invalid action: {$action}");
+			throw new InvalidArgumentException("Invalid action: $action");
 		}
 
 		foreach (self::$validActions as $validAction) {
 			if ($validAction !== $action && self::isInQueue($playerName, $validAction)) {
-				throw new \InvalidArgumentException("Player '{$playerName}' is already in the queue with action {$validAction}");
+				throw new InvalidArgumentException("Player '$playerName' is already in the queue with action $validAction");
 			}
 		}
 
@@ -52,7 +53,7 @@ class Queue {
 	public static function isInQueue(string $playerName, string $action) : bool {
 		$playerName = strtolower($playerName);
 		if (!self::isValidAction($action)) {
-			throw new \InvalidArgumentException("Invalid action: {$action}");
+			throw new InvalidArgumentException("Invalid action: $action");
 		}
 
 		return isset(self::$queues[$playerName][$action]);
@@ -61,7 +62,7 @@ class Queue {
 	public static function removeFromQueue(string $playerName, string $action) : bool {
 		$playerName = strtolower($playerName);
 		if (!self::isValidAction($action)) {
-			throw new \InvalidArgumentException("Invalid action: {$action}");
+			throw new InvalidArgumentException("Invalid action: $action");
 		}
 
 		if (self::isInQueue($playerName, $action)) {

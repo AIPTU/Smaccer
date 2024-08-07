@@ -26,9 +26,9 @@ class NPCVisibilityChangeEvent extends EntityEvent implements Cancellable {
 	use CancellableTrait;
 
 	public function __construct(
-		protected Entity $entity,
-		private EntityVisibility $oldVisibility,
-		private EntityVisibility $newVisibility
+		protected Entity                  $entity,
+		private readonly EntityVisibility $oldVisibility,
+		private EntityVisibility          $newVisibility
 	) {}
 
 	public function getOldVisibility() : EntityVisibility {

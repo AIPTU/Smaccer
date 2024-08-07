@@ -32,6 +32,7 @@ use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\TextFormat;
+use Throwable;
 
 class CreateSubCommand extends BaseSubCommand {
 	/** @param list<string> $aliases */
@@ -97,7 +98,7 @@ class CreateSubCommand extends BaseSubCommand {
 					}
 				}
 			},
-			function (\Throwable $e) use ($sender) : void {
+			function (Throwable $e) use ($sender) : void {
 				$sender->sendMessage(TextFormat::RED . 'Failed to spawn npc: ' . $e->getMessage());
 			}
 		);
@@ -111,7 +112,7 @@ class CreateSubCommand extends BaseSubCommand {
 			Permissions::COMMAND_CREATE_OTHERS,
 		]);
 
-		$this->registerArgument(0, new EntityTypeArgument('entity'));
+		$this->registerArgument(0, new EntityTypeArgument());
 		$this->registerArgument(1, new RawStringArgument('nametag', true));
 		$this->registerArgument(2, new FloatArgument('scale', true));
 		$this->registerArgument(3, new BooleanArgument('isBaby', true));

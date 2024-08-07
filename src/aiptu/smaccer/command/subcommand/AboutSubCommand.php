@@ -33,7 +33,7 @@ class AboutSubCommand extends BaseSubCommand {
 		parent::__construct($plugin, $name, $description, $aliases);
 	}
 
-	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
+	public function onRun(CommandSender $sender) : void {
 		/** @var Smaccer $plugin */
 		$plugin = $this->plugin;
 

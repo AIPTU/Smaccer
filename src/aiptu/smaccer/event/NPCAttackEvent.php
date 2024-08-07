@@ -23,8 +23,8 @@ class NPCAttackEvent extends PlayerEvent implements Cancellable {
 	use CancellableTrait;
 
 	public function __construct(
-		protected Player $player,
-		private Entity $entity,
+		protected Player        $player,
+		private readonly Entity $entity,
 	) {}
 
 	public function getEntity() : Entity {

@@ -61,6 +61,6 @@ class ReloadSubCommand extends BaseSubCommand {
 			Permissions::COMMAND_RELOAD_EMOTES,
 		]);
 
-		$this->registerArgument(0, new ReloadTypeArgument('reloadType'));
+		$this->registerArgument(0, new ReloadTypeArgument());
 	}
 }

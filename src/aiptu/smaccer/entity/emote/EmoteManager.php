@@ -69,7 +69,7 @@ class EmoteManager {
 	 *
 	 * @return bool Returns `true` when the title is the same as the one listed and `false` when the title is Unique
 	 */
-	public function ensureUniqueTitle(string $title) {
+	public function ensureUniqueTitle(string $title): bool {
 		foreach ($this->emotes as $emote) {
 			if ($emote->getTitle() === $title) {
 				return true;

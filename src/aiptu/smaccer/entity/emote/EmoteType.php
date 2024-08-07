@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\emote;
 
-class EmoteType {
+readonly class EmoteType {
 	public function __construct(
 		private string $uuid,
 		private string $title,

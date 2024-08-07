@@ -16,16 +16,20 @@ namespace aiptu\smaccer\tasks;
 use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\EmoteUtils;
+use JsonException;
 use pocketmine\scheduler\AsyncTask;
 use RuntimeException;
 use function is_array;
 
 class LoadEmotesTask extends AsyncTask {
 	public function __construct(
-		private string $cachedFilePath
+		private readonly string $cachedFilePath
 	) {}
 
-	public function onRun() : void {
+    /**
+     * @throws JsonException
+     */
+    public function onRun() : void {
 		$currentCommitId = EmoteUtils::getCurrentCommitId();
 		$cachedFile = EmoteUtils::getEmotesFromCache($this->cachedFilePath);
 

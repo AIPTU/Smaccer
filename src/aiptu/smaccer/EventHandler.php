@@ -32,6 +32,7 @@ use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
+use Throwable;
 use function atan2;
 use function rad2deg;
 use function sqrt;
@@ -165,7 +166,7 @@ class EventHandler implements Listener {
 					function (bool $success) use ($damager, $npcId, $entity) : void {
 						$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
 					},
-					function (\Throwable $e) use ($damager) : void {
+					function (Throwable $e) use ($damager) : void {
 						$damager->sendMessage(TextFormat::RED . 'Failed to despawn NPC: ' . $e->getMessage());
 					}
 				);

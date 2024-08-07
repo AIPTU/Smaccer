@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\utils;
 
+use InvalidArgumentException;
 use function array_column;
 use function array_map;
 use function strtolower;
@@ -23,7 +24,7 @@ enum EntityVisibility : int {
 	case INVISIBLE_TO_EVERYONE = 2;
 
 	public static function fromInt(int $value) : self {
-		return self::tryFrom($value) ?? throw new \InvalidArgumentException("Invalid visibility value: {$value}");
+		return self::tryFrom($value) ?? throw new InvalidArgumentException("Invalid visibility value: $value");
 	}
 
 	public static function fromString(string $value) : self {
@@ -35,7 +36,7 @@ enum EntityVisibility : int {
 			}
 		}
 
-		throw new \InvalidArgumentException("Invalid visibility string: {$value}");
+		throw new InvalidArgumentException("Invalid visibility string: $value");
 	}
 
 	public static function getAll() : array {

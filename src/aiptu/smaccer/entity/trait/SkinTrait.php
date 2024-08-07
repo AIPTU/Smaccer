@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\trait;
 
+use JsonException;
 use pocketmine\entity\Skin;
 
 trait SkinTrait {
-	public function changeSkin(string $skinData) : void {
+    /**
+     * @throws JsonException
+     */
+    public function changeSkin(string $skinData) : void {
 		$this->setSkin(new Skin(
 			$this->getSkin()->getSkinId(),
 			$skinData,
@@ -27,7 +31,10 @@ trait SkinTrait {
 		$this->sendSkin();
 	}
 
-	public function changeCape(string $capeData) : void {
+    /**
+     * @throws JsonException
+     */
+    public function changeCape(string $capeData) : void {
 		$this->setSkin(new Skin(
 			$this->getSkin()->getSkinId(),
 			$this->getSkin()->getSkinData(),

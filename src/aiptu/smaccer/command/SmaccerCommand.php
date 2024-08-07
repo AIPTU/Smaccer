@@ -45,7 +45,7 @@ class SmaccerCommand extends BaseCommand {
 		parent::__construct($plugin, $name, $description, $aliases);
 	}
 
-	public function onRun(CommandSender $sender, string $commandLabel, array $args) : void {
+	public function onRun(CommandSender $sender, array $args) : void {
 		if (!$sender instanceof Player) {
 			throw new AssumptionFailedError(InGameRequiredConstraint::class . ' should have prevented this');
 		}
@@ -54,9 +54,7 @@ class SmaccerCommand extends BaseCommand {
 			FormManager::sendMainMenu($sender, function (Player $player, string $entityType) : void {
 				FormManager::sendCreateNPCForm($player, $entityType, [FormManager::class, 'handleCreateNPCResponse']);
 			});
-
-			return;
-		}
+        }
 	}
 
 	public function prepare() : void {

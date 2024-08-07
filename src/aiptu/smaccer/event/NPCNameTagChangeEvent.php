@@ -25,9 +25,9 @@ class NPCNameTagChangeEvent extends EntityEvent implements Cancellable {
 	use CancellableTrait;
 
 	public function __construct(
-		protected Entity $entity,
-		private string $oldNameTag,
-		private string $newNameTag
+		protected Entity        $entity,
+		private readonly string $oldNameTag,
+		private string          $newNameTag
 	) {}
 
 	public function getOldNameTag() : string {

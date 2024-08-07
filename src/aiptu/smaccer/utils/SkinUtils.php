@@ -16,9 +16,12 @@ namespace aiptu\smaccer\utils;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\promise\Promise;
 use aiptu\smaccer\utils\promise\PromiseResolver;
-use pocketmine\entity\Skin;
+use GdImage;
+use InvalidArgumentException;
 use pocketmine\utils\Filesystem;
+use RuntimeException;
 use Symfony\Component\Filesystem\Path;
+use Throwable;
 use function chr;
 use function imagecolorat;
 use function imagecreatefrompng;
@@ -32,8 +35,8 @@ use function uniqid;
 use function unlink;
 
 class SkinUtils {
-	private const SKIN = 'skin';
-	private const CAPE = 'cape';
+	private const string SKIN = 'skin';
+	private const string CAPE = 'cape';
 
 	/**
 	 * Downloads a skin from a URL and returns the skin bytes in a promise.
@@ -42,7 +45,7 @@ class SkinUtils {
 	 *
 	 * @return Promise<string> a promise that resolves to the skin bytes
 	 *
-	 * @throws \InvalidArgumentException if the URL is invalid or not a PNG
+	 * @throws InvalidArgumentException if the URL is invalid or not a PNG
 	 */
 	public static function skinFromURL(string $url) : Promise {
 		$resolver = new PromiseResolver();
@@ -53,7 +56,7 @@ class SkinUtils {
 
 			Utils::fetchAsync($url, function ($result) use ($resolver) : void {
 				if ($result === null) {
-					$resolver->reject(new \RuntimeException('Failed to download skin.'));
+					$resolver->reject(new RuntimeException('Failed to download skin.'));
 					return;
 				}
 
@@ -63,7 +66,7 @@ class SkinUtils {
 				$skinBytes = self::skinFromFile($filePath);
 				$resolver->resolve($skinBytes);
 			});
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 			$resolver->reject($e);
 		}
 
@@ -77,7 +80,7 @@ class SkinUtils {
 	 *
 	 * @return Promise<string> a promise that resolves to the cape bytes
 	 *
-	 * @throws \InvalidArgumentException if the URL is invalid or not a PNG
+	 * @throws InvalidArgumentException if the URL is invalid or not a PNG
 	 */
 	public static function capeFromURL(string $url) : Promise {
 		$resolver = new PromiseResolver();
@@ -88,7 +91,7 @@ class SkinUtils {
 
 			Utils::fetchAsync($url, function ($result) use ($resolver) : void {
 				if ($result === null) {
-					$resolver->reject(new \RuntimeException('Failed to download cape.'));
+					$resolver->reject(new RuntimeException('Failed to download cape.'));
 					return;
 				}
 
@@ -98,7 +101,7 @@ class SkinUtils {
 				$capeBytes = self::capeFromFile($filePath);
 				$resolver->resolve($capeBytes);
 			});
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 			$resolver->reject($e);
 		}
 
@@ -112,7 +115,7 @@ class SkinUtils {
 	 *
 	 * @return string the skin bytes
 	 *
-	 * @throws \RuntimeException if the file is not a valid PNG skin
+	 * @throws RuntimeException if the file is not a valid PNG skin
 	 */
 	public static function skinFromFile(string $filePath) : string {
 		return self::processPngFile($filePath, self::SKIN);
@@ -125,7 +128,7 @@ class SkinUtils {
 	 *
 	 * @return string the cape bytes
 	 *
-	 * @throws \RuntimeException if the file is not a valid PNG cape
+	 * @throws RuntimeException if the file is not a valid PNG cape
 	 */
 	public static function capeFromFile(string $filePath) : string {
 		return self::processPngFile($filePath, self::CAPE);
@@ -135,7 +138,7 @@ class SkinUtils {
 		$image = imagecreatefrompng($filePath);
 		if ($image === false) {
 			self::cleanupFile($filePath);
-			throw new \RuntimeException("The file is not a valid PNG {$type}.");
+			throw new RuntimeException("The file is not a valid PNG $type.");
 		}
 
 		if (!imageistruecolor($image)) {
@@ -154,11 +157,11 @@ class SkinUtils {
 	 *
 	 * @param string $url the URL to validate
 	 *
-	 * @throws \InvalidArgumentException if the URL format is invalid
+	 * @throws InvalidArgumentException if the URL format is invalid
 	 */
 	private static function validateUrl(string $url) : void {
 		if (!Utils::isValidUrl($url)) {
-			throw new \InvalidArgumentException('Invalid URL format.');
+			throw new InvalidArgumentException('Invalid URL format.');
 		}
 	}
 
@@ -167,11 +170,11 @@ class SkinUtils {
 	 *
 	 * @param string $url the URL to validate
 	 *
-	 * @throws \InvalidArgumentException if the URL does not point to a PNG image
+	 * @throws InvalidArgumentException if the URL does not point to a PNG image
 	 */
 	private static function validatePngUrl(string $url) : void {
 		if (!Utils::isPngUrl($url)) {
-			throw new \InvalidArgumentException('URL does not point to a PNG image.');
+			throw new InvalidArgumentException('URL does not point to a PNG image.');
 		}
 	}
 
@@ -182,26 +185,26 @@ class SkinUtils {
 	 *
 	 * @return string the file path where the image data was saved
 	 *
-	 * @throws \RuntimeException if there is an error saving the image data
+	 * @throws RuntimeException if there is an error saving the image data
 	 */
 	private static function saveSkinToFile(string $data) : string {
 		$filePath = Path::join(Smaccer::getInstance()->getDataFolder(), uniqid('skin_', true) . '.png');
 		try {
 			Filesystem::safeFilePutContents($filePath, $data);
 			return $filePath;
-		} catch (\RuntimeException $e) {
-			throw new \RuntimeException('An error occurred while saving the skin file: ' . $e->getMessage());
+		} catch (RuntimeException $e) {
+			throw new RuntimeException('An error occurred while saving the skin file: ' . $e->getMessage());
 		}
 	}
 
 	/**
 	 * Extracts the bytes from a GD image resource for skin.
 	 *
-	 * @param \GdImage $image the GD image resource
+	 * @param GdImage $image the GD image resource
 	 *
 	 * @return string the extracted skin bytes
 	 */
-	private static function extractSkinBytes(\GdImage $image) : string {
+	private static function extractSkinBytes(GdImage $image) : string {
 		$bytes = '';
 		for ($y = 0; $y < imagesy($image); ++$y) {
 			for ($x = 0; $x < imagesx($image); ++$x) {
@@ -220,11 +223,11 @@ class SkinUtils {
 	/**
 	 * Extracts the bytes from a GD image resource for cape.
 	 *
-	 * @param \GdImage $image the GD image resource
+	 * @param GdImage $image the GD image resource
 	 *
 	 * @return string the extracted cape bytes
 	 */
-	private static function extractCapeBytes(\GdImage $image) : string {
+	private static function extractCapeBytes(GdImage $image) : string {
 		$bytes = '';
 		for ($y = 0; $y < imagesy($image); ++$y) {
 			for ($x = 0; $x < imagesx($image); ++$x) {

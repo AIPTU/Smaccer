@@ -102,6 +102,7 @@ use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\promise\Promise;
 use aiptu\smaccer\utils\promise\PromiseResolver;
 use aiptu\smaccer\utils\Utils;
+use InvalidArgumentException;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
@@ -116,6 +117,7 @@ use pocketmine\player\Player;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
 use pocketmine\world\World;
+use RuntimeException;
 use function array_merge;
 use function is_a;
 use function is_subclass_of;
@@ -223,7 +225,7 @@ class SmaccerHandler {
 
 	private function registerEntity(string $type, string $entityClass) : void {
 		if (!is_subclass_of($entityClass, Entity::class)) {
-			throw new \InvalidArgumentException("Class {$entityClass} must be a subclass of " . Entity::class);
+			throw new InvalidArgumentException("Class $entityClass must be a subclass of " . Entity::class);
 		}
 
 		$registerFunction = function (World $world, CompoundTag $nbt) use ($entityClass) : Entity {
@@ -259,7 +261,7 @@ class SmaccerHandler {
 		}
 
 		if (!is_subclass_of($entityClass, Entity::class)) {
-			throw new \InvalidArgumentException("Class {$entityClass} must be a subclass of " . Entity::class);
+			throw new InvalidArgumentException("Class $entityClass must be a subclass of " . Entity::class);
 		}
 
 		$createFunction = function (Location $location, CompoundTag $nbt) use ($entityClass) {
@@ -323,7 +325,7 @@ class SmaccerHandler {
 
 		$entityClass = $this->getNPC($type);
 		if ($entityClass === null) {
-			$resolver->reject(new \InvalidArgumentException("Invalid NPC type: {$type}"));
+			$resolver->reject(new InvalidArgumentException("Invalid NPC type: $type"));
 			return $promise;
 		}
 
@@ -365,7 +367,7 @@ class SmaccerHandler {
 
 		$entity = $this->createEntity($type, $pos, $nbt);
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			$resolver->reject(new \RuntimeException("Failed to create NPC entity: {$type}"));
+			$resolver->reject(new RuntimeException("Failed to create NPC entity: $type"));
 			return $promise;
 		}
 
@@ -401,7 +403,7 @@ class SmaccerHandler {
 		$ev = new NPCSpawnEvent($entity);
 		$ev->call();
 		if ($ev->isCancelled()) {
-			$resolver->reject(new \RuntimeException('NPC spawn event was cancelled'));
+			$resolver->reject(new RuntimeException('NPC spawn event was cancelled'));
 			return $promise;
 		}
 
@@ -422,14 +424,14 @@ class SmaccerHandler {
 		$entityId = $entity->getId();
 
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
+			$resolver->reject(new InvalidArgumentException('Invalid entity type'));
 			return $promise;
 		}
 
 		$ev = new NPCDespawnEvent($entity);
 		$ev->call();
 		if ($ev->isCancelled()) {
-			$resolver->reject(new \RuntimeException('NPC despawn event was cancelled'));
+			$resolver->reject(new RuntimeException('NPC despawn event was cancelled'));
 			return $promise;
 		}
 
@@ -448,14 +450,14 @@ class SmaccerHandler {
 		$promise = $resolver->getPromise();
 
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
+			$resolver->reject(new InvalidArgumentException('Invalid entity type'));
 			return $promise;
 		}
 
 		$ev = new NPCUpdateEvent($entity, $npcData);
 		$ev->call();
 		if ($ev->isCancelled()) {
-			$resolver->reject(new \RuntimeException('NPC update event was cancelled'));
+			$resolver->reject(new RuntimeException('NPC update event was cancelled'));
 			return $promise;
 		}
 

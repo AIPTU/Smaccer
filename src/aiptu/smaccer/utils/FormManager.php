@@ -35,6 +35,7 @@ use frago9876543210\forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
+use Throwable;
 use function array_keys;
 use function array_map;
 use function array_merge;
@@ -50,18 +51,18 @@ use function min;
 use function ucfirst;
 
 final class FormManager {
-	public const ITEMS_PER_PAGE = 10;
-	public const ACTION_DELETE = 'delete';
-	public const ACTION_EDIT = 'edit';
-	public const TELEPORT_NPC_TO_PLAYER = 'npc_to_player';
-	public const TELEPORT_PLAYER_TO_NPC = 'player_to_npc';
-	public const ARMOR_ALL = 'all_armor';
-	public const ARMOR_HELMET = 'helmet';
-	public const ARMOR_CHESTPLATE = 'chestplate';
-	public const ARMOR_LEGGINGS = 'leggings';
-	public const ARMOR_BOOTS = 'boots';
-	public const PREVIOUS_PAGE = 'Previous Page';
-	public const NEXT_PAGE = 'Next Page';
+	public const int ITEMS_PER_PAGE = 10;
+	public const string ACTION_DELETE = 'delete';
+	public const string ACTION_EDIT = 'edit';
+	public const string TELEPORT_NPC_TO_PLAYER = 'npc_to_player';
+	public const string TELEPORT_PLAYER_TO_NPC = 'player_to_npc';
+	public const string ARMOR_ALL = 'all_armor';
+	public const string ARMOR_HELMET = 'helmet';
+	public const string ARMOR_CHESTPLATE = 'chestplate';
+	public const string ARMOR_LEGGINGS = 'leggings';
+	public const string ARMOR_BOOTS = 'boots';
+	public const string PREVIOUS_PAGE = 'Previous Page';
+	public const string NEXT_PAGE = 'Next Page';
 
 	public static function sendMainMenu(Player $player, callable $onSubmit) : void {
 		$form = MenuForm::withOptions(
@@ -100,7 +101,7 @@ final class FormManager {
 		$end = min($start + self::ITEMS_PER_PAGE, count($entityTypes));
 
 		$buttons = array_map(
-			fn ($type) => new Button($type, Image::url("https://raw.githubusercontent.com/AIPTU/Smaccer/assets/faces/{$type}.png")),
+			fn ($type) => new Button($type, Image::url("https://raw.githubusercontent.com/AIPTU/Smaccer/assets/faces/$type.png")),
 			array_slice($entityTypes, $start, self::ITEMS_PER_PAGE)
 		);
 
@@ -220,7 +221,6 @@ final class FormManager {
 			if (isset($values[$index])) {
 				$enableSlapback = (bool) $values[$index];
 				$npcData->setSlapBack($enableSlapback);
-				++$index;
 			}
 		}
 
@@ -230,7 +230,7 @@ final class FormManager {
 					$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getId());
 				}
 			},
-			function (\Throwable $e) use ($player) : void {
+			function (Throwable $e) use ($player) : void {
 				$player->sendMessage(TextFormat::RED . 'Failed to spawn npc: ' . $e->getMessage());
 			}
 		);
@@ -241,7 +241,7 @@ final class FormManager {
 			new CustomForm(
 				'Select NPC',
 				[
-					new Input("Enter the ID of the NPC to {$action}", 'NPC ID', ''),
+					new Input("Enter the ID of the NPC to $action", 'NPC ID', ''),
 				],
 				function (Player $player, CustomFormResponse $response) use ($action) : void {
 					$npcId = (int) $response->getInput()->getValue();
@@ -259,7 +259,7 @@ final class FormManager {
 					};
 
 					if (!$npc->isOwnedBy($player) && !$hasPermission) {
-						$player->sendMessage(TextFormat::RED . "You don't have permission to {$action} this entity!");
+						$player->sendMessage(TextFormat::RED . "You don't have permission to $action this entity!");
 						return;
 					}
 
@@ -284,10 +284,10 @@ final class FormManager {
 				"Are you sure you want to delete NPC: {$npc->getName()}?",
 				function (Player $player) use ($npc) : void {
 					SmaccerHandler::getInstance()->despawnNPC($npc->getCreatorId(), $npc)->onCompletion(
-						function (bool $success) use ($player, $npc) : void {
+						function () use ($player, $npc) : void {
 							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getId() . ' despawned successfully.');
 						},
-						function (\Throwable $e) use ($player) : void {
+						function (Throwable $e) use ($player) : void {
 							$player->sendMessage(TextFormat::RED . 'Failed to despawn npc: ' . $e->getMessage());
 						}
 					);
@@ -411,7 +411,6 @@ final class FormManager {
 						if (isset($values[$index])) {
 							$enableSlapback = (bool) $values[$index];
 							$npcData->setSlapBack($enableSlapback);
-							++$index;
 						}
 					}
 
@@ -419,7 +418,7 @@ final class FormManager {
 						function (bool $success) use ($player, $npc) : void {
 							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' updated successfully!');
 						},
-						function (\Throwable $e) use ($player) : void {
+						function (Throwable $e) use ($player) : void {
 							$player->sendMessage(TextFormat::RED . 'Failed to edit NPC: ' . $e->getMessage());
 						}
 					);
@@ -527,7 +526,7 @@ final class FormManager {
 		$player->sendForm(
 			MenuForm::withOptions(
 				'Edit or Remove Command',
-				"Command: {$command} (Type: {$type})",
+				"Command: $command (Type: $type)",
 				[
 					'Edit',
 					'Remove',
@@ -626,7 +625,7 @@ final class FormManager {
 					if ($selectedPlayer !== null) {
 						if ($action === self::TELEPORT_NPC_TO_PLAYER) {
 							$npc->teleport($selectedPlayer->getLocation());
-							$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been teleported to {$selectedPlayerName}'s location.");
+							$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been teleported to $selectedPlayerName's location.");
 						} elseif ($action === self::TELEPORT_PLAYER_TO_NPC) {
 							$player->teleport($npc->getLocation());
 							$player->sendMessage(TextFormat::GREEN . "You have been teleported to NPC {$npc->getName()}'s location.");
@@ -834,7 +833,7 @@ final class FormManager {
 					if ($selectedPlayer !== null) {
 						$npc->setSkin($selectedPlayer->getSkin());
 						$npc->sendSkin();
-						$player->sendMessage(TextFormat::GREEN . "Skin updated for NPC {$npc->getName()} from player {$selectedPlayerName}.");
+						$player->sendMessage(TextFormat::GREEN . "Skin updated for NPC {$npc->getName()} from player $selectedPlayerName.");
 					} else {
 						$player->sendMessage(TextFormat::RED . 'Player not found.');
 					}
@@ -864,7 +863,7 @@ final class FormManager {
 							$npc->changeSkin($skinBytes);
 							$player->sendMessage(TextFormat::GREEN . "Skin updated for NPC {$npc->getName()} from URL.");
 						},
-						function (\Throwable $e) use ($player) : void {
+						function (Throwable $e) use ($player) : void {
 							$player->sendMessage(TextFormat::RED . 'Failed to update skin from URL: ' . $e->getMessage());
 						}
 					);
@@ -894,7 +893,7 @@ final class FormManager {
 							$npc->changeCape($capeBytes);
 							$player->sendMessage(TextFormat::GREEN . "Cape updated for NPC {$npc->getName()} from URL.");
 						},
-						function (\Throwable $e) use ($player) : void {
+						function (Throwable $e) use ($player) : void {
 							$player->sendMessage(TextFormat::RED . 'Failed to update cape from URL: ' . $e->getMessage());
 						}
 					);
@@ -933,9 +932,7 @@ final class FormManager {
 	}
 
 	public static function equipArmorPiece(Player $player, HumanSmaccer $npc, string $piece) : void {
-		$armorInventory = $player->getArmorInventory();
-
-		switch ($piece) {
+        switch ($piece) {
 			case self::ARMOR_HELMET:
 				$npc->setHelmet($player);
 				break;

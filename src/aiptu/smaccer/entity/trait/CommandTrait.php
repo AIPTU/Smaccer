@@ -17,6 +17,7 @@ use aiptu\smaccer\entity\command\CommandHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
+use InvalidArgumentException;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
@@ -96,7 +97,7 @@ trait CommandTrait {
 		match ($type) {
 			EntityTag::COMMAND_TYPE_SERVER => $commandMap->dispatch(new ConsoleCommandSender($server, $server->getLanguage()), $command),
 			EntityTag::COMMAND_TYPE_PLAYER => $commandMap->dispatch($player, $command),
-			default => throw new \InvalidArgumentException("Invalid command type: {$type}")
+			default => throw new InvalidArgumentException("Invalid command type: $type")
 		};
 	}
 

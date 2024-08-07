@@ -22,6 +22,7 @@ use aiptu\smaccer\utils\Queue;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\BaseSubCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
+use InvalidArgumentException;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
@@ -54,7 +55,7 @@ class EditSubCommand extends BaseSubCommand {
 				} else {
 					$sender->sendMessage(TextFormat::RED . 'You are already in the queue!');
 				}
-			} catch (\InvalidArgumentException $e) {
+			} catch (InvalidArgumentException $e) {
 				$sender->sendMessage(TextFormat::RED . $e->getMessage());
 			}
 

@@ -26,7 +26,7 @@ use function spl_object_id;
  *
  * @phpstan-template TValue
  */
-final class Promise {
+final readonly class Promise {
 	/**
 	 * @internal Do not call this directly; create a new {@see PromiseResolver} and call {@see PromiseResolver::getPromise()}
 	 *

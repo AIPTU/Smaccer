@@ -17,10 +17,10 @@ use CortexPE\Commando\args\StringEnumArgument;
 use pocketmine\command\CommandSender;
 
 class ReloadTypeArgument extends StringEnumArgument {
-	public const CONFIG = 'config';
-	public const EMOTES = 'emotes';
+	public const string CONFIG = 'config';
+	public const string EMOTES = 'emotes';
 
-	protected const VALUES = [
+	protected const array VALUES = [
 		'config' => self::CONFIG,
 		'emotes' => self::EMOTES,
 	];

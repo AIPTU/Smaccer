@@ -17,18 +17,18 @@ use aiptu\smaccer\entity\utils\EntityVisibility;
 
 class NPCDefaultSettings {
 	public function __construct(
-		private bool $commandCooldownEnabled,
-		private float $commandCooldownValue,
-		private bool $rotationEnabled,
-		private float $maxDistance,
-		private bool $nametagVisible,
-		private EntityVisibility $entityVisibility,
-		private bool $slapEnabled,
-		private bool $emoteCooldownEnabled,
-		private float $emoteCooldownValue,
-		private bool $actionEmoteCooldownEnabled,
-		private float $actionEmoteCooldownValue,
-		private bool $gravityEnabled,
+		private readonly bool             $commandCooldownEnabled,
+		private readonly float            $commandCooldownValue,
+		private readonly bool             $rotationEnabled,
+		private readonly float            $maxDistance,
+		private readonly bool             $nametagVisible,
+		private readonly EntityVisibility $entityVisibility,
+		private readonly bool             $slapEnabled,
+		private readonly bool             $emoteCooldownEnabled,
+		private readonly float            $emoteCooldownValue,
+		private readonly bool             $actionEmoteCooldownEnabled,
+		private readonly float            $actionEmoteCooldownValue,
+		private readonly bool             $gravityEnabled,
 	) {}
 
 	public function isCommandCooldownEnabled() : bool {
