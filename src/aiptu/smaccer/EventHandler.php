@@ -58,9 +58,7 @@ class EventHandler implements Listener {
 
 	public function onQuit(PlayerQuitEvent $event) : void {
 		$player = $event->getPlayer();
-		$playerName = $player->getName();
-
-		Queue::removeFromAllQueues($playerName);
+		Queue::removeFromAllQueues($player->getName());
 	}
 
 	public function onMove(PlayerMoveEvent $event) : void {
@@ -76,16 +74,13 @@ class EventHandler implements Listener {
 		$boundingBox = $player->getBoundingBox()->expandedCopy($maxLookDistance, $maxLookDistance, $maxLookDistance);
 
 		foreach ($world->getNearbyEntities($boundingBox, $player) as $entity) {
-			if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
+			if (($entity instanceof HumanSmaccer || $entity instanceof EntitySmaccer) && $entity->canRotateToPlayers()) {
 				$visibility = $entity->getVisibility();
 				$creator = $entity->getCreator();
+
 				if ($visibility === EntityVisibility::INVISIBLE_TO_EVERYONE
 					|| ($visibility === EntityVisibility::VISIBLE_TO_CREATOR && ($creator === null || $creator !== $player))) {
 					continue;
-				}
-
-				if (!$entity->canRotateToPlayers()) {
-					return;
 				}
 
 				$entityLocation = $entity->getLocation();
@@ -105,7 +100,7 @@ class EventHandler implements Listener {
 	public function onEffectAdd(EntityEffectAddEvent $event) : void {
 		$entity = $event->getEntity();
 
-		if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
+		if ($entity instanceof HumanSmaccer || $entity instanceof EntitySmaccer) {
 			$event->cancel();
 		}
 	}
@@ -118,15 +113,9 @@ class EventHandler implements Listener {
 		$damager = $event->getDamager();
 		$entity = $event->getEntity();
 
-		if (!($entity instanceof HumanSmaccer || $entity instanceof EntitySmaccer)) {
-			return;
-		}
-
-		if ($entity->getVisibility() === EntityVisibility::INVISIBLE_TO_EVERYONE) {
-			return;
-		}
-
-		if (!$damager instanceof Player) {
+		if (!($entity instanceof HumanSmaccer || $entity instanceof EntitySmaccer)
+			|| $entity->getVisibility() === EntityVisibility::INVISIBLE_TO_EVERYONE
+			|| !$damager instanceof Player) {
 			return;
 		}
 
@@ -150,25 +139,25 @@ class EventHandler implements Listener {
 			case Queue::ACTION_EDIT:
 				if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_EDIT_OTHERS)) {
 					$damager->sendMessage(TextFormat::RED . "You don't have permission to edit this entity!");
-					break;
+				} else {
+					FormManager::sendEditMenuForm($damager, $entity);
 				}
 
-				FormManager::sendEditMenuForm($damager, $entity);
 				break;
 			case Queue::ACTION_DELETE:
 				if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
 					$damager->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
-					break;
+				} else {
+					SmaccerHandler::getInstance()->despawnNPC($entity->getCreatorId(), $entity)->onCompletion(
+						function (bool $success) use ($damager, $npcId, $entity) : void {
+							$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
+						},
+						function (\Throwable $e) use ($damager) : void {
+							$damager->sendMessage(TextFormat::RED . 'Failed to despawn NPC: ' . $e->getMessage());
+						}
+					);
 				}
 
-				SmaccerHandler::getInstance()->despawnNPC($entity->getCreatorId(), $entity)->onCompletion(
-					function (bool $success) use ($damager, $npcId, $entity) : void {
-						$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
-					},
-					function (\Throwable $e) use ($damager) : void {
-						$damager->sendMessage(TextFormat::RED . 'Failed to despawn NPC: ' . $e->getMessage());
-					}
-				);
 				break;
 			case Queue::ACTION_RETRIEVE:
 				$damager->sendMessage(TextFormat::GREEN . 'NPC Entity ID: ' . $npcId);

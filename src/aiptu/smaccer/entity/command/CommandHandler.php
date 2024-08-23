@@ -76,6 +76,10 @@ class CommandHandler {
 			return false;
 		}
 
+		if (str_starts_with($newCommand, '/')) {
+			$newCommand = substr($newCommand, 1);
+		}
+
 		$existingId = $this->getIdByCommandAndType($newCommand, $newType);
 		if ($existingId !== null && $existingId !== $id) {
 			return false;

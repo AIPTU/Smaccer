@@ -79,7 +79,7 @@ abstract class EntitySmaccer extends Entity {
 		return 0.08;
 	}
 
-	public function setHasGravity(bool $v = true) : void{
+	public function setHasGravity(bool $v = true) : void {
 		parent::setHasGravity($v);
 
 		$this->networkPropertiesDirty = true;
