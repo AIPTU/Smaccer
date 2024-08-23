@@ -1,0 +1,54 @@
+name: Smaccer
+main: aiptu\smaccer\Smaccer
+version: 1.0.1
+api: [5.16.0]
+author: AIPTU
+permissions:
+  smaccer.bypass.cooldown:
+    description: Allows players to bypass cooldown.
+    default: op
+  smaccer.command.about:
+    description: Allows players to displays information about the plugin (/smaccer about).
+    default: op
+  smaccer.command.create.self:
+    description: Allows players to create their own entities (/smaccer create).
+    default: op
+  smaccer.command.create.others:
+    description: Allows players to create entities owned by others (/smaccer create).
+    default: op
+  smaccer.command.delete.self:
+    description: Allows players to delete their own entities (/smaccer delete).
+    default: op
+  smaccer.command.delete.others:
+    description: Allows players to delete entities owned by others (/smaccer delete).
+    default: op
+  smaccer.command.edit.self:
+    description: Allows players to edit their own entities (/smaccer edit).
+    default: op
+  smaccer.command.edit.others:
+    description: Allows players to edit entities owned by others (/smaccer edit).
+    default: op
+  smaccer.command.id:
+    description: Allows players to retrieve entity IDs (/smaccer id).
+    default: op
+  smaccer.command.list:
+    description: Allows players to list all entities in the worlds (/smaccer list).
+    default: op
+  smaccer.command.move.self:
+    description: Allows players to move an entity to themselves (/smaccer move).
+    default: op
+  smaccer.command.move.others:
+    description: Allows players to move an entity to another player (/smaccer move).
+    default: op
+  smaccer.command.reload.config:
+    description: Allows players to reload the configuration (/smaccer reload).
+    default: op
+  smaccer.command.reload.emotes:
+    description: Allows players to teleport to reload the emotes (/smaccer reload).
+    default: op
+  smaccer.command.teleport.self:
+    description: Allows players to teleport to an entity (/smaccer teleport).
+    default: op
+  smaccer.command.teleport.others:
+    description: Allows players to teleport other players to an entity (/smaccer teleport).
+    default: op
