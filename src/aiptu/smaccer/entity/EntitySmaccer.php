@@ -16,6 +16,7 @@ namespace aiptu\smaccer\entity;
 use aiptu\smaccer\entity\trait\CommandTrait;
 use aiptu\smaccer\entity\trait\CreatorTrait;
 use aiptu\smaccer\entity\trait\NametagTrait;
+use aiptu\smaccer\entity\trait\QueryTrait;
 use aiptu\smaccer\entity\trait\RotationTrait;
 use aiptu\smaccer\entity\trait\VisibilityTrait;
 use aiptu\smaccer\entity\utils\EntityTag;
@@ -30,6 +31,7 @@ abstract class EntitySmaccer extends Entity {
 	use RotationTrait;
 	use VisibilityTrait;
 	use CommandTrait;
+	use QueryTrait;
 
 	public function __construct(Location $location, ?CompoundTag $nbt = null) {
 		if ($nbt instanceof CompoundTag) {
@@ -49,6 +51,7 @@ abstract class EntitySmaccer extends Entity {
 		$this->setNameTagVisible((bool) $nbt->getByte(EntityTag::NAMETAG_VISIBLE, 1));
 		$this->initializeVisibility($nbt);
 		$this->setHasGravity((bool) $nbt->getByte(EntityTag::GRAVITY, 1));
+		$this->initializeQuery($nbt);
 	}
 
 	public function saveNBT() : CompoundTag {
@@ -61,6 +64,7 @@ abstract class EntitySmaccer extends Entity {
 		$nbt->setByte(EntityTag::NAMETAG_VISIBLE, (int) $this->isNameTagVisible());
 		$this->saveVisibility($nbt);
 		$nbt->setByte(EntityTag::GRAVITY, (int) $this->hasGravity());
+		$this->saveQuery($nbt);
 
 		return $nbt;
 	}

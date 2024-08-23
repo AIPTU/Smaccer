@@ -15,7 +15,7 @@ namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_cc950a265aa2bdb4\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_556c929d5ead4b8c\CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;

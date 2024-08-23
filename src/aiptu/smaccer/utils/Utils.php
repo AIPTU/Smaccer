@@ -27,6 +27,9 @@ use function preg_match;
 use function preg_replace;
 use function preg_split;
 use function str_replace;
+use const FILTER_FLAG_HOSTNAME;
+use const FILTER_VALIDATE_DOMAIN;
+use const FILTER_VALIDATE_IP;
 use const FILTER_VALIDATE_URL;
 use const PREG_SPLIT_NO_EMPTY;
 
@@ -83,6 +86,34 @@ class Utils {
 
 	public static function isValidUrl(string $url) : bool {
 		return filter_var($url, FILTER_VALIDATE_URL) !== false;
+	}
+
+	/**
+	 * Validates the IP address or host name format.
+	 */
+	public static function isValidIpOrDomain(string $ipOrDomain) : bool {
+		return self::isValidIp($ipOrDomain) || self::isValidDomain($ipOrDomain);
+	}
+
+	/**
+	 * Validates the IP address format.
+	 */
+	public static function isValidIp(string $ip) : bool {
+		return filter_var($ip, FILTER_VALIDATE_IP) !== false;
+	}
+
+	/**
+	 * Validates the host name format.
+	 */
+	public static function isValidDomain(string $host) : bool {
+		return filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
+	}
+
+	/**
+	 * Validates the port number.
+	 */
+	public static function isValidPort(int $port) : bool {
+		return $port > 0 && $port <= 65535;
 	}
 
 	public static function isPngUrl(string $url) : bool {
