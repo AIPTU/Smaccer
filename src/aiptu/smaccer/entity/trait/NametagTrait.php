@@ -52,9 +52,7 @@ trait NametagTrait {
 	}
 
 	public function applyNametag(?string $nametag, Player $player) : string {
-		if ($nametag === null) {
-			$nametag = $this->getNameTag();
-		}
+		$nametag ??= $this->getNameTag();
 
 		$vars = [
 			'{player}' => $player->getName(),

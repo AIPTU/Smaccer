@@ -31,15 +31,21 @@ use Symfony\Component\Filesystem\Path;
 use function is_bool;
 use function is_int;
 use function is_numeric;
+use function is_string;
 
 class Smaccer extends PluginBase {
 	use SingletonTrait;
 
-	private const CONFIG_VERSION = 1.1;
+	private const CONFIG_VERSION = 1.2;
 
 	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;
 	private EmoteManager $emoteManager;
+
+	private string $worldMessageFormat;
+	private string $worldNotLoadedFormat;
+	private string $serverOnlineFormat;
+	private string $serverOfflineFormat;
 
 	protected function onEnable() : void {
 		self::setInstance($this);
@@ -85,6 +91,34 @@ class Smaccer extends PluginBase {
 		}
 
 		$this->updateNotifierEnabled = $updateNotifierEnabled;
+
+		$worldMessageFormat = $config->get('world_message_format');
+		if (!is_string($worldMessageFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'world_message_format'. Expected a string.");
+		}
+
+		$this->worldMessageFormat = $worldMessageFormat;
+
+		$worldNotLoadedFormat = $config->get('world_not_loaded_format');
+		if (!is_string($worldNotLoadedFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'world_not_loaded_format'. Expected a string.");
+		}
+
+		$this->worldNotLoadedFormat = $worldNotLoadedFormat;
+
+		$serverOnlineFormat = $config->get('server_online_format');
+		if (!is_string($serverOnlineFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'server_online_format'. Expected a string.");
+		}
+
+		$this->serverOnlineFormat = $serverOnlineFormat;
+
+		$serverOfflineFormat = $config->get('server_offline_format');
+		if (!is_string($serverOfflineFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'server_offline_format'. Expected a string.");
+		}
+
+		$this->serverOfflineFormat = $serverOfflineFormat;
 
 		/**
 		 * @var array{
@@ -222,5 +256,21 @@ class Smaccer extends PluginBase {
 
 	public function setEmoteManager(EmoteManager $emoteManager) : void {
 		$this->emoteManager = $emoteManager;
+	}
+
+	public function getWorldMessageFormat() : string {
+		return $this->worldMessageFormat;
+	}
+
+	public function getWorldNotLoadedFormat() : string {
+		return $this->worldNotLoadedFormat;
+	}
+
+	public function getServerOnlineFormat() : string {
+		return $this->serverOnlineFormat;
+	}
+
+	public function getServerOfflineFormat() : string {
+		return $this->serverOfflineFormat;
 	}
 }

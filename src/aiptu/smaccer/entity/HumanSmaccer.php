@@ -18,6 +18,7 @@ use aiptu\smaccer\entity\trait\CreatorTrait;
 use aiptu\smaccer\entity\trait\EmoteTrait;
 use aiptu\smaccer\entity\trait\InventoryTrait;
 use aiptu\smaccer\entity\trait\NametagTrait;
+use aiptu\smaccer\entity\trait\QueryTrait;
 use aiptu\smaccer\entity\trait\RotationTrait;
 use aiptu\smaccer\entity\trait\SkinTrait;
 use aiptu\smaccer\entity\trait\SlapBackTrait;
@@ -38,6 +39,7 @@ class HumanSmaccer extends Human {
 	use CommandTrait;
 	use InventoryTrait;
 	use SkinTrait;
+	use QueryTrait;
 
 	public function __construct(Location $location, Skin $skin, ?CompoundTag $nbt = null) {
 		if ($nbt instanceof CompoundTag) {
@@ -59,6 +61,7 @@ class HumanSmaccer extends Human {
 		$this->initializeSlapBack($nbt);
 		$this->initializeEmote($nbt);
 		$this->setHasGravity((bool) $nbt->getByte(EntityTag::GRAVITY, 1));
+		$this->initializeQuery($nbt);
 	}
 
 	public function saveNBT() : CompoundTag {
@@ -73,6 +76,7 @@ class HumanSmaccer extends Human {
 		$this->saveEmote($nbt);
 		$this->saveSlapBack($nbt);
 		$nbt->setByte(EntityTag::GRAVITY, (int) $this->hasGravity());
+		$this->saveQuery($nbt);
 
 		return $nbt;
 	}

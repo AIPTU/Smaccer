@@ -1,10 +1,38 @@
 # Smaccer Configuration
 
 # Do not change this (Only for internal use)!
-config-version: 1.1
+config-version: 1.2
 
 # Enable or disable the auto update checker notifier.
 update_notifier: true
+
+# World Query Message Formats
+# Customize how world information is displayed in the nametag.
+
+# When all specified worlds are loaded.
+# Placeholders:
+#   - {world_names}: Comma-separated list of loaded world names.
+#   - {count}: Total player count across loaded worlds.
+world_message_format: "§aWorlds: §b{world_names} §a| Players: §e{count}"
+
+# When some or all specified worlds are not loaded.
+# Placeholders:
+#   - {world_names}: Comma-separated list of loaded world names.
+#   - {not_loaded_worlds}: Comma-separated list of worlds not loaded.
+#   - {count}: Total player count across loaded worlds.
+world_not_loaded_format: "§cWorlds: §b{world_names} §c| Not Loaded: §7{not_loaded_worlds} §c| Players: §e{count}"
+
+# Server Query Message Formats
+# Customize how server information is displayed in the nametag.
+
+# When the server is online.
+# Placeholders:
+#   - {online}: Current number of players online.
+#   - {max_online}: Maximum number of players allowed online.
+server_online_format: "§aServer: §b{online}§a/§b{max_online} §aonline"
+
+# When the server is offline.
+server_offline_format: "§cServer: Offline"
 
 # Default settings for NPCs.
 npc-default-settings:

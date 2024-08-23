@@ -18,6 +18,7 @@ use aiptu\smaccer\entity\EntityAgeable;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\NPCData;
+use aiptu\smaccer\entity\query\QueryHandler;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
@@ -35,6 +36,7 @@ use frago9876543210\forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
+use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_merge;
@@ -45,6 +47,7 @@ use function count;
 use function implode;
 use function is_a;
 use function is_bool;
+use function is_numeric;
 use function is_string;
 use function min;
 use function ucfirst;
@@ -187,7 +190,7 @@ final class FormManager {
 		$visibility = $values[4];
 		$gravityEnabled = $values[5];
 
-		if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility) || !is_bool($gravityEnabled)) {
+		if (!is_string($nameTag) || !is_numeric($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility) || !is_bool($gravityEnabled)) {
 			$player->sendMessage(TextFormat::RED . 'Invalid form values.');
 			return;
 		}
@@ -309,17 +312,19 @@ final class FormManager {
 				'Commands',
 				'Teleport NPC to Player',
 				'Teleport Player to NPC',
+				'Query Settings',
 			],
 			fn (Player $player, Button $selected) => match ($selected->getValue()) {
 				0 => self::sendEditNPCForm($player, $npc),
 				1 => self::sendEditCommandsForm($player, $npc),
 				2 => self::sendTeleportOptionsForm($player, $npc, self::TELEPORT_NPC_TO_PLAYER),
 				3 => self::sendTeleportOptionsForm($player, $npc, self::TELEPORT_PLAYER_TO_NPC),
-				4 => self::handleEmoteSelection($player, $npc),
-				5 => self::sendEditSkinSettingsForm($player, $npc),
-				6 => self::sendArmorSettingsForm($player, $npc),
-				7 => self::equipHeldItem($player, $npc),
-				8 => self::equipOffHandItem($player, $npc),
+				4 => self::sendQueryManagementForm($player, $npc),
+				5 => self::handleEmoteSelection($player, $npc),
+				6 => self::sendEditSkinSettingsForm($player, $npc),
+				7 => self::sendArmorSettingsForm($player, $npc),
+				8 => self::equipHeldItem($player, $npc),
+				9 => self::equipOffHandItem($player, $npc),
 				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
 			}
 		);
@@ -378,7 +383,7 @@ final class FormManager {
 					$visibility = $values[4];
 					$gravityEnabled = $values[5];
 
-					if (!is_string($nameTag) || !is_string($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility) || !is_bool($gravityEnabled)) {
+					if (!is_string($nameTag) || !is_numeric($scaleStr) || !is_bool($rotationEnabled) || !is_bool($nameTagVisible) || !is_string($visibility) || !is_bool($gravityEnabled)) {
 						$player->sendMessage(TextFormat::RED . 'Invalid form values.');
 						return;
 					}
@@ -996,5 +1001,228 @@ final class FormManager {
 		}
 
 		$player->sendForm(new MenuForm('List NPCs', $content));
+	}
+
+	public static function sendQueryManagementForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$form = MenuForm::withOptions(
+			'Manage Queries',
+			'Select a query type:',
+			[
+				'Add Server Query',
+				'Add World Query',
+				'Edit/Remove Server Query',
+				'Edit/Remove World Query',
+			],
+			fn (Player $player, Button $selected) => match ($selected->text) {
+				'Add Server Query' => self::sendAddServerQueryForm($player, $npc),
+				'Add World Query' => self::sendAddWorldQueryForm($player, $npc),
+				'Edit/Remove Server Query' => self::sendEditRemoveQueryForm($player, $npc, QueryHandler::TYPE_SERVER),
+				'Edit/Remove World Query' => self::sendEditRemoveQueryForm($player, $npc, QueryHandler::TYPE_WORLD),
+				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+			}
+		);
+
+		$player->sendForm($form);
+	}
+
+	public static function sendAddServerQueryForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$player->sendForm(
+			new CustomForm(
+				'Add Server Query',
+				[
+					new Input('Enter IP/Domain', 'ip_or_domain'),
+					new Input('Enter Port', 'port'),
+				],
+				function (Player $player, CustomFormResponse $response) use ($npc) : void {
+					$values = $response->getValues();
+
+					$ipOrDomain = $values[0];
+					$port = $values[1];
+
+					if (!is_string($ipOrDomain) || !is_numeric($port)) {
+						$player->sendMessage(TextFormat::RED . 'Invalid form values.');
+						return;
+					}
+
+					if ($npc->getQueryHandler()->addServerQuery($ipOrDomain, (int) $port) !== null) {
+						$player->sendMessage(TextFormat::GREEN . "Server query added to NPC {$npc->getName()}.");
+					} else {
+						$player->sendMessage(TextFormat::RED . "Failed to add server query for NPC {$npc->getName()}.");
+					}
+				}
+			)
+		);
+	}
+
+	public static function sendAddWorldQueryForm(Player $player, Entity $npc) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$player->sendForm(
+			new CustomForm(
+				'Add World Query',
+				[
+					new Input('Enter world name', 'world_name'),
+				],
+				function (Player $player, CustomFormResponse $response) use ($npc) : void {
+					$worldName = $response->getInput()->getValue();
+
+					if ($npc->getQueryHandler()->addWorldQuery($worldName) !== null) {
+						$player->sendMessage(TextFormat::GREEN . "World query added to NPC {$npc->getName()}.");
+					} else {
+						$player->sendMessage(TextFormat::RED . "Failed to add world query for NPC {$npc->getName()}.");
+					}
+				}
+			)
+		);
+	}
+
+	public static function sendEditRemoveQueryForm(Player $player, Entity $npc, string $queryType) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$queries = $npc->getQueryHandler()->getAll();
+		$buttons = array_values(array_filter(array_map(
+			fn ($id, $data) => $queryType === $data['type']
+				? new Button(
+					$data['type'] === QueryHandler::TYPE_SERVER
+						? "IP: {$data['value']['ip']} Port: {$data['value']['port']}"
+						: "World: {$data['value']['world_name']}"
+				)
+				: null,
+			array_keys($queries),
+			$queries
+		)));
+
+		if (count($buttons) === 0) {
+			$player->sendMessage(TextFormat::RED . 'No queries found for the selected type.');
+			return;
+		}
+
+		$player->sendForm(
+			new MenuForm(
+				'Edit/Remove Query',
+				'Select a query to edit/remove:',
+				$buttons,
+				function (Player $player, Button $selected) use ($npc, $queries) : void {
+					$selectedText = $selected->text;
+					foreach ($queries as $id => $data) {
+						$expectedText = $data['type'] === QueryHandler::TYPE_SERVER
+							? "IP: {$data['value']['ip']} Port: {$data['value']['port']}"
+							: "World: {$data['value']['world_name']}";
+						if ($expectedText === $selectedText) {
+							self::handleQuerySelection($player, $npc, $id, $data['type'], $data['value']);
+							return;
+						}
+					}
+
+					$player->sendMessage(TextFormat::RED . 'Failed to match the selected query.');
+				}
+			)
+		);
+	}
+
+	public static function handleQuerySelection(Player $player, Entity $npc, int $queryId, string $queryType, array $queryValue) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$player->sendForm(
+			MenuForm::withOptions(
+				'Edit or Remove Query',
+				$queryType === QueryHandler::TYPE_SERVER
+					? "IP: {$queryValue['ip']} Port: {$queryValue['port']}"
+					: "World: {$queryValue['world_name']}",
+				[
+					'Edit',
+					'Remove',
+				],
+				fn (Player $player, Button $selected) => match ($selected->getValue()) {
+					0 => self::sendEditQueryForm($player, $npc, $queryId, $queryType, $queryValue),
+					1 => self::confirmRemoveQuery($player, $npc, $queryId),
+					default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+				}
+			)
+		);
+	}
+
+	public static function sendEditQueryForm(Player $player, Entity $npc, int $queryId, string $queryType, array $queryValue) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		if ($queryType === QueryHandler::TYPE_SERVER) {
+			$player->sendForm(
+				new CustomForm(
+					'Edit Server Query',
+					[
+						new Input('Edit IP/Domain', 'ip_or_domain', $queryValue['ip']),
+						new Input('Edit Port', 'port', (string) $queryValue['port']),
+					],
+					function (Player $player, CustomFormResponse $response) use ($npc, $queryId) : void {
+						$values = $response->getValues();
+
+						$newIpOrDomain = $values[0];
+						$newPort = $values[1];
+
+						if (!is_string($newIpOrDomain) || !is_numeric($newPort)) {
+							$player->sendMessage(TextFormat::RED . 'Invalid form values.');
+							return;
+						}
+
+						if ($npc->getQueryHandler()->editServerQuery($queryId, $newIpOrDomain, (int) $newPort)) {
+							$player->sendMessage(TextFormat::GREEN . "Server query updated for NPC {$npc->getName()}.");
+						} else {
+							$player->sendMessage(TextFormat::RED . "Failed to update server query for NPC {$npc->getName()}.");
+						}
+					}
+				)
+			);
+		} else {
+			$player->sendForm(
+				new CustomForm(
+					'Edit World Query',
+					[
+						new Input('Edit world name', 'world_name', $queryValue['world_name']),
+					],
+					function (Player $player, CustomFormResponse $response) use ($npc, $queryId) : void {
+						$newWorldName = $response->getInput()->getValue();
+
+						if ($npc->getQueryHandler()->editWorldQuery($queryId, $newWorldName)) {
+							$player->sendMessage(TextFormat::GREEN . "World query updated for NPC {$npc->getName()}.");
+						} else {
+							$player->sendMessage(TextFormat::RED . "Failed to update world query for NPC {$npc->getName()}.");
+						}
+					}
+				)
+			);
+		}
+	}
+
+	public static function confirmRemoveQuery(Player $player, Entity $npc, int $queryId) : void {
+		if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
+			return;
+		}
+
+		$player->sendForm(
+			ModalForm::confirm(
+				'Confirm Remove Query',
+				"Are you sure you want to remove this query from NPC: {$npc->getName()}?",
+				function (Player $player) use ($npc, $queryId) : void {
+					$npc->getQueryHandler()->removeById($queryId);
+					$player->sendMessage(TextFormat::GREEN . "Query removed from NPC {$npc->getName()}.");
+				}
+			)
+		);
 	}
 }

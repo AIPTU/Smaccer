@@ -12,6 +12,10 @@ Smaccer is a powerful and easy-to-use PocketMine-MP plugin designed for managing
 - **Teleport**: Quickly teleport to NPCs or move other players to NPCs.
 - **Customizable Configuration**: Tailor the plugin's settings to fit your needs without restarting the server.
 - **Manage Permissions**: Fine-tune permissions to control who can interact with and manage NPCs.
+- **Server Queries**: Check the status of remote servers, including player counts and server uptime.
+- **World Queries**: Monitor player counts and world statuses across multiple worlds.
+- **Customizable Messages**: Define and customize the display messages for server and world queries through configuration files.
+- **Asynchronous Tasks**: Perform server queries asynchronously to avoid blocking the main server thread.
 
 ## Commands
 
@@ -56,10 +60,38 @@ Smaccer offers a customizable configuration to tailor the NPC settings to your p
 # Smaccer Configuration
 
 # Do not change this (Only for internal use)!
-config-version: 1.1
+config-version: 1.2
 
 # Enable or disable the auto update checker notifier.
 update_notifier: true
+
+# World Query Message Formats
+# Customize how world information is displayed in the nametag.
+
+# When all specified worlds are loaded.
+# Placeholders:
+#   - {world_names}: Comma-separated list of loaded world names.
+#   - {count}: Total player count across loaded worlds.
+world_message_format: "§aWorlds: §b{world_names} §a| Players: §e{count}"
+
+# When some or all specified worlds are not loaded.
+# Placeholders:
+#   - {world_names}: Comma-separated list of loaded world names.
+#   - {not_loaded_worlds}: Comma-separated list of worlds not loaded.
+#   - {count}: Total player count across loaded worlds.
+world_not_loaded_format: "§cWorlds: §b{world_names} §c| Not Loaded: §7{not_loaded_worlds} §c| Players: §e{count}"
+
+# Server Query Message Formats
+# Customize how server information is displayed in the nametag.
+
+# When the server is online.
+# Placeholders:
+#   - {online}: Current number of players online.
+#   - {max_online}: Maximum number of players allowed online.
+server_online_format: "§aServer: §b{online}§a/§b{max_online} §aonline"
+
+# When the server is offline.
+server_offline_format: "§cServer: Offline"
 
 # Default settings for NPCs.
 npc-default-settings:
@@ -125,6 +157,7 @@ npc-default-settings:
 <img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image2.jpg" alt="" width="400" height="200">
 <img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image3.jpg" alt="" width="350" height="250">
 <img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image4.jpg" alt="" width="350" height="250">
+<img src="https://raw.githubusercontent.com/AIPTU/Smaccer/assets/image5.jpg" alt="" width="400" height="250">
 
 ## Upcoming Features
 
