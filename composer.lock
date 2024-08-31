@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4a3219896de3940a1cf60ff0626906bd",
+    "content-hash": "f66df34d2b84b023c20b7c971bf1b4d1",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -217,6 +217,87 @@
                 "source": "https://github.com/ifera-mc/UpdateNotifier/tree/master"
             },
             "time": "2024-07-29T20:17:07+00:00"
+        },
+        {
+            "name": "jasonw4331/libpmquery",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AIPTU/libpmquery.git",
+                "reference": "90b516f2e9caa8142fe4fd5be10927439b8799a9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AIPTU/libpmquery/zipball/90b516f2e9caa8142fe4fd5be10927439b8799a9",
+                "reference": "90b516f2e9caa8142fe4fd5be10927439b8799a9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4|^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.11",
+                "phpstan/extension-installer": "^1.3.0",
+                "phpstan/phpstan": "^1.10.14",
+                "phpstan/phpstan-strict-rules": "^1.5.1"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.0",
+                    "namespace-root": "jasonw4331\\libpmquery"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "jasonw4331\\libpmquery\\": "/src/jasonw4331/libpmquery"
+                }
+            },
+            "scripts": {
+                "make-baseline": [
+                    "@php ./vendor/bin/phpstan analyze -b phpstan-baseline.php -c phpstan.neon.dist --allow-empty-baseline"
+                ],
+                "fix-codestyle": [
+                    "@php ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --verbose --diff"
+                ]
+            },
+            "license": [
+                "lgpl-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "jasonw4331",
+                    "email": "jasonwynn10@gmail.com"
+                }
+            ],
+            "description": "A library for querying Minecraft Bedrock servers",
+            "support": {
+                "source": "https://github.com/AIPTU/libpmquery/tree/master"
+            },
+            "funding": [
+                {
+                    "type": "github",
+                    "url": "https://github.com/jasonwynn10 ] # Replace with up to 4 GitHub Sponsors-enabled usernames e.g."
+                },
+                {
+                    "type": "github",
+                    "url": "https://github.com/[user1"
+                },
+                {
+                    "type": "github",
+                    "url": "https://github.com/user2"
+                },
+                {
+                    "type": "patreon",
+                    "url": "https://www.patreon.com/jasonwynn10"
+                },
+                {
+                    "type": "custom",
+                    "url": "https://www.buymeacoffee.com/jasonwynn10"
+                }
+            ],
+            "time": "2024-08-23T12:33:53+00:00"
         },
         {
             "name": "muqsit/simple-packet-handler",
@@ -1435,7 +1516,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "frago9876543210/forms": 20,
-        "ifera-mc/update-notifier": 20
+        "ifera-mc/update-notifier": 20,
+        "jasonw4331/libpmquery": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
