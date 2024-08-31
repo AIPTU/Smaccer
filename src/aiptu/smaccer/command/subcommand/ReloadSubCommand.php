@@ -18,7 +18,7 @@ use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_5763a5124e0e1cee\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_80b352f36f658340\CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
