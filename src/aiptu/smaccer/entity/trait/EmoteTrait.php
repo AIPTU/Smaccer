@@ -52,8 +52,10 @@ trait EmoteTrait {
 	}
 
 	public function setActionEmote(?EmoteType $actionEmote) : void {
-		$this->actionEmote = $actionEmote;
-		$this->saveNBT();
+		if ($this->actionEmote !== $actionEmote) {
+			$this->actionEmote = $actionEmote;
+			$this->saveNBT();
+		}
 	}
 
 	public function getActionEmote() : ?EmoteType {
@@ -61,8 +63,10 @@ trait EmoteTrait {
 	}
 
 	public function setEmote(?EmoteType $emote) : void {
-		$this->emote = $emote;
-		$this->saveNBT();
+		if ($this->emote !== $emote) {
+			$this->emote = $emote;
+			$this->saveNBT();
+		}
 	}
 
 	public function getEmote() : ?EmoteType {
@@ -128,17 +132,12 @@ trait EmoteTrait {
 	protected function entityBaseTick(int $tickDiff = 1) : bool {
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
-		if ($this->getEmote() !== null) {
-			$emoteUuid = $this->getEmote()->getUuid();
+		if ($this->emote !== null) {
+			$emoteUuid = $this->emote->getUuid();
+			$cooldownEnabled = Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled();
 
-			if (Smaccer::getInstance()->getDefaultSettings()->isEmoteCooldownEnabled()) {
-				if ($this->canPerformEmote($emoteUuid)) {
-					$this->performEmote($emoteUuid);
-					$hasUpdate = true;
-				}
-			} else {
+			if (!$cooldownEnabled || $this->canPerformEmote($emoteUuid)) {
 				$this->performEmote($emoteUuid);
-				$hasUpdate = true;
 			}
 		}
 
