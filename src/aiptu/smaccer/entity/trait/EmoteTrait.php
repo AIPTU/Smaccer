@@ -20,8 +20,8 @@ use aiptu\smaccer\event\NPCPerformEmoteEvent;
 use aiptu\smaccer\Smaccer;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\EntityEventBroadcaster;
 use pocketmine\network\mcpe\NetworkBroadcastUtils;
-use pocketmine\network\mcpe\protocol\EmotePacket;
 use function microtime;
 
 trait EmoteTrait {
@@ -123,10 +123,11 @@ trait EmoteTrait {
 		$this->broadcastEmote($event->getActionEmote()->getUuid(), $targets);
 	}
 
-	private function broadcastEmote(string $emote, ?array $targets = null) : void {
-		NetworkBroadcastUtils::broadcastPackets($targets ?? $this->getViewers(), [
-			EmotePacket::create($this->getId(), $emote, '', '', EmotePacket::FLAG_MUTE_ANNOUNCEMENT),
-		]);
+	private function broadcastEmote(string $emoteId, ?array $targets = null) : void {
+		NetworkBroadcastUtils::broadcastEntityEvent(
+			$targets ?? $this->getViewers(),
+			fn (EntityEventBroadcaster $broadcaster, array $recipients) => $broadcaster->onEmote($recipients, $this, $emoteId)
+		);
 	}
 
 	protected function entityBaseTick(int $tickDiff = 1) : bool {
