@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace aiptu\smaccer\tasks;
 
 use aiptu\smaccer\entity\query\QueryInfo;
-use aiptu\smaccer\libs\_e5d7347506e8a218\jasonw4331\libpmquery\PMQuery;
-use aiptu\smaccer\libs\_e5d7347506e8a218\jasonw4331\libpmquery\PmQueryException;
+use aiptu\smaccer\libs\_7c8d132d3110d4be\jasonw4331\libpmquery\PMQuery;
+use aiptu\smaccer\libs\_7c8d132d3110d4be\jasonw4331\libpmquery\PmQueryException;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\scheduler\AsyncTask;
 use function is_array;

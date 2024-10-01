@@ -13,15 +13,16 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer;
 
+use aiptu\libplaceholder\PlaceholderManager;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
-use aiptu\smaccer\libs\_e5d7347506e8a218\CortexPE\Commando\PacketHooker;
+use aiptu\smaccer\libs\_7c8d132d3110d4be\CortexPE\Commando\PacketHooker;
 use InvalidArgumentException;
-use aiptu\smaccer\libs\_e5d7347506e8a218\JackMD\UpdateNotifier\UpdateNotifier;
+use aiptu\smaccer\libs\_7c8d132d3110d4be\JackMD\UpdateNotifier\UpdateNotifier;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
@@ -41,6 +42,8 @@ class Smaccer extends PluginBase {
 	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;
 	private EmoteManager $emoteManager;
+
+	private PlaceholderManager $placeholderManager;
 
 	private string $worldMessageFormat;
 	private string $worldNotLoadedFormat;
@@ -72,6 +75,8 @@ class Smaccer extends PluginBase {
 		if ($this->updateNotifierEnabled) {
 			UpdateNotifier::checkUpdate($this->getDescription()->getName(), $this->getDescription()->getVersion());
 		}
+
+		$this->placeholderManager = PlaceholderManager::getInstance()->init();
 	}
 
 	/**
@@ -256,6 +261,10 @@ class Smaccer extends PluginBase {
 
 	public function setEmoteManager(EmoteManager $emoteManager) : void {
 		$this->emoteManager = $emoteManager;
+	}
+
+	public function getPlaceholderManager() : PlaceholderManager {
+		return $this->placeholderManager;
 	}
 
 	public function getWorldMessageFormat() : string {

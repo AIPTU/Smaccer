@@ -13,11 +13,15 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\trait;
 
+use aiptu\libplaceholder\PlaceholderContext;
 use aiptu\smaccer\entity\query\QueryHandler;
 use aiptu\smaccer\entity\query\QueryInfo;
 use aiptu\smaccer\Smaccer;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
+use pocketmine\network\mcpe\protocol\types\entity\StringMetadataProperty;
+use function count;
 use function implode;
 use function strtok;
 use function usort;
@@ -54,13 +58,30 @@ trait QueryTrait {
 	public function onUpdate(int $currentTick) : bool {
 		$result = parent::onUpdate($currentTick);
 
-		$this->updateNameTag();
+		$nameTagUpdated = $this->updateNameTag();
 
-		return $result;
+		foreach ($this->hasSpawned as $player) {
+			$nameTag = $this->getNameTag();
+
+			$parsedNameTag = Smaccer::getInstance()->getPlaceholderManager()->parsePlaceholders(
+				$nameTag,
+				new PlaceholderContext($player)
+			);
+			$this->sendData(
+				[$player],
+				[EntityMetadataProperties::NAMETAG => new StringMetadataProperty($parsedNameTag)]
+			);
+		}
+
+		return $result || $nameTagUpdated;
 	}
 
-	public function updateNameTag() : void {
+	public function updateNameTag() : bool {
 		$queries = $this->queryHandler->getAll();
+		if (count($queries) === 0) {
+			return false;
+		}
+
 		$currentNameTag = $this->getNameTag();
 		$newNameTagParts = [];
 
@@ -97,7 +118,10 @@ trait QueryTrait {
 		$newNameTag = implode("\n", $newNameTagParts);
 		if ($newNameTag !== $currentNameTag) {
 			$this->setNameTag($newNameTag);
+			return true;
 		}
+
+		return false;
 	}
 
 	public function getQueryHandler() : QueryHandler {
