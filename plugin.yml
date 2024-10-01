@@ -1,6 +1,6 @@
 name: Smaccer
 main: aiptu\smaccer\Smaccer
-version: 1.0.4
+version: 1.0.5
 api: [5.16.0]
 author: AIPTU
 permissions:
