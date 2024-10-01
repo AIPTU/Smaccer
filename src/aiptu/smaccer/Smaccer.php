@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer;
 
+use aiptu\libplaceholder\PlaceholderManager;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\entity\SmaccerHandler;
@@ -41,6 +42,8 @@ class Smaccer extends PluginBase {
 	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;
 	private EmoteManager $emoteManager;
+
+	private PlaceholderManager $placeholderManager;
 
 	private string $worldMessageFormat;
 	private string $worldNotLoadedFormat;
@@ -72,6 +75,8 @@ class Smaccer extends PluginBase {
 		if ($this->updateNotifierEnabled) {
 			UpdateNotifier::checkUpdate($this->getDescription()->getName(), $this->getDescription()->getVersion());
 		}
+
+		$this->placeholderManager = PlaceholderManager::getInstance()->init();
 	}
 
 	/**
@@ -256,6 +261,10 @@ class Smaccer extends PluginBase {
 
 	public function setEmoteManager(EmoteManager $emoteManager) : void {
 		$this->emoteManager = $emoteManager;
+	}
+
+	public function getPlaceholderManager() : PlaceholderManager {
+		return $this->placeholderManager;
 	}
 
 	public function getWorldMessageFormat() : string {

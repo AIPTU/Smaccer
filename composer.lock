@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f66df34d2b84b023c20b7c971bf1b4d1",
+    "content-hash": "ac00b95f39c165514fd862fe537c1b0a",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -64,6 +64,46 @@
                 }
             ],
             "time": "2022-10-02T11:22:07+00:00"
+        },
+        {
+            "name": "aiptu/libplaceholder",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AIPTU/libplaceholder.git",
+                "reference": "99afc16093d4b43febdad445b16fe3626d897531"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AIPTU/libplaceholder/zipball/99afc16093d4b43febdad445b16fe3626d897531",
+                "reference": "99afc16093d4b43febdad445b16fe3626d897531",
+                "shasum": ""
+            },
+            "require": {
+                "pocketmine/pocketmine-mp": "^5.0"
+            },
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "namespace-root": "aiptu\\libplaceholder",
+                    "spec": "3.0"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "aiptu\\libplaceholder\\": "/src/aiptu/libplaceholder"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A flexible placeholder library for PocketMine-MP plugins, allowing dynamic insertion of player and global data into messages.",
+            "support": {
+                "issues": "https://github.com/AIPTU/libplaceholder/issues",
+                "source": "https://github.com/AIPTU/libplaceholder/tree/1.0.0"
+            },
+            "time": "2024-09-07T07:12:46+00:00"
         },
         {
             "name": "brick/math",

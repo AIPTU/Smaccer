@@ -370,7 +370,7 @@ class SmaccerHandler {
 		}
 
 		if ($nameTag !== null) {
-			$entity->setNameTag($entity->applyNametag($nameTag, $player));
+			$entity->setNameTag($nameTag);
 		}
 
 		$entity->setScale($scale);
@@ -396,7 +396,6 @@ class SmaccerHandler {
 
 		$entity->setVisibility($visibility);
 		$entity->setHasGravity($gravityEnabled);
-		$entity->sendData($entity->getViewers());
 
 		$ev = new NPCSpawnEvent($entity);
 		$ev->call();
@@ -471,7 +470,7 @@ class SmaccerHandler {
 		$gravityEnabled = $npcData->hasGravity();
 
 		if ($nameTag !== null) {
-			$entity->setNameTag($entity->applyNametag($nameTag, $player));
+			$entity->setNameTag($nameTag);
 		}
 
 		$entity->setScale($scale);
@@ -497,7 +496,6 @@ class SmaccerHandler {
 
 		$entity->setVisibility($visibility);
 		$entity->setHasGravity($gravityEnabled);
-		$entity->sendData($entity->getViewers());
 
 		$resolver->resolve(true);
 		return $promise;

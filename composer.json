@@ -8,7 +8,8 @@
         "ifera-mc/update-notifier": "dev-master",
         "jasonw4331/libpmquery": "dev-master",
         "paroxity/commando": "^3.2",
-        "pocketmine/pocketmine-mp": "^5.16"
+        "pocketmine/pocketmine-mp": "^5.16",
+        "aiptu/libplaceholder": "^1.0"
     },
     "repositories": [
         {
