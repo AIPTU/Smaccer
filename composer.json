@@ -4,12 +4,12 @@
     "license": "MIT",
     "type": "project",
     "require": {
+        "aiptu/libplaceholder": "^1.0",
         "frago9876543210/forms": "dev-master",
         "ifera-mc/update-notifier": "dev-master",
         "jasonw4331/libpmquery": "dev-master",
         "paroxity/commando": "^3.2",
-        "pocketmine/pocketmine-mp": "^5.16",
-        "aiptu/libplaceholder": "^1.0"
+        "pocketmine/pocketmine-mp": "^5.16"
     },
     "repositories": [
         {
