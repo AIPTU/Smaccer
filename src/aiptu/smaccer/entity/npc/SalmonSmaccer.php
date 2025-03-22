@@ -37,8 +37,4 @@ class SalmonSmaccer extends EntitySmaccer {
 	public function getName() : string {
 		return 'Salmon';
 	}
-
-	public function getBabyScale() : float {
-		return 1.5;
-	}
 }
