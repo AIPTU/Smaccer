@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024 AIPTU
+ * Copyright (c) 2024-2025 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -13,16 +13,16 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer;
 
-use aiptu\smaccer\libs\_34c901e48cdd0ce3\aiptu\libplaceholder\PlaceholderManager;
+use aiptu\smaccer\libs\_29f5cd4b60e216f2\aiptu\libplaceholder\PlaceholderManager;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
-use aiptu\smaccer\libs\_34c901e48cdd0ce3\CortexPE\Commando\PacketHooker;
+use aiptu\smaccer\libs\_29f5cd4b60e216f2\CortexPE\Commando\PacketHooker;
 use InvalidArgumentException;
-use aiptu\smaccer\libs\_34c901e48cdd0ce3\JackMD\UpdateNotifier\UpdateNotifier;
+use aiptu\smaccer\libs\_29f5cd4b60e216f2\JackMD\UpdateNotifier\UpdateNotifier;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;

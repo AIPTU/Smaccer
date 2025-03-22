@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024 AIPTU
+ * Copyright (c) 2024-2025 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -25,8 +25,8 @@ use aiptu\smaccer\command\subcommand\TeleportSubCommand;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\FormManager;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_34c901e48cdd0ce3\CortexPE\Commando\BaseCommand;
-use aiptu\smaccer\libs\_34c901e48cdd0ce3\CortexPE\Commando\constraint\InGameRequiredConstraint;
+use aiptu\smaccer\libs\_29f5cd4b60e216f2\CortexPE\Commando\BaseCommand;
+use aiptu\smaccer\libs\_29f5cd4b60e216f2\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
