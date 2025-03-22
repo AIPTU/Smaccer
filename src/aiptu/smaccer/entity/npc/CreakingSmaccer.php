@@ -17,28 +17,24 @@ use aiptu\smaccer\entity\EntitySmaccer;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
-class SalmonSmaccer extends EntitySmaccer {
+class CreakingSmaccer extends EntitySmaccer {
 	protected function getInitialSizeInfo() : EntitySizeInfo {
 		return new EntitySizeInfo($this->getHeight(), $this->getWidth());
 	}
 
 	public function getHeight() : float {
-		return 0.5;
+		return 2.7;
 	}
 
 	public function getWidth() : float {
-		return 0.5;
+		return 0.9;
 	}
 
 	public static function getNetworkTypeId() : string {
-		return EntityIds::SALMON;
+		return EntityIds::CREAKING;
 	}
 
 	public function getName() : string {
-		return 'Salmon';
-	}
-
-	public function getBabyScale() : float {
-		return 1.5;
+		return 'Creaking';
 	}
 }

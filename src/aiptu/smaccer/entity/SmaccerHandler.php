@@ -27,6 +27,7 @@ use aiptu\smaccer\entity\npc\CaveSpiderSmaccer;
 use aiptu\smaccer\entity\npc\ChickenSmaccer;
 use aiptu\smaccer\entity\npc\CodSmaccer;
 use aiptu\smaccer\entity\npc\CowSmaccer;
+use aiptu\smaccer\entity\npc\CreakingSmaccer;
 use aiptu\smaccer\entity\npc\CreeperSmaccer;
 use aiptu\smaccer\entity\npc\DolphinSmaccer;
 use aiptu\smaccer\entity\npc\DonkeySmaccer;
@@ -139,6 +140,7 @@ class SmaccerHandler {
 		'Chicken' => ChickenSmaccer::class,
 		'Cod' => CodSmaccer::class,
 		'Cow' => CowSmaccer::class,
+		'Creaking' => CreakingSmaccer::class,
 		'Creeper' => CreeperSmaccer::class,
 		'Dolphin' => DolphinSmaccer::class,
 		'Donkey' => DonkeySmaccer::class,
