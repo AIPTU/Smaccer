@@ -15,8 +15,8 @@ namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
-use aiptu\smaccer\libs\_29f5cd4b60e216f2\CortexPE\Commando\BaseSubCommand;
-use aiptu\smaccer\libs\_29f5cd4b60e216f2\CortexPE\Commando\constraint\InGameRequiredConstraint;
+use aiptu\smaccer\libs\_cc0cc57c7854fb8d\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_cc0cc57c7854fb8d\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;

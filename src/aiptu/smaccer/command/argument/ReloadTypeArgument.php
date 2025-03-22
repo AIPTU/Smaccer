@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\argument;
 
-use aiptu\smaccer\libs\_29f5cd4b60e216f2\CortexPE\Commando\args\StringEnumArgument;
+use aiptu\smaccer\libs\_cc0cc57c7854fb8d\CortexPE\Commando\args\StringEnumArgument;
 use pocketmine\command\CommandSender;
 
 class ReloadTypeArgument extends StringEnumArgument {
