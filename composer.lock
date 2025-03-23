@@ -551,16 +551,16 @@
         },
         {
             "name": "pocketmine/bedrock-protocol",
-            "version": "36.0.0+bedrock-1.21.60",
+            "version": "36.2.0+bedrock-1.21.60",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pmmp/BedrockProtocol.git",
-                "reference": "2057de319c5c551001c2a544e08d1bc7727d9963"
+                "reference": "6830e8a9ee9ecb6984b7b02f412473136ae92d50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pmmp/BedrockProtocol/zipball/2057de319c5c551001c2a544e08d1bc7727d9963",
-                "reference": "2057de319c5c551001c2a544e08d1bc7727d9963",
+                "url": "https://api.github.com/repos/pmmp/BedrockProtocol/zipball/6830e8a9ee9ecb6984b7b02f412473136ae92d50",
+                "reference": "6830e8a9ee9ecb6984b7b02f412473136ae92d50",
                 "shasum": ""
             },
             "require": {
@@ -591,9 +591,9 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/pmmp/BedrockProtocol/issues",
-                "source": "https://github.com/pmmp/BedrockProtocol/tree/36.0.0+bedrock-1.21.60"
+                "source": "https://github.com/pmmp/BedrockProtocol/tree/36.2.0+bedrock-1.21.60"
             },
-            "time": "2025-02-16T15:59:08+00:00"
+            "time": "2025-03-14T17:17:21+00:00"
         },
         {
             "name": "pocketmine/binaryutils",
@@ -871,16 +871,16 @@
         },
         {
             "name": "pocketmine/nbt",
-            "version": "1.0.1",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pmmp/NBT.git",
-                "reference": "53db37487bc5ddbfbd84247966e1a073bdcfdb7d"
+                "reference": "c3c7b0a7295daeaf7873d90fed5c5d10381d12e1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pmmp/NBT/zipball/53db37487bc5ddbfbd84247966e1a073bdcfdb7d",
-                "reference": "53db37487bc5ddbfbd84247966e1a073bdcfdb7d",
+                "url": "https://api.github.com/repos/pmmp/NBT/zipball/c3c7b0a7295daeaf7873d90fed5c5d10381d12e1",
+                "reference": "c3c7b0a7295daeaf7873d90fed5c5d10381d12e1",
                 "shasum": ""
             },
             "require": {
@@ -907,22 +907,22 @@
             "description": "PHP library for working with Named Binary Tags",
             "support": {
                 "issues": "https://github.com/pmmp/NBT/issues",
-                "source": "https://github.com/pmmp/NBT/tree/1.0.1"
+                "source": "https://github.com/pmmp/NBT/tree/1.1.1"
             },
-            "time": "2025-01-07T22:47:46+00:00"
+            "time": "2025-03-09T01:46:03+00:00"
         },
         {
             "name": "pocketmine/pocketmine-mp",
-            "version": "5.25.2",
+            "version": "5.26.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pmmp/PocketMine-MP.git",
-                "reference": "e8824a36b95b8a27927faa1b8d1ac4c6f3487649"
+                "reference": "f416cb8902eccc5e9053fe3189ee2bfc4d401a77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pmmp/PocketMine-MP/zipball/e8824a36b95b8a27927faa1b8d1ac4c6f3487649",
-                "reference": "e8824a36b95b8a27927faa1b8d1ac4c6f3487649",
+                "url": "https://api.github.com/repos/pmmp/PocketMine-MP/zipball/f416cb8902eccc5e9053fe3189ee2bfc4d401a77",
+                "reference": "f416cb8902eccc5e9053fe3189ee2bfc4d401a77",
                 "shasum": ""
             },
             "require": {
@@ -957,7 +957,7 @@
                 "pocketmine/bedrock-block-upgrade-schema": "~5.1.0+bedrock-1.21.60",
                 "pocketmine/bedrock-data": "~4.0.0+bedrock-1.21.60",
                 "pocketmine/bedrock-item-upgrade-schema": "~1.14.0+bedrock-1.21.50",
-                "pocketmine/bedrock-protocol": "~36.0.0+bedrock-1.21.60",
+                "pocketmine/bedrock-protocol": "~36.2.0+bedrock-1.21.60",
                 "pocketmine/binaryutils": "^0.2.1",
                 "pocketmine/callback-validator": "^1.0.2",
                 "pocketmine/color": "^0.3.0",
@@ -965,7 +965,7 @@
                 "pocketmine/locale-data": "~2.24.0",
                 "pocketmine/log": "^0.4.0",
                 "pocketmine/math": "~1.0.0",
-                "pocketmine/nbt": "~1.0.0",
+                "pocketmine/nbt": "~1.1.0",
                 "pocketmine/raklib": "~1.1.0",
                 "pocketmine/raklib-ipc": "~1.0.0",
                 "pocketmine/snooze": "^0.5.0",
@@ -973,7 +973,7 @@
                 "symfony/filesystem": "~6.4.0"
             },
             "require-dev": {
-                "phpstan/phpstan": "2.1.6",
+                "phpstan/phpstan": "2.1.8",
                 "phpstan/phpstan-phpunit": "^2.0.0",
                 "phpstan/phpstan-strict-rules": "^2.0.0",
                 "phpunit/phpunit": "^10.5.24"
@@ -995,7 +995,7 @@
             "homepage": "https://pmmp.io",
             "support": {
                 "issues": "https://github.com/pmmp/PocketMine-MP/issues",
-                "source": "https://github.com/pmmp/PocketMine-MP/tree/5.25.2"
+                "source": "https://github.com/pmmp/PocketMine-MP/tree/5.26.0"
             },
             "funding": [
                 {
@@ -1007,7 +1007,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2025-03-04T21:03:52+00:00"
+            "time": "2025-03-22T18:32:15+00:00"
         },
         {
             "name": "pocketmine/raklib",
