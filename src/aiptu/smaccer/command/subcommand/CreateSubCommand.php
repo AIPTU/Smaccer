@@ -88,7 +88,7 @@ class CreateSubCommand extends BaseSubCommand {
 			function (Entity $entity) use ($sender, $target) : void {
 				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
 					$npcName = $entity->getName();
-					$npcId = $entity->getId();
+					$npcId = $entity->getActorId();
 
 					if ($sender !== $target) {
 						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId . ' for: ' . $target->getName());

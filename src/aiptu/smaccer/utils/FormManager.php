@@ -20,6 +20,7 @@ use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\NPCData;
 use aiptu\smaccer\entity\query\QueryHandler;
 use aiptu\smaccer\entity\SmaccerHandler;
+use aiptu\smaccer\entity\utils\ActorHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
@@ -230,7 +231,7 @@ final class FormManager {
 		SmaccerHandler::getInstance()->spawnNPC($entityType, $player, $npcData)->onCompletion(
 			function (Entity $entity) use ($player) : void {
 				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
-					$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getId());
+					$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getActorId());
 				}
 			},
 			function (\Throwable $e) use ($player) : void {
@@ -248,7 +249,7 @@ final class FormManager {
 				],
 				function (Player $player, CustomFormResponse $response) use ($action) : void {
 					$npcId = (int) $response->getInput()->getValue();
-					$npc = Smaccer::getInstance()->getServer()->getWorldManager()->findEntity($npcId);
+					$npc = ActorHandler::findEntity($npcId);
 
 					if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
 						$player->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');
@@ -288,7 +289,7 @@ final class FormManager {
 				function (Player $player) use ($npc) : void {
 					SmaccerHandler::getInstance()->despawnNPC($npc->getCreatorId(), $npc)->onCompletion(
 						function (bool $success) use ($player, $npc) : void {
-							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getId() . ' despawned successfully.');
+							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getActorId() . ' despawned successfully.');
 						},
 						function (\Throwable $e) use ($player) : void {
 							$player->sendMessage(TextFormat::RED . 'Failed to despawn npc: ' . $e->getMessage());

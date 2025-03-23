@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
 
+use aiptu\smaccer\entity\trait\ActorTrait;
 use aiptu\smaccer\entity\trait\CommandTrait;
 use aiptu\smaccer\entity\trait\CreatorTrait;
 use aiptu\smaccer\entity\trait\EmoteTrait;
@@ -30,6 +31,7 @@ use pocketmine\entity\Skin;
 use pocketmine\nbt\tag\CompoundTag;
 
 class HumanSmaccer extends Human {
+	use ActorTrait;
 	use CreatorTrait;
 	use NametagTrait;
 	use RotationTrait;
@@ -43,6 +45,7 @@ class HumanSmaccer extends Human {
 
 	public function __construct(Location $location, Skin $skin, ?CompoundTag $nbt = null) {
 		if ($nbt instanceof CompoundTag) {
+			$this->initializeActor($nbt);
 			$this->initializeCreator($nbt);
 			$this->initializeCommand($nbt);
 		}
@@ -67,6 +70,7 @@ class HumanSmaccer extends Human {
 	public function saveNBT() : CompoundTag {
 		$nbt = parent::saveNBT();
 
+		$this->saveActor($nbt);
 		$this->saveCreator($nbt);
 		$this->saveCommand($nbt);
 		$nbt->setFloat(EntityTag::SCALE, $this->scale);

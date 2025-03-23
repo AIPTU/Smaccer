@@ -15,7 +15,7 @@ namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
-use aiptu\smaccer\Smaccer;
+use aiptu\smaccer\entity\utils\ActorHandler;
 use aiptu\smaccer\utils\FormManager;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
@@ -61,9 +61,7 @@ class DeleteSubCommand extends BaseSubCommand {
 			return;
 		}
 
-		/** @var Smaccer $plugin */
-		$plugin = $this->plugin;
-		$entity = $plugin->getServer()->getWorldManager()->findEntity($npcId);
+		$entity = ActorHandler::findEntity($npcId);
 
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
 			$sender->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');

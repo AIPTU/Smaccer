@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
+use aiptu\smaccer\entity\utils\ActorHandler;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
 use CortexPE\Commando\args\IntegerArgument;
@@ -66,7 +67,7 @@ class TeleportSubCommand extends BaseSubCommand {
 			return;
 		}
 
-		$entity = $plugin->getServer()->getWorldManager()->findEntity($npcId);
+		$entity = ActorHandler::findEntity($npcId);
 
 		if ($entity === null) {
 			$sender->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');
