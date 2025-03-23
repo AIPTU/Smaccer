@@ -120,6 +120,7 @@ use pocketmine\world\World;
 use function array_merge;
 use function is_a;
 use function is_subclass_of;
+use function ksort;
 use function strtolower;
 
 class SmaccerHandler {
@@ -406,7 +407,7 @@ class SmaccerHandler {
 			return $promise;
 		}
 
-		$entityId = $entity->getId();
+		$entityId = $entity->getActorId();
 		$this->playerNPCs[$playerId][$entityId] = $entity;
 
 		$resolver->resolve($entity);
@@ -420,12 +421,12 @@ class SmaccerHandler {
 		$resolver = new PromiseResolver();
 		$promise = $resolver->getPromise();
 
-		$entityId = $entity->getId();
-
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
 			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
 			return $promise;
 		}
+
+		$entityId = $entity->getActorId();
 
 		$ev = new NPCDespawnEvent($entity);
 		$ev->call();
@@ -435,6 +436,7 @@ class SmaccerHandler {
 		}
 
 		$entity->flagForDespawn();
+		$entity->removeActorId();
 		unset($this->playerNPCs[$creatorId][$entityId]);
 
 		$resolver->resolve(true);
@@ -506,17 +508,24 @@ class SmaccerHandler {
 	public function getEntitiesInfo(?Player $player = null, bool $collectInfo = false) : array {
 		$entityCount = 0;
 		$entityInfoList = [];
+		$entities = [];
 
 		foreach (Smaccer::getInstance()->getServer()->getWorldManager()->getWorlds() as $world) {
 			foreach ($world->getEntities() as $entity) {
 				if ($entity instanceof EntitySmaccer || $entity instanceof HumanSmaccer) {
 					if ($player === null || $entity->isOwnedBy($player)) {
-						++$entityCount;
-						if ($collectInfo) {
-							$entityInfoList[] = TextFormat::YELLOW . 'ID: (' . $entity->getId() . ') ' . TextFormat::GREEN . $entity->getNameTag() . TextFormat::GRAY . ' -- ' . TextFormat::AQUA . $entity->getWorld()->getFolderName() . ': ' . $entity->getLocation()->getFloorX() . '/' . $entity->getLocation()->getFloorY() . '/' . $entity->getLocation()->getFloorZ();
-						}
+						$entities[$entity->getActorId()] = $entity;
 					}
 				}
+			}
+		}
+
+		ksort($entities);
+
+		foreach ($entities as $entityId => $entity) {
+			++$entityCount;
+			if ($collectInfo) {
+				$entityInfoList[] = TextFormat::YELLOW . 'ID: (' . $entityId . ') ' . TextFormat::GREEN . $entity->getNameTag() . TextFormat::GRAY . ' -- ' . TextFormat::AQUA . $entity->getWorld()->getFolderName() . ': ' . $entity->getLocation()->getFloorX() . '/' . $entity->getLocation()->getFloorY() . '/' . $entity->getLocation()->getFloorZ();
 			}
 		}
 

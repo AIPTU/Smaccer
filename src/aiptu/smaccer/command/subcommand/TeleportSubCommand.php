@@ -13,12 +13,13 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\command\subcommand;
 
+use aiptu\smaccer\entity\utils\ActorHandler;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\args\IntegerArgument;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\args\TargetPlayerArgument;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\BaseSubCommand;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\constraint\InGameRequiredConstraint;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\args\IntegerArgument;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\args\TargetPlayerArgument;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
@@ -66,7 +67,7 @@ class TeleportSubCommand extends BaseSubCommand {
 			return;
 		}
 
-		$entity = $plugin->getServer()->getWorldManager()->findEntity($npcId);
+		$entity = ActorHandler::findEntity($npcId);
 
 		if ($entity === null) {
 			$sender->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');

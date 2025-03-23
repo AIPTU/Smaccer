@@ -126,7 +126,7 @@ class EventHandler implements Listener {
 			return;
 		}
 
-		$npcId = $entity->getId();
+		$npcId = $entity->getActorId();
 		$playerName = $damager->getName();
 		$action = Queue::getCurrentAction($playerName);
 

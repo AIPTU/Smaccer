@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace aiptu\smaccer\entity\utils;
 
 class EntityTag {
+	public const ACTOR_ID = 'ActorId';
 	public const CREATOR = 'Creator';
 	public const SCALE = 'Scale';
 	public const BABY = 'Baby';

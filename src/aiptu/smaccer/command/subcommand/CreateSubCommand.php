@@ -20,12 +20,12 @@ use aiptu\smaccer\entity\NPCData;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\args\BooleanArgument;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\args\FloatArgument;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\args\RawStringArgument;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\args\TargetPlayerArgument;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\BaseSubCommand;
-use aiptu\smaccer\libs\_edcdf86901d25bab\CortexPE\Commando\constraint\InGameRequiredConstraint;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\args\BooleanArgument;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\args\FloatArgument;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\args\RawStringArgument;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\args\TargetPlayerArgument;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
@@ -88,7 +88,7 @@ class CreateSubCommand extends BaseSubCommand {
 			function (Entity $entity) use ($sender, $target) : void {
 				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
 					$npcName = $entity->getName();
-					$npcId = $entity->getId();
+					$npcId = $entity->getActorId();
 
 					if ($sender !== $target) {
 						$sender->sendMessage(TextFormat::GREEN . 'NPC ' . $npcName . ' created successfully! ID: ' . $npcId . ' for: ' . $target->getName());

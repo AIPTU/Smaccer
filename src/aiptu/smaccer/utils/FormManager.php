@@ -20,19 +20,20 @@ use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\NPCData;
 use aiptu\smaccer\entity\query\QueryHandler;
 use aiptu\smaccer\entity\SmaccerHandler;
+use aiptu\smaccer\entity\utils\ActorHandler;
 use aiptu\smaccer\entity\utils\EntityTag;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\CustomForm;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\CustomFormResponse;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\element\Dropdown;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\element\Input;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\element\StepSlider;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\element\Toggle;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\menu\Button;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\menu\Image;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\MenuForm;
-use aiptu\smaccer\libs\_edcdf86901d25bab\frago9876543210\forms\ModalForm;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\CustomForm;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\CustomFormResponse;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\element\Dropdown;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\element\Input;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\element\StepSlider;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\element\Toggle;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\menu\Button;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\menu\Image;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\MenuForm;
+use aiptu\smaccer\libs\_0dd12c153a5bba9a\frago9876543210\forms\ModalForm;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -230,7 +231,7 @@ final class FormManager {
 		SmaccerHandler::getInstance()->spawnNPC($entityType, $player, $npcData)->onCompletion(
 			function (Entity $entity) use ($player) : void {
 				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
-					$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getId());
+					$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getActorId());
 				}
 			},
 			function (\Throwable $e) use ($player) : void {
@@ -248,7 +249,7 @@ final class FormManager {
 				],
 				function (Player $player, CustomFormResponse $response) use ($action) : void {
 					$npcId = (int) $response->getInput()->getValue();
-					$npc = Smaccer::getInstance()->getServer()->getWorldManager()->findEntity($npcId);
+					$npc = ActorHandler::findEntity($npcId);
 
 					if (!$npc instanceof EntitySmaccer && !$npc instanceof HumanSmaccer) {
 						$player->sendMessage(TextFormat::RED . 'NPC with ID ' . $npcId . ' not found!');
@@ -288,7 +289,7 @@ final class FormManager {
 				function (Player $player) use ($npc) : void {
 					SmaccerHandler::getInstance()->despawnNPC($npc->getCreatorId(), $npc)->onCompletion(
 						function (bool $success) use ($player, $npc) : void {
-							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getId() . ' despawned successfully.');
+							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getActorId() . ' despawned successfully.');
 						},
 						function (\Throwable $e) use ($player) : void {
 							$player->sendMessage(TextFormat::RED . 'Failed to despawn npc: ' . $e->getMessage());

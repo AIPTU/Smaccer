@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity;
 
+use aiptu\smaccer\entity\trait\ActorTrait;
 use aiptu\smaccer\entity\trait\CommandTrait;
 use aiptu\smaccer\entity\trait\CreatorTrait;
 use aiptu\smaccer\entity\trait\NametagTrait;
@@ -26,6 +27,7 @@ use pocketmine\entity\Location;
 use pocketmine\nbt\tag\CompoundTag;
 
 abstract class EntitySmaccer extends Entity {
+	use ActorTrait;
 	use CreatorTrait;
 	use NametagTrait;
 	use RotationTrait;
@@ -35,6 +37,7 @@ abstract class EntitySmaccer extends Entity {
 
 	public function __construct(Location $location, ?CompoundTag $nbt = null) {
 		if ($nbt instanceof CompoundTag) {
+			$this->initializeActor($nbt);
 			$this->initializeCreator($nbt);
 			$this->initializeCommand($nbt);
 		}
@@ -57,6 +60,7 @@ abstract class EntitySmaccer extends Entity {
 	public function saveNBT() : CompoundTag {
 		$nbt = parent::saveNBT();
 
+		$this->saveActor($nbt);
 		$this->saveCreator($nbt);
 		$this->saveCommand($nbt);
 		$nbt->setFloat(EntityTag::SCALE, $this->scale);
