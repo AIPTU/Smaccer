@@ -15,7 +15,7 @@ namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
-use aiptu\smaccer\libs\_ddf5a3abeeba7972\CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_8eb9d07e92ee62c6\CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
@@ -45,11 +45,11 @@ class AboutSubCommand extends BaseSubCommand {
 
 		$sender->sendMessage(TextFormat::GREEN . 'Plugin Information:');
 		foreach ($info as $label => $value) {
-			$this->sendFormattedMessage($sender, $label, $value);
+			self::sendFormattedMessage($sender, $label, $value);
 		}
 	}
 
-	private function sendFormattedMessage(CommandSender $sender, string $label, string $value) : void {
+	private static function sendFormattedMessage(CommandSender $sender, string $label, string $value) : void {
 		$sender->sendMessage(sprintf(
 			'%s| %s | %s |',
 			TextFormat::GREEN,
