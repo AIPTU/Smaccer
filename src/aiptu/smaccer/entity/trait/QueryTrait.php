@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\trait;
 
-use aiptu\smaccer\libs\_8eb9d07e92ee62c6\aiptu\libplaceholder\PlaceholderContext;
+use aiptu\smaccer\libs\_5f0963a88c38c95d\aiptu\libplaceholder\PlaceholderContext;
 use aiptu\smaccer\entity\query\QueryHandler;
 use aiptu\smaccer\entity\query\QueryInfo;
 use aiptu\smaccer\Smaccer;
