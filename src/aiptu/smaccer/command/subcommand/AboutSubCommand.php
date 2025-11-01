@@ -45,11 +45,11 @@ class AboutSubCommand extends BaseSubCommand {
 
 		$sender->sendMessage(TextFormat::GREEN . 'Plugin Information:');
 		foreach ($info as $label => $value) {
-			$this->sendFormattedMessage($sender, $label, $value);
+			self::sendFormattedMessage($sender, $label, $value);
 		}
 	}
 
-	private function sendFormattedMessage(CommandSender $sender, string $label, string $value) : void {
+	private static function sendFormattedMessage(CommandSender $sender, string $label, string $value) : void {
 		$sender->sendMessage(sprintf(
 			'%s| %s | %s |',
 			TextFormat::GREEN,

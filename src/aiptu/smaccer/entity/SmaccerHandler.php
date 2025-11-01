@@ -276,7 +276,7 @@ class SmaccerHandler {
 		return $createFunction($location, $nbt);
 	}
 
-	private function createBaseNBT(Vector3 $pos, ?Vector3 $motion = null, float $yaw = 0.0, float $pitch = 0.0) : CompoundTag {
+	private static function createBaseNBT(Vector3 $pos, ?Vector3 $motion = null, float $yaw = 0.0, float $pitch = 0.0) : CompoundTag {
 		return CompoundTag::create()
 			->setTag('Pos', new ListTag([
 				new DoubleTag($pos->x),
@@ -330,7 +330,7 @@ class SmaccerHandler {
 			return $promise;
 		}
 
-		$nbt = $this->createBaseNBT($pos, $motion, $yaw, $pitch);
+		$nbt = self::createBaseNBT($pos, $motion, $yaw, $pitch);
 		$nbt->setString(EntityTag::CREATOR, $playerId)
 			->setFloat(EntityTag::SCALE, $scale)
 			->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $rotationEnabled)
