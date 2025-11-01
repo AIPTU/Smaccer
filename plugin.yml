@@ -1,7 +1,7 @@
 name: Smaccer
 main: aiptu\smaccer\Smaccer
 version: 1.0.7
-api: [5.16.0]
+api: [5.36.0]
 author: AIPTU
 permissions:
   smaccer.bypass.cooldown:
