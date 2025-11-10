@@ -20,7 +20,7 @@ jobs:
         with:
           additional-assets: |
             icon.png
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: Smaccer.phar
           path: ${{steps.pharynx.outputs.output-phar}}
