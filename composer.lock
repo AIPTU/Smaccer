@@ -434,12 +434,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/AIPTU/Commando.git",
-                "reference": "a36d346209862eef1ec433702eec3538718215b0"
+                "reference": "877a464bf95ba82dda647dc22aa2bea9176c0b2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AIPTU/Commando/zipball/a36d346209862eef1ec433702eec3538718215b0",
-                "reference": "a36d346209862eef1ec433702eec3538718215b0",
+                "url": "https://api.github.com/repos/AIPTU/Commando/zipball/877a464bf95ba82dda647dc22aa2bea9176c0b2d",
+                "reference": "877a464bf95ba82dda647dc22aa2bea9176c0b2d",
                 "shasum": ""
             },
             "require": {
@@ -468,7 +468,7 @@
             "support": {
                 "source": "https://github.com/AIPTU/Commando/tree/master"
             },
-            "time": "2025-11-01T05:30:55+00:00"
+            "time": "2025-11-12T03:18:56+00:00"
         },
         {
             "name": "pocketmine/bedrock-block-upgrade-schema",
@@ -1353,5 +1353,5 @@
     "prefer-lowest": false,
     "platform": {},
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
