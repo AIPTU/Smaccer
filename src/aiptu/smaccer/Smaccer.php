@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024 AIPTU
+ * Copyright (c) 2024-2025 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer;
 
+use aiptu\libplaceholder\PlaceholderManager;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\entity\SmaccerHandler;
@@ -20,46 +21,37 @@ use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
 use CortexPE\Commando\PacketHooker;
-use frago9876543210\forms\BaseForm;
 use InvalidArgumentException;
+use JackMD\UpdateNotifier\UpdateNotifier;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
-use function array_filter;
-use function class_exists;
-use function count;
 use function is_bool;
 use function is_int;
 use function is_numeric;
+use function is_string;
 
 class Smaccer extends PluginBase {
 	use SingletonTrait;
 
-	private const CONFIG_VERSION = 1.0;
+	private const CONFIG_VERSION = 1.2;
 
+	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;
 	private EmoteManager $emoteManager;
 
+	private PlaceholderManager $placeholderManager;
+
+	private string $worldMessageFormat;
+	private string $worldNotLoadedFormat;
+	private string $serverOnlineFormat;
+	private string $serverOfflineFormat;
+
 	protected function onEnable() : void {
 		self::setInstance($this);
-
-		$requiredVirions = [
-			'Commando' => PacketHooker::class,
-			'forms' => BaseForm::class,
-		];
-		$missingVirions = array_filter($requiredVirions, fn ($class) => !class_exists($class));
-
-		if (count($missingVirions) > 0) {
-			foreach ($missingVirions as $virionName => $virionClass) {
-				$this->getLogger()->error("Required virion '{$virionName}' (class: {$virionClass}) not found.");
-			}
-
-			$this->getLogger()->error('Disabling plugin due to missing virions.');
-			throw new DisablePluginException();
-		}
 
 		SmaccerHandler::getInstance()->registerAll();
 
@@ -79,18 +71,59 @@ class Smaccer extends PluginBase {
 		$this->getServer()->getCommandMap()->register('Smaccer', new SmaccerCommand($this, 'smaccer', 'Smaccer commands.'));
 
 		$this->getServer()->getPluginManager()->registerEvents(new EventHandler(), $this);
+
+		if ($this->updateNotifierEnabled) {
+			UpdateNotifier::checkUpdate($this->getDescription()->getName(), $this->getDescription()->getVersion());
+		}
+
+		$this->placeholderManager = PlaceholderManager::getInstance()->init();
 	}
 
 	/**
 	 * Loads and validates the plugin configuration from the `config.yml` file.
 	 * If the configuration is invalid, an exception will be thrown.
 	 *
-	 * @throws \InvalidArgumentException when the configuration is invalid
+	 * @throws InvalidArgumentException when the configuration is invalid
 	 */
 	private function loadConfig() : void {
 		$this->checkConfig();
 
 		$config = $this->getConfig();
+
+		$updateNotifierEnabled = $config->get('update_notifier');
+		if (!is_bool($updateNotifierEnabled)) {
+			throw new InvalidArgumentException('Invalid or missing "update_notifier" value in the configuration. Please provide a boolean (true/false) value.');
+		}
+
+		$this->updateNotifierEnabled = $updateNotifierEnabled;
+
+		$worldMessageFormat = $config->get('world_message_format');
+		if (!is_string($worldMessageFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'world_message_format'. Expected a string.");
+		}
+
+		$this->worldMessageFormat = $worldMessageFormat;
+
+		$worldNotLoadedFormat = $config->get('world_not_loaded_format');
+		if (!is_string($worldNotLoadedFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'world_not_loaded_format'. Expected a string.");
+		}
+
+		$this->worldNotLoadedFormat = $worldNotLoadedFormat;
+
+		$serverOnlineFormat = $config->get('server_online_format');
+		if (!is_string($serverOnlineFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'server_online_format'. Expected a string.");
+		}
+
+		$this->serverOnlineFormat = $serverOnlineFormat;
+
+		$serverOfflineFormat = $config->get('server_offline_format');
+		if (!is_string($serverOfflineFormat)) {
+			throw new InvalidArgumentException("Invalid value for 'server_offline_format'. Expected a string.");
+		}
+
+		$this->serverOfflineFormat = $serverOfflineFormat;
 
 		/**
 		 * @var array{
@@ -157,6 +190,11 @@ class Smaccer extends PluginBase {
 
 		$actionEmoteCooldownValue = (float) $actionEmoteCooldownValue;
 
+		$gravityEnabled = $npcSettings['gravity']['enabled'] ?? null;
+		if (!isset($gravityEnabled) || !is_bool($gravityEnabled)) {
+			throw new InvalidArgumentException("Invalid gravity settings. 'enabled' must be a boolean.");
+		}
+
 		$this->npcDefaultSettings = new NPCDefaultSettings(
 			$commandCooldownEnabled,
 			$commandCooldownValue,
@@ -168,7 +206,8 @@ class Smaccer extends PluginBase {
 			$emoteCooldownEnabled,
 			$emoteCooldownValue,
 			$actionEmoteCooldownEnabled,
-			$actionEmoteCooldownValue
+			$actionEmoteCooldownValue,
+			$gravityEnabled
 		);
 	}
 
@@ -222,5 +261,25 @@ class Smaccer extends PluginBase {
 
 	public function setEmoteManager(EmoteManager $emoteManager) : void {
 		$this->emoteManager = $emoteManager;
+	}
+
+	public function getPlaceholderManager() : PlaceholderManager {
+		return $this->placeholderManager;
+	}
+
+	public function getWorldMessageFormat() : string {
+		return $this->worldMessageFormat;
+	}
+
+	public function getWorldNotLoadedFormat() : string {
+		return $this->worldNotLoadedFormat;
+	}
+
+	public function getServerOnlineFormat() : string {
+		return $this->serverOnlineFormat;
+	}
+
+	public function getServerOfflineFormat() : string {
+		return $this->serverOfflineFormat;
 	}
 }

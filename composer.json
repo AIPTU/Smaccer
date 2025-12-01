@@ -4,14 +4,29 @@
     "license": "MIT",
     "type": "project",
     "require": {
+        "aiptu/libplaceholder": "^1.0",
         "frago9876543210/forms": "dev-master",
-        "paroxity/commando": "^3.2",
-        "pocketmine/pocketmine-mp": "^5.15"
+        "ifera-mc/update-notifier": "dev-master",
+        "jasonw4331/libpmquery": "dev-master",
+        "paroxity/commando": "dev-master",
+        "pocketmine/pocketmine-mp": "^5.16"
     },
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/AIPTU/forms"
+            "url": "https://github.com/AIPTU/Commando.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/AIPTU/forms.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/AIPTU/libpmquery.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ifera-mc/UpdateNotifier.git"
         }
     ],
     "autoload": {

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024 AIPTU
+ * Copyright (c) 2024-2025 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -28,6 +28,7 @@ class NPCDefaultSettings {
 		private float $emoteCooldownValue,
 		private bool $actionEmoteCooldownEnabled,
 		private float $actionEmoteCooldownValue,
+		private bool $gravityEnabled,
 	) {}
 
 	public function isCommandCooldownEnabled() : bool {
@@ -72,5 +73,9 @@ class NPCDefaultSettings {
 
 	public function getActionEmoteCooldownValue() : float {
 		return $this->actionEmoteCooldownValue;
+	}
+
+	public function isGravityEnabled() : bool {
+		return $this->gravityEnabled;
 	}
 }

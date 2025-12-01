@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024 AIPTU
+ * Copyright (c) 2024-2025 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -27,6 +27,7 @@ use aiptu\smaccer\entity\npc\CaveSpiderSmaccer;
 use aiptu\smaccer\entity\npc\ChickenSmaccer;
 use aiptu\smaccer\entity\npc\CodSmaccer;
 use aiptu\smaccer\entity\npc\CowSmaccer;
+use aiptu\smaccer\entity\npc\CreakingSmaccer;
 use aiptu\smaccer\entity\npc\CreeperSmaccer;
 use aiptu\smaccer\entity\npc\DolphinSmaccer;
 use aiptu\smaccer\entity\npc\DonkeySmaccer;
@@ -119,6 +120,7 @@ use pocketmine\world\World;
 use function array_merge;
 use function is_a;
 use function is_subclass_of;
+use function ksort;
 use function strtolower;
 
 class SmaccerHandler {
@@ -139,6 +141,7 @@ class SmaccerHandler {
 		'Chicken' => ChickenSmaccer::class,
 		'Cod' => CodSmaccer::class,
 		'Cow' => CowSmaccer::class,
+		'Creaking' => CreakingSmaccer::class,
 		'Creeper' => CreeperSmaccer::class,
 		'Dolphin' => DolphinSmaccer::class,
 		'Donkey' => DonkeySmaccer::class,
@@ -273,7 +276,7 @@ class SmaccerHandler {
 		return $createFunction($location, $nbt);
 	}
 
-	private function createBaseNBT(Vector3 $pos, ?Vector3 $motion = null, float $yaw = 0.0, float $pitch = 0.0) : CompoundTag {
+	private static function createBaseNBT(Vector3 $pos, ?Vector3 $motion = null, float $yaw = 0.0, float $pitch = 0.0) : CompoundTag {
 		return CompoundTag::create()
 			->setTag('Pos', new ListTag([
 				new DoubleTag($pos->x),
@@ -319,6 +322,7 @@ class SmaccerHandler {
 		$slapBack = $npcData->getSlapBack();
 		$actionEmote = $npcData->getActionEmote();
 		$emote = $npcData->getEmote();
+		$gravityEnabled = $npcData->hasGravity();
 
 		$entityClass = $this->getNPC($type);
 		if ($entityClass === null) {
@@ -326,12 +330,13 @@ class SmaccerHandler {
 			return $promise;
 		}
 
-		$nbt = $this->createBaseNBT($pos, $motion, $yaw, $pitch);
+		$nbt = self::createBaseNBT($pos, $motion, $yaw, $pitch);
 		$nbt->setString(EntityTag::CREATOR, $playerId)
 			->setFloat(EntityTag::SCALE, $scale)
 			->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $rotationEnabled)
 			->setByte(EntityTag::NAMETAG_VISIBLE, (int) $nametagVisible)
-			->setInt(EntityTag::VISIBILITY, $visibility->value);
+			->setInt(EntityTag::VISIBILITY, $visibility->value)
+			->setByte(EntityTag::GRAVITY, (int) $gravityEnabled);
 
 		if (is_a($entityClass, EntityAgeable::class, true)) {
 			$nbt->setByte(EntityTag::BABY, (int) $isBaby);
@@ -368,7 +373,7 @@ class SmaccerHandler {
 		}
 
 		if ($nameTag !== null) {
-			$entity->setNameTag($entity->applyNametag($nameTag, $player));
+			$entity->setNameTag($nameTag);
 		}
 
 		$entity->setScale($scale);
@@ -393,7 +398,7 @@ class SmaccerHandler {
 		}
 
 		$entity->setVisibility($visibility);
-		$entity->sendData($entity->getViewers());
+		$entity->setHasGravity($gravityEnabled);
 
 		$ev = new NPCSpawnEvent($entity);
 		$ev->call();
@@ -402,7 +407,7 @@ class SmaccerHandler {
 			return $promise;
 		}
 
-		$entityId = $entity->getId();
+		$entityId = $entity->getActorId();
 		$this->playerNPCs[$playerId][$entityId] = $entity;
 
 		$resolver->resolve($entity);
@@ -416,12 +421,12 @@ class SmaccerHandler {
 		$resolver = new PromiseResolver();
 		$promise = $resolver->getPromise();
 
-		$entityId = $entity->getId();
-
 		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
 			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
 			return $promise;
 		}
+
+		$entityId = $entity->getActorId();
 
 		$ev = new NPCDespawnEvent($entity);
 		$ev->call();
@@ -431,6 +436,7 @@ class SmaccerHandler {
 		}
 
 		$entity->flagForDespawn();
+		$entity->removeActorId();
 		unset($this->playerNPCs[$creatorId][$entityId]);
 
 		$resolver->resolve(true);
@@ -465,9 +471,10 @@ class SmaccerHandler {
 		$slapBack = $ev->getNPCData()->getSlapBack();
 		$actionEmote = $ev->getNPCData()->getActionEmote();
 		$emote = $ev->getNPCData()->getEmote();
+		$gravityEnabled = $npcData->hasGravity();
 
 		if ($nameTag !== null) {
-			$entity->setNameTag($entity->applyNametag($nameTag, $player));
+			$entity->setNameTag($nameTag);
 		}
 
 		$entity->setScale($scale);
@@ -492,7 +499,7 @@ class SmaccerHandler {
 		}
 
 		$entity->setVisibility($visibility);
-		$entity->sendData($entity->getViewers());
+		$entity->setHasGravity($gravityEnabled);
 
 		$resolver->resolve(true);
 		return $promise;
@@ -501,17 +508,24 @@ class SmaccerHandler {
 	public function getEntitiesInfo(?Player $player = null, bool $collectInfo = false) : array {
 		$entityCount = 0;
 		$entityInfoList = [];
+		$entities = [];
 
 		foreach (Smaccer::getInstance()->getServer()->getWorldManager()->getWorlds() as $world) {
 			foreach ($world->getEntities() as $entity) {
 				if ($entity instanceof EntitySmaccer || $entity instanceof HumanSmaccer) {
 					if ($player === null || $entity->isOwnedBy($player)) {
-						++$entityCount;
-						if ($collectInfo) {
-							$entityInfoList[] = TextFormat::YELLOW . 'ID: (' . $entity->getId() . ') ' . TextFormat::GREEN . $entity->getNameTag() . TextFormat::GRAY . ' -- ' . TextFormat::AQUA . $entity->getWorld()->getFolderName() . ': ' . $entity->getLocation()->getFloorX() . '/' . $entity->getLocation()->getFloorY() . '/' . $entity->getLocation()->getFloorZ();
-						}
+						$entities[$entity->getActorId()] = $entity;
 					}
 				}
+			}
+		}
+
+		ksort($entities);
+
+		foreach ($entities as $entityId => $entity) {
+			++$entityCount;
+			if ($collectInfo) {
+				$entityInfoList[] = TextFormat::YELLOW . 'ID: (' . $entityId . ') ' . TextFormat::GREEN . $entity->getNameTag() . TextFormat::GRAY . ' -- ' . TextFormat::AQUA . $entity->getWorld()->getFolderName() . ': ' . $entity->getLocation()->getFloorX() . '/' . $entity->getLocation()->getFloorY() . '/' . $entity->getLocation()->getFloorZ();
 			}
 		}
 

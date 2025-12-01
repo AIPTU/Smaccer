@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024 AIPTU
+ * Copyright (c) 2024-2025 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -45,11 +45,11 @@ class AboutSubCommand extends BaseSubCommand {
 
 		$sender->sendMessage(TextFormat::GREEN . 'Plugin Information:');
 		foreach ($info as $label => $value) {
-			$this->sendFormattedMessage($sender, $label, $value);
+			self::sendFormattedMessage($sender, $label, $value);
 		}
 	}
 
-	private function sendFormattedMessage(CommandSender $sender, string $label, string $value) : void {
+	private static function sendFormattedMessage(CommandSender $sender, string $label, string $value) : void {
 		$sender->sendMessage(sprintf(
 			'%s| %s | %s |',
 			TextFormat::GREEN,
