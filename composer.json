@@ -4,6 +4,7 @@
     "license": "MIT",
     "type": "project",
     "require": {
+        "php": "^8.3",
         "aiptu/libplaceholder": "^1.0",
         "frago9876543210/forms": "dev-master",
         "ifera-mc/update-notifier": "dev-master",
@@ -31,5 +32,8 @@
     ],
     "autoload": {
         "classmap": ["src"]
+    },
+    "config": {
+        "sort-packages": true
     }
 }
