@@ -37,7 +37,7 @@ use function is_string;
 class Smaccer extends PluginBase {
 	use SingletonTrait;
 
-	private const CONFIG_VERSION = 1.2;
+	private const float CONFIG_VERSION = 1.2;
 
 	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;

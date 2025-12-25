@@ -54,18 +54,18 @@ use function min;
 use function ucfirst;
 
 final class FormManager {
-	public const ITEMS_PER_PAGE = 10;
-	public const ACTION_DELETE = 'delete';
-	public const ACTION_EDIT = 'edit';
-	public const TELEPORT_NPC_TO_PLAYER = 'npc_to_player';
-	public const TELEPORT_PLAYER_TO_NPC = 'player_to_npc';
-	public const ARMOR_ALL = 'all_armor';
-	public const ARMOR_HELMET = 'helmet';
-	public const ARMOR_CHESTPLATE = 'chestplate';
-	public const ARMOR_LEGGINGS = 'leggings';
-	public const ARMOR_BOOTS = 'boots';
-	public const PREVIOUS_PAGE = 'Previous Page';
-	public const NEXT_PAGE = 'Next Page';
+	public const int ITEMS_PER_PAGE = 10;
+	public const string ACTION_DELETE = 'delete';
+	public const string ACTION_EDIT = 'edit';
+	public const string TELEPORT_NPC_TO_PLAYER = 'npc_to_player';
+	public const string TELEPORT_PLAYER_TO_NPC = 'player_to_npc';
+	public const string ARMOR_ALL = 'all_armor';
+	public const string ARMOR_HELMET = 'helmet';
+	public const string ARMOR_CHESTPLATE = 'chestplate';
+	public const string ARMOR_LEGGINGS = 'leggings';
+	public const string ARMOR_BOOTS = 'boots';
+	public const string PREVIOUS_PAGE = 'Previous Page';
+	public const string NEXT_PAGE = 'Next Page';
 
 	public static function sendMainMenu(Player $player, callable $onSubmit) : void {
 		$form = MenuForm::withOptions(

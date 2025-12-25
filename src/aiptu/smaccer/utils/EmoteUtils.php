@@ -25,8 +25,8 @@ use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
 
 class EmoteUtils {
-	public const CURRENT_COMMIT_URL = 'https://api.github.com/repos/TwistedAsylumMC/Bedrock-Emotes/commits/main';
-	public const EMOTES_URL = 'https://raw.githubusercontent.com/TwistedAsylumMC/Bedrock-Emotes/main/emotes.json';
+	public const string CURRENT_COMMIT_URL = 'https://api.github.com/repos/TwistedAsylumMC/Bedrock-Emotes/commits/main';
+	public const string EMOTES_URL = 'https://raw.githubusercontent.com/TwistedAsylumMC/Bedrock-Emotes/main/emotes.json';
 
 	/**
 	 * Retrieve the current commit ID from https://github.com/TwistedAsylumMC/Bedrock-Emotes.

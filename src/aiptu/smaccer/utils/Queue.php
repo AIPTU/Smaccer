@@ -18,9 +18,9 @@ use function in_array;
 use function strtolower;
 
 class Queue {
-	public const ACTION_EDIT = 'edit';
-	public const ACTION_DELETE = 'delete';
-	public const ACTION_RETRIEVE = 'retrieve';
+	public const string ACTION_EDIT = 'edit';
+	public const string ACTION_DELETE = 'delete';
+	public const string ACTION_RETRIEVE = 'retrieve';
 
 	private static array $queues = [];
 	private static array $validActions = [self::ACTION_EDIT, self::ACTION_DELETE, self::ACTION_RETRIEVE];
