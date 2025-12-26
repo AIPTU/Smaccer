@@ -29,9 +29,7 @@ class EmoteUtils {
 	public const string EMOTES_URL = 'https://raw.githubusercontent.com/TwistedAsylumMC/Bedrock-Emotes/main/emotes.json';
 
 	/**
-	 * Retrieve the current commit ID from https://github.com/TwistedAsylumMC/Bedrock-Emotes.
-	 *
-	 * @return string|null a `string` of current commit id or `null` if there is an issue with fetching the current commit ID
+	 * Retrieve the current commit ID from the Bedrock-Emotes repository.
 	 */
 	public static function getCurrentCommitId() : ?string {
 		$response = Internet::getURL(self::CURRENT_COMMIT_URL);
@@ -39,7 +37,8 @@ class EmoteUtils {
 			return null;
 		}
 
-		$data = json_decode($response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+		$data = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+
 		if (!is_array($data) || !isset($data['sha']) || !is_string($data['sha'])) {
 			return null;
 		}
@@ -48,20 +47,9 @@ class EmoteUtils {
 	}
 
 	/**
-	 * Retrieve a list of emotes in emotes.json from this github repository https://github.com/TwistedAsylumMC/Bedrock-Emotes.
+	 * Retrieve and validate the list of emotes from the repository.
 	 *
-	 * @return array{
-	 *      array{
-	 *          uuid: string,
-	 *          title: string,
-	 *          image: string
-	 *      }
-	 * }|null An array of associative arrays, each containing:
-	 *               - 'uuid' (string): The unique identifier of the emote.
-	 *               - 'title' (string): The title of the emote.
-	 *               - 'image' (string): The URL to the thumbnail image of the emote.
-	 *
-	 *               Or `null` if there is an issue with fetching the emotes.
+	 * @return list<array{uuid: string, title: string, image: string}>|null
 	 */
 	public static function getEmotes() : ?array {
 		$response = Internet::getURL(self::EMOTES_URL);
@@ -69,82 +57,89 @@ class EmoteUtils {
 			return null;
 		}
 
-		/** @var array{array{uuid: string, title: string, image: string}} $data */
-		$data = json_decode($response->getBody(), true, flags: JSON_THROW_ON_ERROR);
-		if (!is_array($data)) {
+		$data = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+
+		if (!is_array($data) || !self::validateEmotesStructure($data)) {
 			return null;
 		}
 
-		foreach ($data as $emote) {
-			if (!isset($emote['uuid'], $emote['title'], $emote['image']) || !is_string($emote['uuid']) || !is_string($emote['title']) || !is_string($emote['image'])) {
-				return null;
-			}
-		}
-
+		/** @var list<array{uuid: string, title: string, image: string}> $data */
 		return $data;
 	}
 
 	/**
-	 * Retrieve emotes from a cache file.
+	 * Retrieve emotes from the cache file.
 	 *
-	 * @param string $cacheFilePath the path to the cache file
-	 *
-	 * @return array{
-	 *      commit_id: string,
-	 *      emotes: array
-	 * }|null Returns an associative array with `commit_id` and `emotes` if the cache file exists,
-	 *        or `null` if the file does not exist
+	 * @return array{commit_id: string, emotes: list<array{uuid: string, title: string, image: string}>}|null
 	 */
 	public static function getEmotesFromCache(string $cacheFilePath) : ?array {
-		if (file_exists($cacheFilePath)) {
-			$data = json_decode(Filesystem::fileGetContents($cacheFilePath), true, flags: JSON_THROW_ON_ERROR);
-			if (!is_array($data) || !isset($data['commit_id'], $data['emotes']) || !is_string($data['commit_id']) || !is_array($data['emotes'])) {
-				return null;
-			}
-
-			foreach ($data['emotes'] as $emote) {
-				if (!isset($emote['uuid'], $emote['title'], $emote['image']) || !is_string($emote['uuid']) || !is_string($emote['title']) || !is_string($emote['image'])) {
-					return null;
-				}
-			}
-
-			return $data;
+		if (!file_exists($cacheFilePath)) {
+			return null;
 		}
 
-		return null;
+		$content = Filesystem::fileGetContents($cacheFilePath);
+		$data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+
+		if (!is_array($data) || !isset($data['commit_id'], $data['emotes'])) {
+			return null;
+		}
+
+		if (!is_string($data['commit_id']) || !is_array($data['emotes'])) {
+			return null;
+		}
+
+		if (!self::validateEmotesStructure($data['emotes'])) {
+			return null;
+		}
+
+		/** @var array{commit_id: string, emotes: list<array{uuid: string, title: string, image: string}>} $data */
+		return $data;
 	}
 
 	/**
-	 * Save emotes to a cache file.
+	 * Save emotes to the cache file.
 	 *
-	 * @param string $cacheFilePath the path to the cache file will be saved
-	 * @param string $commitId      the Current Commit ID
-	 * @param array{
-	 *      array{
-	 *          uuid: string,
-	 *          title: string,
-	 *          image: string
-	 *      }
-	 * } $emotes the array of emotes list
+	 * @param list<array{uuid: string, title: string, image: string}> $emotes
 	 */
 	public static function saveEmoteToCache(string $cacheFilePath, string $commitId, array $emotes) : void {
 		$jsonData = json_encode([
 			'commit_id' => $commitId,
 			'emotes' => $emotes,
 		], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
-		if ($jsonData === false) {
-			throw new \RuntimeException('Failed to encode emotes to JSON.');
-		}
 
 		Filesystem::safeFilePutContents($cacheFilePath, $jsonData);
 	}
 
 	/**
-	 * Get the emote file path.
-	 *
-	 * @return string the emote file path
+	 * Get the emote cache file path.
 	 */
 	public static function getEmoteCachePath() : string {
 		return Smaccer::getInstance()->getDataFolder() . 'emotes_cache.json';
+	}
+
+	/**
+	 * Validate the structure of emotes data.
+	 */
+	private static function validateEmotesStructure(mixed $data) : bool {
+		if (!is_array($data)) {
+			return false;
+		}
+
+		foreach ($data as $emote) {
+			if (!is_array($emote)) {
+				return false;
+			}
+
+			if (
+				!isset($emote['uuid'], $emote['title'], $emote['image'])
+				|| !is_string($emote['uuid'])
+				|| !is_string($emote['title'])
+				|| !is_string($emote['image'])
+			) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

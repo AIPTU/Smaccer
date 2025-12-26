@@ -672,7 +672,7 @@ final class FormManager {
 			return;
 		}
 
-		$actionEmoteOptions = array_merge([new EmoteType('', 'None', '')], Smaccer::getInstance()->getEmoteManager()->getAll());
+		$actionEmoteOptions = array_merge([new EmoteType('', 'None', '')], array_values(Smaccer::getInstance()->getEmoteManager()->getAll()));
 		$defaultActionEmote = $npc->getActionEmote();
 		$currentActionEmote = $defaultActionEmote === null ? 'None' : $defaultActionEmote->getTitle();
 
@@ -726,7 +726,7 @@ final class FormManager {
 			return;
 		}
 
-		$emoteOptions = array_merge([new EmoteType('', 'None', '')], Smaccer::getInstance()->getEmoteManager()->getAll());
+		$emoteOptions = array_merge([new EmoteType('', 'None', '')], array_values(Smaccer::getInstance()->getEmoteManager()->getAll()));
 		$defaultEmote = $npc->getEmote();
 		$currentEmote = $defaultEmote === null ? 'None' : $defaultEmote->getTitle();
 

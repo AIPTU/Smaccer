@@ -15,8 +15,6 @@ namespace aiptu\smaccer\command\subcommand;
 
 use aiptu\smaccer\command\argument\ReloadTypeArgument;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\tasks\LoadEmotesTask;
-use aiptu\smaccer\utils\EmoteUtils;
 use aiptu\smaccer\utils\Permissions;
 use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
@@ -46,8 +44,7 @@ class ReloadSubCommand extends BaseSubCommand {
 				$sender->sendMessage(TextFormat::GREEN . 'Configuration reloaded successfully.');
 				break;
 			case ReloadTypeArgument::EMOTES:
-				$plugin->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask(EmoteUtils::getEmoteCachePath()));
-				$sender->sendMessage(TextFormat::GREEN . 'Emotes reloaded successfully.');
+				$plugin->reloadEmotes($sender);
 				break;
 			default:
 				$sender->sendMessage(TextFormat::RED . 'Invalid reload type specified.');
