@@ -103,8 +103,6 @@ use aiptu\smaccer\event\NPCDespawnEvent;
 use aiptu\smaccer\event\NPCSpawnEvent;
 use aiptu\smaccer\event\NPCUpdateEvent;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\utils\promise\Promise;
-use aiptu\smaccer\utils\promise\PromiseResolver;
 use aiptu\smaccer\utils\Utils;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
@@ -301,214 +299,194 @@ class SmaccerHandler {
 	}
 
 	/**
-	 * @return Promise<Entity>
+	 * @param \Closure(Entity) : void     $onSuccess
+	 * @param \Closure(\Throwable) : void $onError
 	 */
 	public function spawnNPC(
 		string $type,
 		Player $player,
 		NPCData $npcData,
 		?Location $customPos = null,
-		?Vector3 $motion = null
-	) : Promise {
-		$resolver = new PromiseResolver();
-		$promise = $resolver->getPromise();
+		?Vector3 $motion = null,
+		?\Closure $onSuccess = null,
+		?\Closure $onError = null
+	) : void {
+		try {
+			$entityClass = $this->getNPC($type);
+			if ($entityClass === null) {
+				throw new \InvalidArgumentException("Invalid NPC type: {$type}");
+			}
 
-		$pos = $customPos ?? $player->getLocation();
-		$yaw = $pos->getYaw();
-		$pitch = $pos->getPitch();
-		$motion ??= $player->getMotion();
+			$pos = $customPos ?? $player->getLocation();
+			$yaw = $pos->getYaw();
+			$pitch = $pos->getPitch();
+			$motion ??= $player->getMotion();
 
-		$playerId = $player->getUniqueId()->getBytes();
-		$nameTag = $npcData->getNameTag();
-		$scale = $npcData->getScale();
-		$rotationEnabled = $npcData->isRotationEnabled();
-		$nametagVisible = $npcData->isNametagVisible();
-		$visibility = $npcData->getVisibility();
-		$isBaby = $npcData->isBaby();
-		$slapBack = $npcData->getSlapBack();
-		$actionEmote = $npcData->getActionEmote();
-		$emote = $npcData->getEmote();
-		$gravityEnabled = $npcData->hasGravity();
+			$playerId = $player->getUniqueId()->getBytes();
 
-		$entityClass = $this->getNPC($type);
-		if ($entityClass === null) {
-			$resolver->reject(new \InvalidArgumentException("Invalid NPC type: {$type}"));
-			return $promise;
-		}
+			$nbt = self::createBaseNBT($pos, $motion, $yaw, $pitch);
+			$nbt->setString(EntityTag::CREATOR, $playerId)
+				->setFloat(EntityTag::SCALE, $npcData->getScale())
+				->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $npcData->isRotationEnabled())
+				->setByte(EntityTag::NAMETAG_VISIBLE, (int) $npcData->isNametagVisible())
+				->setInt(EntityTag::VISIBILITY, $npcData->getVisibility()->value)
+				->setByte(EntityTag::GRAVITY, (int) $npcData->hasGravity());
 
-		$nbt = self::createBaseNBT($pos, $motion, $yaw, $pitch);
-		$nbt->setString(EntityTag::CREATOR, $playerId)
-			->setFloat(EntityTag::SCALE, $scale)
-			->setByte(EntityTag::ROTATE_TO_PLAYERS, (int) $rotationEnabled)
-			->setByte(EntityTag::NAMETAG_VISIBLE, (int) $nametagVisible)
-			->setInt(EntityTag::VISIBILITY, $visibility->value)
-			->setByte(EntityTag::GRAVITY, (int) $gravityEnabled);
+			if (is_a($entityClass, EntityAgeable::class, true)) {
+				$nbt->setByte(EntityTag::BABY, (int) $npcData->isBaby());
+			}
 
-		if (is_a($entityClass, EntityAgeable::class, true)) {
-			$nbt->setByte(EntityTag::BABY, (int) $isBaby);
-		}
-
-		if (is_a($entityClass, HumanSmaccer::class, true)) {
-			$skin = $player->getSkin();
-
-			$nbt->setTag(
-				'Skin',
-				CompoundTag::create()
+			if (is_a($entityClass, HumanSmaccer::class, true)) {
+				$skin = $player->getSkin();
+				$nbt->setTag('Skin', CompoundTag::create()
 					->setString('Name', $skin->getSkinId())
 					->setByteArray('Data', $skin->getSkinData())
 					->setByteArray('CapeData', $skin->getCapeData())
 					->setString('GeometryName', $skin->getGeometryName())
-					->setByteArray('GeometryData', $skin->getGeometryData())
-			);
+					->setByteArray('GeometryData', $skin->getGeometryData()));
 
-			$nbt->setByte(EntityTag::SLAP_BACK, (int) $slapBack);
+				$nbt->setByte(EntityTag::SLAP_BACK, (int) $npcData->getSlapBack());
+				if (($ae = $npcData->getActionEmote()) !== null) {
+					$nbt->setString(EntityTag::ACTION_EMOTE, $ae->getUuid());
+				}
 
-			if ($actionEmote !== null) {
-				$nbt->setString(EntityTag::ACTION_EMOTE, $actionEmote->getUuid());
+				if (($e = $npcData->getEmote()) !== null) {
+					$nbt->setString(EntityTag::EMOTE, $e->getUuid());
+				}
 			}
 
-			if ($emote !== null) {
-				$nbt->setString(EntityTag::EMOTE, $emote->getUuid());
-			}
-		}
-
-		$entity = $this->createEntity($type, $pos, $nbt);
-		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			$resolver->reject(new \RuntimeException("Failed to create NPC entity: {$type}"));
-			return $promise;
-		}
-
-		if ($nameTag !== null) {
-			$entity->setNameTag($nameTag);
-		}
-
-		$entity->setScale($scale);
-		$entity->setRotateToPlayers($rotationEnabled);
-		$entity->setNameTagAlwaysVisible($nametagVisible);
-		$entity->setNameTagVisible($nametagVisible);
-
-		if ($entity instanceof EntityAgeable) {
-			$entity->setBaby($isBaby);
-		}
-
-		if ($entity instanceof HumanSmaccer) {
-			$entity->setSlapBack($slapBack);
-
-			if ($actionEmote !== null) {
-				$entity->setActionEmote($actionEmote);
+			$entity = $this->createEntity($type, $pos, $nbt);
+			if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
+				throw new \RuntimeException("Failed to create NPC entity instance for type: {$type}");
 			}
 
-			if ($emote !== null) {
-				$entity->setEmote($emote);
+			if (($nt = $npcData->getNameTag()) !== null) {
+				$entity->setNameTag($nt);
+			}
+
+			$entity->setScale($npcData->getScale());
+			$entity->setRotateToPlayers($npcData->isRotationEnabled());
+			$entity->setNameTagAlwaysVisible($npcData->isNametagVisible());
+			$entity->setNameTagVisible($npcData->isNametagVisible());
+			if ($entity instanceof EntityAgeable) {
+				$entity->setBaby($npcData->isBaby());
+			}
+
+			if ($entity instanceof HumanSmaccer) {
+				$entity->setSlapBack($npcData->getSlapBack());
+				if (($ae = $npcData->getActionEmote()) !== null) {
+					$entity->setActionEmote($ae);
+				}
+
+				if (($e = $npcData->getEmote()) !== null) {
+					$entity->setEmote($e);
+				}
+			}
+
+			$entity->setVisibility($npcData->getVisibility());
+			$entity->setHasGravity($npcData->hasGravity());
+
+			$ev = new NPCSpawnEvent($entity);
+			$ev->call();
+			if ($ev->isCancelled()) {
+				throw new \RuntimeException('NPC spawn event was cancelled by another plugin');
+			}
+
+			$this->playerNPCs[$player->getUniqueId()->getBytes()][$entity->getActorId()] = $entity;
+
+			if ($onSuccess !== null) {
+				$onSuccess($entity);
+			}
+		} catch (\Throwable $t) {
+			if ($onError !== null) {
+				$onError($t);
 			}
 		}
-
-		$entity->setVisibility($visibility);
-		$entity->setHasGravity($gravityEnabled);
-
-		$ev = new NPCSpawnEvent($entity);
-		$ev->call();
-		if ($ev->isCancelled()) {
-			$resolver->reject(new \RuntimeException('NPC spawn event was cancelled'));
-			return $promise;
-		}
-
-		$entityId = $entity->getActorId();
-		$this->playerNPCs[$playerId][$entityId] = $entity;
-
-		$resolver->resolve($entity);
-		return $promise;
 	}
 
 	/**
-	 * @return Promise<bool>
+	 * @param \Closure(bool) : void       $onSuccess
+	 * @param \Closure(\Throwable) : void $onError
 	 */
-	public function despawnNPC(string $creatorId, Entity $entity) : Promise {
-		$resolver = new PromiseResolver();
-		$promise = $resolver->getPromise();
+	public function despawnNPC(string $creatorId, Entity $entity, ?\Closure $onSuccess = null, ?\Closure $onError = null) : void {
+		try {
+			if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
+				throw new \InvalidArgumentException('Provided entity is not a valid Smaccer NPC');
+			}
 
-		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
-			return $promise;
+			$ev = new NPCDespawnEvent($entity);
+			$ev->call();
+			if ($ev->isCancelled()) {
+				throw new \RuntimeException('NPC despawn event was cancelled by another plugin');
+			}
+
+			$entityId = $entity->getActorId();
+			$entity->flagForDespawn();
+			$entity->removeActorId();
+			unset($this->playerNPCs[$creatorId][$entityId]);
+
+			if ($onSuccess !== null) {
+				$onSuccess(true);
+			}
+		} catch (\Throwable $t) {
+			if ($onError !== null) {
+				$onError($t);
+			}
 		}
-
-		$entityId = $entity->getActorId();
-
-		$ev = new NPCDespawnEvent($entity);
-		$ev->call();
-		if ($ev->isCancelled()) {
-			$resolver->reject(new \RuntimeException('NPC despawn event was cancelled'));
-			return $promise;
-		}
-
-		$entity->flagForDespawn();
-		$entity->removeActorId();
-		unset($this->playerNPCs[$creatorId][$entityId]);
-
-		$resolver->resolve(true);
-		return $promise;
 	}
 
 	/**
-	 * @return Promise<bool>
+	 * @param \Closure(bool) : void       $onSuccess
+	 * @param \Closure(\Throwable) : void $onError
 	 */
-	public function editNPC(Player $player, Entity $entity, NPCData $npcData) : Promise {
-		$resolver = new PromiseResolver();
-		$promise = $resolver->getPromise();
-
-		if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
-			$resolver->reject(new \InvalidArgumentException('Invalid entity type'));
-			return $promise;
-		}
-
-		$ev = new NPCUpdateEvent($entity, $npcData);
-		$ev->call();
-		if ($ev->isCancelled()) {
-			$resolver->reject(new \RuntimeException('NPC update event was cancelled'));
-			return $promise;
-		}
-
-		$nameTag = $ev->getNPCData()->getNameTag();
-		$scale = $ev->getNPCData()->getScale();
-		$rotationEnabled = $ev->getNPCData()->isRotationEnabled();
-		$nametagVisible = $ev->getNPCData()->isNametagVisible();
-		$visibility = $ev->getNPCData()->getVisibility();
-		$isBaby = $ev->getNPCData()->isBaby();
-		$slapBack = $ev->getNPCData()->getSlapBack();
-		$actionEmote = $ev->getNPCData()->getActionEmote();
-		$emote = $ev->getNPCData()->getEmote();
-		$gravityEnabled = $npcData->hasGravity();
-
-		if ($nameTag !== null) {
-			$entity->setNameTag($nameTag);
-		}
-
-		$entity->setScale($scale);
-		$entity->setRotateToPlayers($rotationEnabled);
-		$entity->setNameTagAlwaysVisible($nametagVisible);
-		$entity->setNameTagVisible($nametagVisible);
-
-		if ($entity instanceof EntityAgeable) {
-			$entity->setBaby($isBaby);
-		}
-
-		if ($entity instanceof HumanSmaccer) {
-			$entity->setSlapBack($slapBack);
-
-			if ($actionEmote !== null) {
-				$entity->setActionEmote($actionEmote);
+	public function editNPC(Player $player, Entity $entity, NPCData $npcData, ?\Closure $onSuccess = null, ?\Closure $onError = null) : void {
+		try {
+			if (!$entity instanceof EntitySmaccer && !$entity instanceof HumanSmaccer) {
+				throw new \InvalidArgumentException('Provided entity is not a valid Smaccer NPC');
 			}
 
-			if ($emote !== null) {
-				$entity->setEmote($emote);
+			$ev = new NPCUpdateEvent($entity, $npcData);
+			$ev->call();
+			if ($ev->isCancelled()) {
+				throw new \RuntimeException('NPC update event was cancelled by another plugin');
+			}
+
+			$data = $ev->getNPCData();
+			if (($nt = $data->getNameTag()) !== null) {
+				$entity->setNameTag($nt);
+			}
+
+			$entity->setScale($data->getScale());
+			$entity->setRotateToPlayers($data->isRotationEnabled());
+			$entity->setNameTagAlwaysVisible($data->isNametagVisible());
+			$entity->setNameTagVisible($data->isNametagVisible());
+
+			if ($entity instanceof EntityAgeable) {
+				$entity->setBaby($data->isBaby());
+			}
+
+			if ($entity instanceof HumanSmaccer) {
+				$entity->setSlapBack($data->getSlapBack());
+				if (($ae = $data->getActionEmote()) !== null) {
+					$entity->setActionEmote($ae);
+				}
+
+				if (($e = $data->getEmote()) !== null) {
+					$entity->setEmote($e);
+				}
+			}
+
+			$entity->setVisibility($data->getVisibility());
+			$entity->setHasGravity($data->hasGravity());
+
+			if ($onSuccess !== null) {
+				$onSuccess(true);
+			}
+		} catch (\Throwable $t) {
+			if ($onError !== null) {
+				$onError($t);
 			}
 		}
-
-		$entity->setVisibility($visibility);
-		$entity->setHasGravity($gravityEnabled);
-
-		$resolver->resolve(true);
-		return $promise;
 	}
 
 	public function getEntitiesInfo(?Player $player = null, bool $collectInfo = false) : array {

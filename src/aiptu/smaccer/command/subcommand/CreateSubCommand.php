@@ -84,8 +84,11 @@ class CreateSubCommand extends BaseSubCommand {
 			->setScale($scale)
 			->setBaby($isBaby);
 
-		SmaccerHandler::getInstance()->spawnNPC($entityType, $target, $npcData)->onCompletion(
-			function (Entity $entity) use ($sender, $target) : void {
+		SmaccerHandler::getInstance()->spawnNPC(
+			$entityType,
+			$target,
+			$npcData,
+			onSuccess: function (Entity $entity) use ($sender, $target) : void {
 				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
 					$npcName = $entity->getName();
 					$npcId = $entity->getActorId();
@@ -97,7 +100,7 @@ class CreateSubCommand extends BaseSubCommand {
 					}
 				}
 			},
-			function (\Throwable $e) use ($sender) : void {
+			onError: function (\Throwable $e) use ($sender) : void {
 				$sender->sendMessage(TextFormat::RED . 'Failed to spawn npc: ' . $e->getMessage());
 			}
 		);

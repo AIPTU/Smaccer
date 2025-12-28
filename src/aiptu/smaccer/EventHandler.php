@@ -148,7 +148,9 @@ class EventHandler implements Listener {
 				if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_DELETE_OTHERS)) {
 					$damager->sendMessage(TextFormat::RED . "You don't have permission to delete this entity!");
 				} else {
-					SmaccerHandler::getInstance()->despawnNPC($entity->getCreatorId(), $entity)->onCompletion(
+					SmaccerHandler::getInstance()->despawnNPC(
+						$entity->getCreatorId(),
+						$entity,
 						function (bool $success) use ($damager, $npcId, $entity) : void {
 							$damager->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' with ID ' . $npcId . ' despawned successfully.');
 						},

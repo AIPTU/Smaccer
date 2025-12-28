@@ -228,13 +228,16 @@ final class FormManager {
 			}
 		}
 
-		SmaccerHandler::getInstance()->spawnNPC($entityType, $player, $npcData)->onCompletion(
-			function (Entity $entity) use ($player) : void {
+		SmaccerHandler::getInstance()->spawnNPC(
+			$entityType,
+			$player,
+			$npcData,
+			onSuccess: function (Entity $entity) use ($player) : void {
 				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
 					$player->sendMessage(TextFormat::GREEN . 'NPC ' . $entity->getName() . ' created successfully! ID: ' . $entity->getActorId());
 				}
 			},
-			function (\Throwable $e) use ($player) : void {
+			onError: function (\Throwable $e) use ($player) : void {
 				$player->sendMessage(TextFormat::RED . 'Failed to spawn npc: ' . $e->getMessage());
 			}
 		);
@@ -287,7 +290,9 @@ final class FormManager {
 				'Confirm Deletion',
 				"Are you sure you want to delete NPC: {$npc->getName()}?",
 				function (Player $player) use ($npc) : void {
-					SmaccerHandler::getInstance()->despawnNPC($npc->getCreatorId(), $npc)->onCompletion(
+					SmaccerHandler::getInstance()->despawnNPC(
+						$npc->getCreatorId(),
+						$npc,
 						function (bool $success) use ($player, $npc) : void {
 							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' with ID ' . $npc->getActorId() . ' despawned successfully.');
 						},
@@ -421,7 +426,10 @@ final class FormManager {
 						}
 					}
 
-					SmaccerHandler::getInstance()->editNPC($player, $npc, $npcData)->onCompletion(
+					SmaccerHandler::getInstance()->editNPC(
+						$player,
+						$npc,
+						$npcData,
 						function (bool $success) use ($player, $npc) : void {
 							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' updated successfully!');
 						},
