@@ -23,11 +23,11 @@ class SquidSmaccer extends EntityAgeable {
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.475 : 0.95;
+		return $this->isBaby() ? 0.4 : 0.8;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.475 : 0.95;
+		return $this->isBaby() ? 0.4 : 0.8;
 	}
 
 	public static function getNetworkTypeId() : string {

@@ -17,24 +17,28 @@ use aiptu\smaccer\entity\EntityAgeable;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
-class GlowSquidSmaccer extends EntityAgeable {
+class HappyGhastSmaccer extends EntityAgeable {
 	protected function getInitialSizeInfo() : EntitySizeInfo {
 		return new EntitySizeInfo($this->getHeight(), $this->getWidth());
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.4 : 0.8;
+		return $this->isBaby() ? 0.95 : 4;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.4 : 0.8;
+		return $this->isBaby() ? 0.95 : 4;
 	}
 
 	public static function getNetworkTypeId() : string {
-		return EntityIds::GLOW_SQUID;
+		return EntityIds::HAPPY_GHAST;
 	}
 
 	public function getName() : string {
-		return 'Glow Squid';
+		return 'Happy Ghast';
+	}
+
+	public function getBabyScale() : float {
+		return 0.2375;
 	}
 }

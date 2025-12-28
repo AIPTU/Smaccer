@@ -13,28 +13,28 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\npc;
 
-use aiptu\smaccer\entity\EntityAgeable;
+use aiptu\smaccer\entity\EntitySmaccer;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
-class GlowSquidSmaccer extends EntityAgeable {
+class CamelHuskSmaccer extends EntitySmaccer {
 	protected function getInitialSizeInfo() : EntitySizeInfo {
 		return new EntitySizeInfo($this->getHeight(), $this->getWidth());
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.4 : 0.8;
+		return 2.375;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.4 : 0.8;
+		return 1.7;
 	}
 
 	public static function getNetworkTypeId() : string {
-		return EntityIds::GLOW_SQUID;
+		return EntityIds::CAMEL_HUSK;
 	}
 
 	public function getName() : string {
-		return 'Glow Squid';
+		return 'Camel Husk';
 	}
 }

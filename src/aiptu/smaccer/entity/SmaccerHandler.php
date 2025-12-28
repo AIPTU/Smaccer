@@ -21,6 +21,7 @@ use aiptu\smaccer\entity\npc\BeeSmaccer;
 use aiptu\smaccer\entity\npc\BlazeSmaccer;
 use aiptu\smaccer\entity\npc\BoggedSmaccer;
 use aiptu\smaccer\entity\npc\BreezeSmaccer;
+use aiptu\smaccer\entity\npc\CamelHuskSmaccer;
 use aiptu\smaccer\entity\npc\CamelSmaccer;
 use aiptu\smaccer\entity\npc\CatSmaccer;
 use aiptu\smaccer\entity\npc\CaveSpiderSmaccer;
@@ -43,6 +44,7 @@ use aiptu\smaccer\entity\npc\GhastSmaccer;
 use aiptu\smaccer\entity\npc\GlowSquidSmaccer;
 use aiptu\smaccer\entity\npc\GoatSmaccer;
 use aiptu\smaccer\entity\npc\GuardianSmaccer;
+use aiptu\smaccer\entity\npc\HappyGhastSmaccer;
 use aiptu\smaccer\entity\npc\HoglinSmaccer;
 use aiptu\smaccer\entity\npc\HorseSmaccer;
 use aiptu\smaccer\entity\npc\HuskSmaccer;
@@ -53,6 +55,7 @@ use aiptu\smaccer\entity\npc\MooshroomSmaccer;
 use aiptu\smaccer\entity\npc\MuleSmaccer;
 use aiptu\smaccer\entity\npc\OcelotSmaccer;
 use aiptu\smaccer\entity\npc\PandaSmaccer;
+use aiptu\smaccer\entity\npc\ParchedSmaccer;
 use aiptu\smaccer\entity\npc\ParrotSmaccer;
 use aiptu\smaccer\entity\npc\PhantomSmaccer;
 use aiptu\smaccer\entity\npc\PiglinBruteSmaccer;
@@ -136,6 +139,7 @@ class SmaccerHandler {
 		'Bogged' => BoggedSmaccer::class,
 		'Breeze' => BreezeSmaccer::class,
 		'Camel' => CamelSmaccer::class,
+		'CamelHusk' => CamelHuskSmaccer::class,
 		'Cat' => CatSmaccer::class,
 		'CaveSpider' => CaveSpiderSmaccer::class,
 		'Chicken' => ChickenSmaccer::class,
@@ -157,6 +161,7 @@ class SmaccerHandler {
 		'GlowSquid' => GlowSquidSmaccer::class,
 		'Goat' => GoatSmaccer::class,
 		'Guardian' => GuardianSmaccer::class,
+		'HappyGhast' => HappyGhastSmaccer::class,
 		'Hoglin' => HoglinSmaccer::class,
 		'Horse' => HorseSmaccer::class,
 		'Husk' => HuskSmaccer::class,
@@ -167,6 +172,7 @@ class SmaccerHandler {
 		'Mule' => MuleSmaccer::class,
 		'Ocelot' => OcelotSmaccer::class,
 		'Panda' => PandaSmaccer::class,
+		'Parched' => ParchedSmaccer::class,
 		'Parrot' => ParrotSmaccer::class,
 		'Phantom' => PhantomSmaccer::class,
 		'Pig' => PigSmaccer::class,
