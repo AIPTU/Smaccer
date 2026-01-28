@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -19,7 +19,7 @@ use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\event\NPCAttackEvent;
 use aiptu\smaccer\event\NPCInteractEvent;
-use aiptu\smaccer\utils\FormManager;
+use aiptu\smaccer\forms\EditForms;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -140,7 +140,7 @@ class EventHandler implements Listener {
 				if (!$entity->isOwnedBy($damager) && !$damager->hasPermission(Permissions::COMMAND_EDIT_OTHERS)) {
 					$damager->sendMessage(TextFormat::RED . "You don't have permission to edit this entity!");
 				} else {
-					FormManager::sendEditMenuForm($damager, $entity);
+					EditForms::sendMenu($damager, $entity);
 				}
 
 				break;

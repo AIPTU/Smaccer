@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -14,8 +14,7 @@ declare(strict_types=1);
 namespace aiptu\smaccer\utils;
 
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\utils\promise\Promise;
-use aiptu\smaccer\utils\promise\PromiseResolver;
+use Closure;
 use GdImage;
 use InvalidArgumentException;
 use pocketmine\utils\Filesystem;
@@ -35,38 +34,46 @@ use function is_file;
 use function uniqid;
 use function unlink;
 
-final class SkinUtils {
+class SkinUtils {
 	private const string TYPE_SKIN = 'skin';
 	private const string TYPE_CAPE = 'cape';
 
 	private function __construct() {}
 
 	/**
-	 * Download and process skin from URL.
+	 * Download and process skin from URL asynchronously.
 	 *
-	 * @param string $url PNG image URL
-	 *
-	 * @phpstan-return Promise<string> Resolves to RGBA bytes (64x64 or 64x32)
+	 * @param string  $url       PNG image URL
+	 * @param Closure $onSuccess Callback on success: function(string $skinBytes)
+	 * @param Closure $onError   Callback on error: function(Throwable $error)
 	 *
 	 * @throws InvalidArgumentException if URL format invalid
 	 */
-	public static function skinFromURL(string $url) : Promise {
-		self::validatePngUrl($url);
-		return self::downloadAndProcess($url, self::TYPE_SKIN);
+	public static function skinFromURL(string $url, Closure $onSuccess, Closure $onError) : void {
+		try {
+			self::validatePngUrl($url);
+			self::downloadAndProcess($url, self::TYPE_SKIN, $onSuccess, $onError);
+		} catch (InvalidArgumentException $e) {
+			$onError($e);
+		}
 	}
 
 	/**
-	 * Download and process cape from URL.
+	 * Download and process cape from URL asynchronously.
 	 *
-	 * @param string $url PNG image URL
-	 *
-	 * @phpstan-return Promise<string> Resolves to RGBA bytes (typically 64x32)
+	 * @param string  $url       PNG image URL
+	 * @param Closure $onSuccess Callback on success: function(string $capeBytes)
+	 * @param Closure $onError   Callback on error: function(Throwable $error)
 	 *
 	 * @throws InvalidArgumentException if URL format invalid
 	 */
-	public static function capeFromURL(string $url) : Promise {
-		self::validatePngUrl($url);
-		return self::downloadAndProcess($url, self::TYPE_CAPE);
+	public static function capeFromURL(string $url, Closure $onSuccess, Closure $onError) : void {
+		try {
+			self::validatePngUrl($url);
+			self::downloadAndProcess($url, self::TYPE_CAPE, $onSuccess, $onError);
+		} catch (InvalidArgumentException $e) {
+			$onError($e);
+		}
 	}
 
 	/**
@@ -74,7 +81,7 @@ final class SkinUtils {
 	 *
 	 * @param string $filePath Path to PNG file
 	 *
-	 * @return string RGBA bytes
+	 * @return string RGBA bytes (64x64 or 64x32)
 	 *
 	 * @throws RuntimeException if file invalid or processing fails
 	 */
@@ -87,7 +94,7 @@ final class SkinUtils {
 	 *
 	 * @param string $filePath Path to PNG file
 	 *
-	 * @return string RGBA bytes
+	 * @return string RGBA bytes (typically 64x32)
 	 *
 	 * @throws RuntimeException if file invalid or processing fails
 	 */
@@ -96,17 +103,14 @@ final class SkinUtils {
 	}
 
 	/**
-	 * @phpstan-param self::TYPE_* $type
+	 * Download and process skin or cape from URL.
 	 *
-	 * @phpstan-return Promise<string>
+	 * @phpstan-param self::TYPE_* $type
 	 */
-	private static function downloadAndProcess(string $url, string $type) : Promise {
-		/** @phpstan-var PromiseResolver<string> $resolver */
-		$resolver = new PromiseResolver();
-
-		Utils::fetchAsync($url, static function (?InternetRequestResult $result) use ($resolver, $type) : void {
+	private static function downloadAndProcess(string $url, string $type, Closure $onSuccess, Closure $onError) : void {
+		Utils::fetchAsync($url, static function (?InternetRequestResult $result) use ($type, $onSuccess, $onError) : void {
 			if ($result === null) {
-				$resolver->reject(new RuntimeException('Failed to download image from URL'));
+				$onError(new RuntimeException('Failed to download image from URL'));
 				return;
 			}
 
@@ -115,13 +119,11 @@ final class SkinUtils {
 				$tempPath = self::saveTempFile($imageData);
 
 				$bytes = self::processPngFile($tempPath, $type);
-				$resolver->resolve($bytes);
+				$onSuccess($bytes);
 			} catch (Throwable $e) {
-				$resolver->reject($e);
+				$onError($e);
 			}
 		});
-
-		return $resolver->getPromise();
 	}
 
 	/**

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -22,8 +22,8 @@ use aiptu\smaccer\command\subcommand\ListSubCommand;
 use aiptu\smaccer\command\subcommand\MoveSubCommand;
 use aiptu\smaccer\command\subcommand\ReloadSubCommand;
 use aiptu\smaccer\command\subcommand\TeleportSubCommand;
+use aiptu\smaccer\forms\NPCForms;
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\utils\FormManager;
 use aiptu\smaccer\utils\Permissions;
 use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\constraint\InGameRequiredConstraint;
@@ -51,9 +51,7 @@ class SmaccerCommand extends BaseCommand {
 		}
 
 		if (count($args) === 0) {
-			FormManager::sendMainMenu($sender, function (Player $player, string $entityType) : void {
-				FormManager::sendCreateNPCForm($player, $entityType, [FormManager::class, 'handleCreateNPCResponse']);
-			});
+			NPCForms::sendMainMenu($sender);
 
 			return;
 		}
