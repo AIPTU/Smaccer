@@ -3,10 +3,5 @@ parameters:
 	paths:
 		- src
 	treatPhpDocTypesAsCertain: false
-	stubFiles:
-		- vendor/pocketmine/pocketmine-mp/tests/phpstan/stubs/pmmpthread.stub
-		- vendor/pocketmine/snooze/tests/phpstan/stubs/pmmpthread.stub
 	ignoreErrors:
 		- identifier: missingType.iterableValue
-		- identifier: class.notFound
-		  path: src/aiptu/smaccer/tasks/QueryServerTask.php
