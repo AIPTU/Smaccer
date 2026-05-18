@@ -253,9 +253,7 @@ class Smaccer extends PluginBase {
 				$this->getLogger()->info('Loaded ' . count($cachedFile['emotes']) . ' emotes from cache');
 			}
 
-			$this->getServer()->getAsyncPool()->submitTask(
-				new LoadEmotesTask($cacheFilePath, $cachedFile['commit_id'], $sender)
-			);
+			$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask($cacheFilePath, $cachedFile['commit_id'], $sender));
 		} else {
 			$this->emoteManager = new EmoteManager([]);
 
@@ -265,9 +263,7 @@ class Smaccer extends PluginBase {
 				$sender->sendMessage('[Smaccer] §eLoading emotes from repository...');
 			}
 
-			$this->getServer()->getAsyncPool()->submitTask(
-				new LoadEmotesTask($cacheFilePath, null, $sender)
-			);
+			$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask($cacheFilePath, null, $sender));
 		}
 	}
 

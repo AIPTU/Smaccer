@@ -65,29 +65,27 @@ class QueryForms {
 			return;
 		}
 
-		$player->sendForm(
-			new CustomForm(
-				'Add Server Query',
-				[
-					new Input('Enter IP/Domain', 'ip_or_domain'),
-					new Input('Enter Port', 'port'),
-				],
-				function (Player $player, CustomFormResponse $response) use ($npc) : void {
-					$values = $response->getValues();
+		$player->sendForm(new CustomForm(
+			'Add Server Query',
+			[
+				new Input('Enter IP/Domain', 'ip_or_domain'),
+				new Input('Enter Port', 'port'),
+			],
+			function (Player $player, CustomFormResponse $response) use ($npc) : void {
+				$values = $response->getValues();
 
-					if (!is_string($values[0]) || !is_numeric($values[1])) {
-						$player->sendMessage(TextFormat::RED . 'Invalid form values.');
-						return;
-					}
-
-					if ($npc->getQueryHandler()->addServerQuery($values[0], (int) $values[1]) !== null) {
-						$player->sendMessage(TextFormat::GREEN . "Server query added to NPC {$npc->getName()}.");
-					} else {
-						$player->sendMessage(TextFormat::RED . "Failed to add server query for NPC {$npc->getName()}.");
-					}
+				if (!is_string($values[0]) || !is_numeric($values[1])) {
+					$player->sendMessage(TextFormat::RED . 'Invalid form values.');
+					return;
 				}
-			)
-		);
+
+				if ($npc->getQueryHandler()->addServerQuery($values[0], (int) $values[1]) !== null) {
+					$player->sendMessage(TextFormat::GREEN . "Server query added to NPC {$npc->getName()}.");
+				} else {
+					$player->sendMessage(TextFormat::RED . "Failed to add server query for NPC {$npc->getName()}.");
+				}
+			}
+		));
 	}
 
 	private static function sendAddWorld(Player $player, Entity $npc) : void {
@@ -95,21 +93,19 @@ class QueryForms {
 			return;
 		}
 
-		$player->sendForm(
-			new CustomForm(
-				'Add World Query',
-				[new Input('Enter world name', 'world_name')],
-				function (Player $player, CustomFormResponse $response) use ($npc) : void {
-					$worldName = $response->getInput()->getValue();
+		$player->sendForm(new CustomForm(
+			'Add World Query',
+			[new Input('Enter world name', 'world_name')],
+			function (Player $player, CustomFormResponse $response) use ($npc) : void {
+				$worldName = $response->getInput()->getValue();
 
-					if ($npc->getQueryHandler()->addWorldQuery($worldName) !== null) {
-						$player->sendMessage(TextFormat::GREEN . "World query added to NPC {$npc->getName()}.");
-					} else {
-						$player->sendMessage(TextFormat::RED . "Failed to add world query for NPC {$npc->getName()}.");
-					}
+				if ($npc->getQueryHandler()->addWorldQuery($worldName) !== null) {
+					$player->sendMessage(TextFormat::GREEN . "World query added to NPC {$npc->getName()}.");
+				} else {
+					$player->sendMessage(TextFormat::RED . "Failed to add world query for NPC {$npc->getName()}.");
 				}
-			)
-		);
+			}
+		));
 	}
 
 	private static function sendEditRemove(Player $player, Entity $npc, string $queryType) : void {
@@ -135,25 +131,23 @@ class QueryForms {
 			return;
 		}
 
-		$player->sendForm(
-			new MenuForm(
-				'Edit/Remove Query',
-				'Select a query to edit/remove:',
-				$buttons,
-				function (Player $player, Button $selected) use ($npc, $queries) : void {
-					$selectedText = $selected->text;
-					foreach ($queries as $id => $data) {
-						$expectedText = $data['type'] === QueryHandler::TYPE_SERVER
-							? "IP: {$data['value']['ip']} Port: {$data['value']['port']}"
-							: "World: {$data['value']['world_name']}";
-						if ($expectedText === $selectedText) {
-							self::sendEditOrRemoveOptions($player, $npc, $id, $data['type'], $data['value']);
-							return;
-						}
+		$player->sendForm(new MenuForm(
+			'Edit/Remove Query',
+			'Select a query to edit/remove:',
+			$buttons,
+			function (Player $player, Button $selected) use ($npc, $queries) : void {
+				$selectedText = $selected->text;
+				foreach ($queries as $id => $data) {
+					$expectedText = $data['type'] === QueryHandler::TYPE_SERVER
+						? "IP: {$data['value']['ip']} Port: {$data['value']['port']}"
+						: "World: {$data['value']['world_name']}";
+					if ($expectedText === $selectedText) {
+						self::sendEditOrRemoveOptions($player, $npc, $id, $data['type'], $data['value']);
+						return;
 					}
 				}
-			)
-		);
+			}
+		));
 	}
 
 	private static function sendEditOrRemoveOptions(Player $player, Entity $npc, int $queryId, string $queryType, array $queryValue) : void {
@@ -161,20 +155,18 @@ class QueryForms {
 			return;
 		}
 
-		$player->sendForm(
-			MenuForm::withOptions(
-				'Edit or Remove Query',
-				$queryType === QueryHandler::TYPE_SERVER
+		$player->sendForm(MenuForm::withOptions(
+			'Edit or Remove Query',
+			$queryType === QueryHandler::TYPE_SERVER
 					? "IP: {$queryValue['ip']} Port: {$queryValue['port']}"
 					: "World: {$queryValue['world_name']}",
-				['Edit', 'Remove'],
-				fn (Player $player, Button $selected) => match ($selected->getValue()) {
-					0 => self::sendEdit($player, $npc, $queryId, $queryType, $queryValue),
-					1 => self::confirmRemove($player, $npc, $queryId),
-					default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
-				}
-			)
-		);
+			['Edit', 'Remove'],
+			fn (Player $player, Button $selected) => match ($selected->getValue()) {
+				0 => self::sendEdit($player, $npc, $queryId, $queryType, $queryValue),
+				1 => self::confirmRemove($player, $npc, $queryId),
+				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+			}
+		));
 	}
 
 	private static function sendEdit(Player $player, Entity $npc, int $queryId, string $queryType, array $queryValue) : void {
@@ -183,45 +175,41 @@ class QueryForms {
 		}
 
 		if ($queryType === QueryHandler::TYPE_SERVER) {
-			$player->sendForm(
-				new CustomForm(
-					'Edit Server Query',
-					[
-						new Input('Edit IP/Domain', 'ip_or_domain', $queryValue['ip']),
-						new Input('Edit Port', 'port', (string) $queryValue['port']),
-					],
-					function (Player $player, CustomFormResponse $response) use ($npc, $queryId) : void {
-						$values = $response->getValues();
+			$player->sendForm(new CustomForm(
+				'Edit Server Query',
+				[
+					new Input('Edit IP/Domain', 'ip_or_domain', $queryValue['ip']),
+					new Input('Edit Port', 'port', (string) $queryValue['port']),
+				],
+				function (Player $player, CustomFormResponse $response) use ($npc, $queryId) : void {
+					$values = $response->getValues();
 
-						if (!is_string($values[0]) || !is_numeric($values[1])) {
-							$player->sendMessage(TextFormat::RED . 'Invalid form values.');
-							return;
-						}
-
-						if ($npc->getQueryHandler()->editServerQuery($queryId, $values[0], (int) $values[1])) {
-							$player->sendMessage(TextFormat::GREEN . "Server query updated for NPC {$npc->getName()}.");
-						} else {
-							$player->sendMessage(TextFormat::RED . "Failed to update server query for NPC {$npc->getName()}.");
-						}
+					if (!is_string($values[0]) || !is_numeric($values[1])) {
+						$player->sendMessage(TextFormat::RED . 'Invalid form values.');
+						return;
 					}
-				)
-			);
+
+					if ($npc->getQueryHandler()->editServerQuery($queryId, $values[0], (int) $values[1])) {
+						$player->sendMessage(TextFormat::GREEN . "Server query updated for NPC {$npc->getName()}.");
+					} else {
+						$player->sendMessage(TextFormat::RED . "Failed to update server query for NPC {$npc->getName()}.");
+					}
+				}
+			));
 		} else {
-			$player->sendForm(
-				new CustomForm(
-					'Edit World Query',
-					[new Input('Edit world name', 'world_name', $queryValue['world_name'])],
-					function (Player $player, CustomFormResponse $response) use ($npc, $queryId) : void {
-						$newWorldName = $response->getInput()->getValue();
+			$player->sendForm(new CustomForm(
+				'Edit World Query',
+				[new Input('Edit world name', 'world_name', $queryValue['world_name'])],
+				function (Player $player, CustomFormResponse $response) use ($npc, $queryId) : void {
+					$newWorldName = $response->getInput()->getValue();
 
-						if ($npc->getQueryHandler()->editWorldQuery($queryId, $newWorldName)) {
-							$player->sendMessage(TextFormat::GREEN . "World query updated for NPC {$npc->getName()}.");
-						} else {
-							$player->sendMessage(TextFormat::RED . "Failed to update world query for NPC {$npc->getName()}.");
-						}
+					if ($npc->getQueryHandler()->editWorldQuery($queryId, $newWorldName)) {
+						$player->sendMessage(TextFormat::GREEN . "World query updated for NPC {$npc->getName()}.");
+					} else {
+						$player->sendMessage(TextFormat::RED . "Failed to update world query for NPC {$npc->getName()}.");
 					}
-				)
-			);
+				}
+			));
 		}
 	}
 
@@ -230,15 +218,13 @@ class QueryForms {
 			return;
 		}
 
-		$player->sendForm(
-			ModalForm::confirm(
-				'Confirm Remove Query',
-				"Are you sure you want to remove this query from NPC: {$npc->getName()}?",
-				function (Player $player) use ($npc, $queryId) : void {
-					$npc->getQueryHandler()->removeById($queryId);
-					$player->sendMessage(TextFormat::GREEN . "Query removed from NPC {$npc->getName()}.");
-				}
-			)
-		);
+		$player->sendForm(ModalForm::confirm(
+			'Confirm Remove Query',
+			"Are you sure you want to remove this query from NPC: {$npc->getName()}?",
+			function (Player $player) use ($npc, $queryId) : void {
+				$npc->getQueryHandler()->removeById($queryId);
+				$player->sendMessage(TextFormat::GREEN . "Query removed from NPC {$npc->getName()}.");
+			}
+		));
 	}
 }

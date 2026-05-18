@@ -64,28 +64,26 @@ class CommandForms {
 			return;
 		}
 
-		$player->sendForm(
-			new CustomForm(
-				'Add Command',
-				[
-					new Input('Enter command', 'command', ''),
-					new Dropdown('Select command type', [
-						EntityTag::COMMAND_TYPE_PLAYER,
-						EntityTag::COMMAND_TYPE_SERVER,
-					]),
-				],
-				function (Player $player, CustomFormResponse $response) use ($npc) : void {
-					$command = $response->getInput()->getValue();
-					$commandType = $response->getDropdown()->getSelectedOption();
+		$player->sendForm(new CustomForm(
+			'Add Command',
+			[
+				new Input('Enter command', 'command', ''),
+				new Dropdown('Select command type', [
+					EntityTag::COMMAND_TYPE_PLAYER,
+					EntityTag::COMMAND_TYPE_SERVER,
+				]),
+			],
+			function (Player $player, CustomFormResponse $response) use ($npc) : void {
+				$command = $response->getInput()->getValue();
+				$commandType = $response->getDropdown()->getSelectedOption();
 
-					if ($npc->addCommand($command, $commandType) !== null) {
-						$player->sendMessage(TextFormat::GREEN . "Command added to NPC {$npc->getName()}.");
-					} else {
-						$player->sendMessage(TextFormat::RED . "Failed to add command for NPC {$npc->getName()}.");
-					}
+				if ($npc->addCommand($command, $commandType) !== null) {
+					$player->sendMessage(TextFormat::GREEN . "Command added to NPC {$npc->getName()}.");
+				} else {
+					$player->sendMessage(TextFormat::RED . "Failed to add command for NPC {$npc->getName()}.");
 				}
-			)
-		);
+			}
+		));
 	}
 
 	private static function sendList(Player $player, Entity $npc) : void {
@@ -101,22 +99,20 @@ class CommandForms {
 			$commands
 		);
 
-		$player->sendForm(
-			new MenuForm(
-				'List Commands',
-				'Commands for NPC:',
-				$buttons,
-				function (Player $player, Button $selected) use ($npc, $commands) : void {
-					$selectedText = $selected->text;
-					foreach ($commands as $id => $data) {
-						if ("Command: {$data['command']} (Type: {$data['type']})" === $selectedText) {
-							self::sendEditOrRemove($player, $npc, $id, $data['command'], $data['type']);
-							break;
-						}
+		$player->sendForm(new MenuForm(
+			'List Commands',
+			'Commands for NPC:',
+			$buttons,
+			function (Player $player, Button $selected) use ($npc, $commands) : void {
+				$selectedText = $selected->text;
+				foreach ($commands as $id => $data) {
+					if ("Command: {$data['command']} (Type: {$data['type']})" === $selectedText) {
+						self::sendEditOrRemove($player, $npc, $id, $data['command'], $data['type']);
+						break;
 					}
 				}
-			)
-		);
+			}
+		));
 	}
 
 	private static function sendEditOrRemove(Player $player, Entity $npc, int $commandId, string $command, string $type) : void {
@@ -124,18 +120,16 @@ class CommandForms {
 			return;
 		}
 
-		$player->sendForm(
-			MenuForm::withOptions(
-				'Edit or Remove Command',
-				"Command: {$command} (Type: {$type})",
-				['Edit', 'Remove'],
-				fn (Player $player, Button $selected) => match ($selected->getValue()) {
-					0 => self::sendEdit($player, $npc, $commandId, $command, $type),
-					1 => self::confirmRemove($player, $npc, $commandId),
-					default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
-				}
-			)
-		);
+		$player->sendForm(MenuForm::withOptions(
+			'Edit or Remove Command',
+			"Command: {$command} (Type: {$type})",
+			['Edit', 'Remove'],
+			fn (Player $player, Button $selected) => match ($selected->getValue()) {
+				0 => self::sendEdit($player, $npc, $commandId, $command, $type),
+				1 => self::confirmRemove($player, $npc, $commandId),
+				default => $player->sendMessage(TextFormat::RED . 'Invalid option selected.'),
+			}
+		));
 	}
 
 	private static function sendEdit(Player $player, Entity $npc, int $commandId, string $command, string $type) : void {
@@ -145,28 +139,26 @@ class CommandForms {
 
 		$defaultTypeIndex = array_search($type, [EntityTag::COMMAND_TYPE_PLAYER, EntityTag::COMMAND_TYPE_SERVER], true);
 
-		$player->sendForm(
-			new CustomForm(
-				'Edit Command',
-				[
-					new Input('Edit command', 'command', $command),
-					new Dropdown('Select command type', [
-						EntityTag::COMMAND_TYPE_PLAYER,
-						EntityTag::COMMAND_TYPE_SERVER,
-					], $defaultTypeIndex !== false ? $defaultTypeIndex : 0),
-				],
-				function (Player $player, CustomFormResponse $response) use ($npc, $commandId) : void {
-					$newCommand = $response->getInput()->getValue();
-					$newType = $response->getDropdown()->getSelectedOption();
+		$player->sendForm(new CustomForm(
+			'Edit Command',
+			[
+				new Input('Edit command', 'command', $command),
+				new Dropdown('Select command type', [
+					EntityTag::COMMAND_TYPE_PLAYER,
+					EntityTag::COMMAND_TYPE_SERVER,
+				], $defaultTypeIndex !== false ? $defaultTypeIndex : 0),
+			],
+			function (Player $player, CustomFormResponse $response) use ($npc, $commandId) : void {
+				$newCommand = $response->getInput()->getValue();
+				$newType = $response->getDropdown()->getSelectedOption();
 
-					if ($npc->editCommand($commandId, $newCommand, $newType)) {
-						$player->sendMessage(TextFormat::GREEN . "Command updated for NPC {$npc->getName()}.");
-					} else {
-						$player->sendMessage(TextFormat::RED . "Failed to update command for NPC {$npc->getName()}.");
-					}
+				if ($npc->editCommand($commandId, $newCommand, $newType)) {
+					$player->sendMessage(TextFormat::GREEN . "Command updated for NPC {$npc->getName()}.");
+				} else {
+					$player->sendMessage(TextFormat::RED . "Failed to update command for NPC {$npc->getName()}.");
 				}
-			)
-		);
+			}
+		));
 	}
 
 	private static function confirmRemove(Player $player, Entity $npc, int $commandId) : void {
@@ -174,16 +166,14 @@ class CommandForms {
 			return;
 		}
 
-		$player->sendForm(
-			ModalForm::confirm(
-				'Confirm Remove Command',
-				"Are you sure you want to remove this command from NPC: {$npc->getName()}?",
-				function (Player $player) use ($npc, $commandId) : void {
-					$npc->removeCommandById($commandId);
-					$player->sendMessage(TextFormat::GREEN . "Command removed from NPC {$npc->getName()}.");
-				}
-			)
-		);
+		$player->sendForm(ModalForm::confirm(
+			'Confirm Remove Command',
+			"Are you sure you want to remove this command from NPC: {$npc->getName()}?",
+			function (Player $player) use ($npc, $commandId) : void {
+				$npc->removeCommandById($commandId);
+				$player->sendMessage(TextFormat::GREEN . "Command removed from NPC {$npc->getName()}.");
+			}
+		));
 	}
 
 	private static function confirmClear(Player $player, Entity $npc) : void {
@@ -191,15 +181,13 @@ class CommandForms {
 			return;
 		}
 
-		$player->sendForm(
-			ModalForm::confirm(
-				'Confirm Clear Commands',
-				"Are you sure you want to clear all commands from NPC: {$npc->getName()}?",
-				function (Player $player) use ($npc) : void {
-					$npc->clearCommands();
-					$player->sendMessage(TextFormat::GREEN . "All commands cleared from NPC {$npc->getName()}.");
-				}
-			)
-		);
+		$player->sendForm(ModalForm::confirm(
+			'Confirm Clear Commands',
+			"Are you sure you want to clear all commands from NPC: {$npc->getName()}?",
+			function (Player $player) use ($npc) : void {
+				$npc->clearCommands();
+				$player->sendMessage(TextFormat::GREEN . "All commands cleared from NPC {$npc->getName()}.");
+			}
+		));
 	}
 }

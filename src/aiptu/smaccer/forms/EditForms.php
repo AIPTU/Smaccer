@@ -108,63 +108,61 @@ class EditForms {
 			$formElements[] = new Toggle('Enable slapback?', $npc->canSlapBack());
 		}
 
-		$player->sendForm(
-			new CustomForm(
-				'Edit NPC',
-				$formElements,
-				function (Player $player, CustomFormResponse $response) use ($npc) : void {
-					$values = $response->getValues();
+		$player->sendForm(new CustomForm(
+			'Edit NPC',
+			$formElements,
+			function (Player $player, CustomFormResponse $response) use ($npc) : void {
+				$values = $response->getValues();
 
-					if (!is_string($values[0]) || !is_numeric($values[1]) || !is_bool($values[2]) || !is_bool($values[3]) || !is_string($values[4]) || !is_bool($values[5])) {
-						$player->sendMessage(TextFormat::RED . 'Invalid form values.');
-						return;
-					}
-
-					$scale = (float) $values[1];
-					if ($scale < 0.1 || $scale > 10.0) {
-						$player->sendMessage(TextFormat::RED . 'Invalid scale value. Please enter a number between 0.1 and 10.0.');
-						return;
-					}
-
-					$type = SmaccerHandler::getInstance()->getIdentifierByClass($npc);
-					if ($type === null) {
-						$player->sendMessage(TextFormat::RED . 'Could not determine NPC type.');
-						return;
-					}
-
-					$npcData = NPCData::create($type)
-						->setNameTag($values[0])
-						->setScale($scale)
-						->setRotationEnabled($values[2])
-						->setNametagVisible($values[3])
-						->setVisibility(EntityVisibility::fromString($values[4]))
-						->setHasGravity($values[5]);
-
-					$index = 6;
-
-					if ($npc instanceof EntityAgeable && isset($values[$index])) {
-						$npcData->setBaby((bool) $values[$index]);
-						++$index;
-					}
-
-					if ($npc instanceof HumanSmaccer && isset($values[$index])) {
-						$npcData->setSlapBack((bool) $values[$index]);
-					}
-
-					SmaccerHandler::getInstance()->editNPC(
-						$player,
-						$npc,
-						$npcData,
-						function (bool $success) use ($player, $npc) : void {
-							$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' updated successfully!');
-						},
-						function (\Throwable $e) use ($player) : void {
-							$player->sendMessage(TextFormat::RED . 'Failed to edit NPC: ' . $e->getMessage());
-						}
-					);
+				if (!is_string($values[0]) || !is_numeric($values[1]) || !is_bool($values[2]) || !is_bool($values[3]) || !is_string($values[4]) || !is_bool($values[5])) {
+					$player->sendMessage(TextFormat::RED . 'Invalid form values.');
+					return;
 				}
-			)
-		);
+
+				$scale = (float) $values[1];
+				if ($scale < 0.1 || $scale > 10.0) {
+					$player->sendMessage(TextFormat::RED . 'Invalid scale value. Please enter a number between 0.1 and 10.0.');
+					return;
+				}
+
+				$type = SmaccerHandler::getInstance()->getIdentifierByClass($npc);
+				if ($type === null) {
+					$player->sendMessage(TextFormat::RED . 'Could not determine NPC type.');
+					return;
+				}
+
+				$npcData = NPCData::create($type)
+					->setNameTag($values[0])
+					->setScale($scale)
+					->setRotationEnabled($values[2])
+					->setNametagVisible($values[3])
+					->setVisibility(EntityVisibility::fromString($values[4]))
+					->setHasGravity($values[5]);
+
+				$index = 6;
+
+				if ($npc instanceof EntityAgeable && isset($values[$index])) {
+					$npcData->setBaby((bool) $values[$index]);
+					++$index;
+				}
+
+				if ($npc instanceof HumanSmaccer && isset($values[$index])) {
+					$npcData->setSlapBack((bool) $values[$index]);
+				}
+
+				SmaccerHandler::getInstance()->editNPC(
+					$player,
+					$npc,
+					$npcData,
+					function (bool $success) use ($player, $npc) : void {
+						$player->sendMessage(TextFormat::GREEN . 'NPC ' . $npc->getName() . ' updated successfully!');
+					},
+					function (\Throwable $e) use ($player) : void {
+						$player->sendMessage(TextFormat::RED . 'Failed to edit NPC: ' . $e->getMessage());
+					}
+				);
+			}
+		));
 	}
 
 	public static function sendTeleport(Player $player, Entity $npc, string $action) : void {
@@ -175,28 +173,26 @@ class EditForms {
 		$server = Smaccer::getInstance()->getServer();
 		$playerNames = array_values(array_map(fn ($player) => $player->getName(), $server->getOnlinePlayers()));
 
-		$player->sendForm(
-			MenuForm::withOptions(
-				'Teleport Options',
-				'Select a player:',
-				$playerNames,
-				function (Player $player, Button $selected) use ($server, $npc, $action) : void {
-					$selectedPlayerName = $selected->text;
-					$selectedPlayer = $server->getPlayerExact($selectedPlayerName);
+		$player->sendForm(MenuForm::withOptions(
+			'Teleport Options',
+			'Select a player:',
+			$playerNames,
+			function (Player $player, Button $selected) use ($server, $npc, $action) : void {
+				$selectedPlayerName = $selected->text;
+				$selectedPlayer = $server->getPlayerExact($selectedPlayerName);
 
-					if ($selectedPlayer !== null) {
-						if ($action === 'npc_to_player') {
-							$npc->teleport($selectedPlayer->getLocation());
-							$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been teleported to {$selectedPlayerName}'s location.");
-						} elseif ($action === 'player_to_npc') {
-							$player->teleport($npc->getLocation());
-							$player->sendMessage(TextFormat::GREEN . "You have been teleported to NPC {$npc->getName()}'s location.");
-						}
-					} else {
-						$player->sendMessage(TextFormat::RED . 'Player not found.');
+				if ($selectedPlayer !== null) {
+					if ($action === 'npc_to_player') {
+						$npc->teleport($selectedPlayer->getLocation());
+						$player->sendMessage(TextFormat::GREEN . "NPC {$npc->getName()} has been teleported to {$selectedPlayerName}'s location.");
+					} elseif ($action === 'player_to_npc') {
+						$player->teleport($npc->getLocation());
+						$player->sendMessage(TextFormat::GREEN . "You have been teleported to NPC {$npc->getName()}'s location.");
 					}
+				} else {
+					$player->sendMessage(TextFormat::RED . 'Player not found.');
 				}
-			)
-		);
+			}
+		));
 	}
 }
