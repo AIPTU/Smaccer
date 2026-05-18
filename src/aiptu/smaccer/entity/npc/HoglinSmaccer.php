@@ -23,11 +23,11 @@ class HoglinSmaccer extends EntityAgeable {
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.425 : 0.85;
+		return $this->isBaby() ? 0.95 : 1.9;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.425 : 0.85;
+		return $this->isBaby() ? 0.3 : 0.6;
 	}
 
 	public static function getNetworkTypeId() : string {

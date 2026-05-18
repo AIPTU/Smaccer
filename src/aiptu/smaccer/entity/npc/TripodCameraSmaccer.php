@@ -13,28 +13,28 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\npc;
 
-use aiptu\smaccer\entity\EntityAgeable;
+use aiptu\smaccer\entity\EntitySmaccer;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
-class ZoglinSmaccer extends EntityAgeable {
+class TripodCameraSmaccer extends EntitySmaccer {
 	protected function getInitialSizeInfo() : EntitySizeInfo {
 		return new EntitySizeInfo($this->getHeight(), $this->getWidth());
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.7 : 1.4;
+		return 1.8;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.7 : 1.4;
+		return 0.75;
 	}
 
 	public static function getNetworkTypeId() : string {
-		return EntityIds::ZOGLIN;
+		return EntityIds::TRIPOD_CAMERA;
 	}
 
 	public function getName() : string {
-		return 'Zoglin';
+		return 'Tripod Camera';
 	}
 }

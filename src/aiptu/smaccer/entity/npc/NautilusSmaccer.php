@@ -17,24 +17,24 @@ use aiptu\smaccer\entity\EntityAgeable;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
-class ZoglinSmaccer extends EntityAgeable {
+class NautilusSmaccer extends EntityAgeable {
 	protected function getInitialSizeInfo() : EntitySizeInfo {
 		return new EntitySizeInfo($this->getHeight(), $this->getWidth());
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.7 : 1.4;
+		return $this->isBaby() ? 0.5 : 0.5;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.7 : 1.4;
+		return $this->isBaby() ? 0.44 : 0.44;
 	}
 
 	public static function getNetworkTypeId() : string {
-		return EntityIds::ZOGLIN;
+		return EntityIds::NAUTILUS;
 	}
 
 	public function getName() : string {
-		return 'Zoglin';
+		return 'Nautilus';
 	}
 }

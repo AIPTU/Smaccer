@@ -23,11 +23,11 @@ class TurtleSmaccer extends EntityAgeable {
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.032 : 0.2;
+		return $this->isBaby() ? 0.21333328 : 1.333333;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.096 : 0.6;
+		return $this->isBaby() ? 0.64 : 4;
 	}
 
 	public static function getNetworkTypeId() : string {

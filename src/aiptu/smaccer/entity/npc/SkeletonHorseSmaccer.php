@@ -23,11 +23,11 @@ class SkeletonHorseSmaccer extends EntityAgeable {
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.8 : 1.6;
+		return $this->isBaby() ? 1.12 : 2.24;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.7 : 1.4;
+		return $this->isBaby() ? 0.98 : 1.96;
 	}
 
 	public static function getNetworkTypeId() : string {

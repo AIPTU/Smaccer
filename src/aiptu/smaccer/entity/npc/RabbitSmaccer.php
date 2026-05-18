@@ -23,11 +23,11 @@ class RabbitSmaccer extends EntityAgeable {
 	}
 
 	public function getHeight() : float {
-		return $this->isBaby() ? 0.402 : 0.67;
+		return $this->isBaby() ? 0.6 : 1;
 	}
 
 	public function getWidth() : float {
-		return $this->isBaby() ? 0.402 : 0.67;
+		return $this->isBaby() ? 0.36 : 0.6;
 	}
 
 	public static function getNetworkTypeId() : string {
