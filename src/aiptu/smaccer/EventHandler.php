@@ -131,9 +131,10 @@ class EventHandler implements Listener {
 		$action = Queue::getCurrentAction($playerName);
 
 		if ($action === null) {
-            if ($entity->canExecuteCommands($damager)) {
-                $entity->executeCommands($damager);
-            }
+			if ($entity->canExecuteCommands($damager)) {
+				$entity->executeCommands($damager);
+			}
+
 			$event->cancel();
 			return;
 		}

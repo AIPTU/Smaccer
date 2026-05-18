@@ -21,6 +21,8 @@ use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use function count;
 use function is_array;
+use function is_int;
+use function is_string;
 
 class LoadEmotesTask extends AsyncTask {
 	private ?string $playerName;
@@ -81,7 +83,7 @@ class LoadEmotesTask extends AsyncTask {
 		}
 
 		$status = $result['status'];
-		$message = $result['message'] ?? 'Unknown error';
+		$message = isset($result['message']) && is_string($result['message']) ? $result['message'] : 'Unknown error';
 
 		if ($status === 'unchanged') {
 			Smaccer::getInstance()->getLogger()->debug($message);
@@ -102,8 +104,8 @@ class LoadEmotesTask extends AsyncTask {
 			$emoteManager = new EmoteManager($emotes);
 			Smaccer::getInstance()->setEmoteManager($emoteManager);
 
-			$count = $result['count'] ?? count($emotes);
-			$commitId = $result['commit_id'] ?? 'unknown';
+			$count = (string) (isset($result['count']) && is_int($result['count']) ? $result['count'] : count($emotes));
+			$commitId = isset($result['commit_id']) && is_string($result['commit_id']) ? $result['commit_id'] : 'unknown';
 
 			Smaccer::getInstance()->getLogger()->info('Successfully loaded ' . $count . ' emotes (commit: ' . $commitId . ')');
 			$this->sendMessage('§aSuccessfully loaded §e' . $count . '§a emotes!');
