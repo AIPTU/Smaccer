@@ -16,7 +16,7 @@ namespace aiptu\smaccer\command\subcommand;
 use aiptu\smaccer\command\argument\ReloadTypeArgument;
 use aiptu\smaccer\Smaccer;
 use aiptu\smaccer\utils\Permissions;
-use CortexPE\Commando\BaseSubCommand;
+use aiptu\smaccer\libs\_be99fe6700f3ed7a\CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;

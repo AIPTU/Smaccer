@@ -13,16 +13,16 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer;
 
-use aiptu\libplaceholder\PlaceholderManager;
+use aiptu\smaccer\libs\_be99fe6700f3ed7a\aiptu\libplaceholder\PlaceholderManager;
 use aiptu\smaccer\command\SmaccerCommand;
 use aiptu\smaccer\entity\emote\EmoteManager;
 use aiptu\smaccer\entity\SmaccerHandler;
 use aiptu\smaccer\entity\utils\EntityVisibility;
 use aiptu\smaccer\tasks\LoadEmotesTask;
 use aiptu\smaccer\utils\EmoteUtils;
-use CortexPE\Commando\PacketHooker;
+use aiptu\smaccer\libs\_be99fe6700f3ed7a\CortexPE\Commando\PacketHooker;
 use InvalidArgumentException;
-use JackMD\UpdateNotifier\UpdateNotifier;
+use aiptu\smaccer\libs\_be99fe6700f3ed7a\JackMD\UpdateNotifier\UpdateNotifier;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
