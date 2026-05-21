@@ -78,7 +78,7 @@ class SmaccerHandler {
 			throw new InvalidArgumentException("NPC type '{$identifier}' is already registered.");
 		}
 
-		if (!is_subclass_of($entityClass, EntitySmaccer::class) && !is_subclass_of($entityClass, HumanSmaccer::class)) {
+		if (!is_subclass_of($entityClass, EntitySmaccer::class, true) && !is_subclass_of($entityClass, HumanSmaccer::class, true)) {
 			throw new InvalidArgumentException("Class {$entityClass} must be a subclass of " . EntitySmaccer::class . ' or ' . HumanSmaccer::class);
 		}
 

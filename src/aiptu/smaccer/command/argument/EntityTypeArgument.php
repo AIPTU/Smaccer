@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace aiptu\smaccer\command\argument;
 
 use aiptu\smaccer\entity\SmaccerHandler;
-use aiptu\smaccer\libs\_be99fe6700f3ed7a\CortexPE\Commando\args\StringEnumArgument;
+use aiptu\smaccer\libs\_f310f1bb518bdb77\CortexPE\Commando\args\StringEnumArgument;
 use pocketmine\command\CommandSender;
 use function array_values;
 
