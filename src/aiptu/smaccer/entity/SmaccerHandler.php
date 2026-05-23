@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace aiptu\smaccer\entity;
 
 use aiptu\smaccer\entity\npc\AllaySmaccer;
+use aiptu\smaccer\entity\npc\ArmorStandSmaccer;
 use aiptu\smaccer\entity\npc\ArmadilloSmaccer;
 use aiptu\smaccer\entity\npc\AxolotlSmaccer;
 use aiptu\smaccer\entity\npc\BatSmaccer;
@@ -22,6 +23,8 @@ use aiptu\smaccer\entity\npc\BlazeSmaccer;
 use aiptu\smaccer\entity\npc\BoggedSmaccer;
 use aiptu\smaccer\entity\npc\BreezeSmaccer;
 use aiptu\smaccer\entity\npc\CamelSmaccer;
+use aiptu\smaccer\entity\npc\CamelHuskSmaccer;
+use aiptu\smaccer\entity\npc\CopperGolemSmaccer;
 use aiptu\smaccer\entity\npc\CatSmaccer;
 use aiptu\smaccer\entity\npc\CaveSpiderSmaccer;
 use aiptu\smaccer\entity\npc\ChickenSmaccer;
@@ -33,6 +36,7 @@ use aiptu\smaccer\entity\npc\DolphinSmaccer;
 use aiptu\smaccer\entity\npc\DonkeySmaccer;
 use aiptu\smaccer\entity\npc\DrownedSmaccer;
 use aiptu\smaccer\entity\npc\ElderGuardianSmaccer;
+use aiptu\smaccer\entity\npc\ElderGuardianGhostSmaccer;
 use aiptu\smaccer\entity\npc\EnderDragonSmaccer;
 use aiptu\smaccer\entity\npc\EndermanSmaccer;
 use aiptu\smaccer\entity\npc\EndermiteSmaccer;
@@ -43,6 +47,7 @@ use aiptu\smaccer\entity\npc\GhastSmaccer;
 use aiptu\smaccer\entity\npc\GlowSquidSmaccer;
 use aiptu\smaccer\entity\npc\GoatSmaccer;
 use aiptu\smaccer\entity\npc\GuardianSmaccer;
+use aiptu\smaccer\entity\npc\HappyGhastSmaccer;
 use aiptu\smaccer\entity\npc\HoglinSmaccer;
 use aiptu\smaccer\entity\npc\HorseSmaccer;
 use aiptu\smaccer\entity\npc\HuskSmaccer;
@@ -93,6 +98,7 @@ use aiptu\smaccer\entity\npc\WolfSmaccer;
 use aiptu\smaccer\entity\npc\ZoglinSmaccer;
 use aiptu\smaccer\entity\npc\ZombieHorseSmaccer;
 use aiptu\smaccer\entity\npc\ZombieSmaccer;
+use aiptu\smaccer\entity\npc\ZombiePigmanSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerSmaccer;
 use aiptu\smaccer\entity\npc\ZombieVillagerV2Smaccer;
 use aiptu\smaccer\entity\utils\EntityTag;
@@ -128,6 +134,7 @@ class SmaccerHandler {
 
 	private array $npcs = [
 		'Allay' => AllaySmaccer::class,
+		'ArmorStand' => ArmorStandSmaccer::class,
 		'Armadillo' => ArmadilloSmaccer::class,
 		'Axolotl' => AxolotlSmaccer::class,
 		'Bat' => BatSmaccer::class,
@@ -136,10 +143,12 @@ class SmaccerHandler {
 		'Bogged' => BoggedSmaccer::class,
 		'Breeze' => BreezeSmaccer::class,
 		'Camel' => CamelSmaccer::class,
+		'CamelHusk' => CamelHuskSmaccer::class,
 		'Cat' => CatSmaccer::class,
 		'CaveSpider' => CaveSpiderSmaccer::class,
 		'Chicken' => ChickenSmaccer::class,
 		'Cod' => CodSmaccer::class,
+		'CopperGolem' => CopperGolemSmaccer::class,
 		'Cow' => CowSmaccer::class,
 		'Creaking' => CreakingSmaccer::class,
 		'Creeper' => CreeperSmaccer::class,
@@ -147,6 +156,7 @@ class SmaccerHandler {
 		'Donkey' => DonkeySmaccer::class,
 		'Drowned' => DrownedSmaccer::class,
 		'ElderGuardian' => ElderGuardianSmaccer::class,
+		'ElderGuardianGhost' => ElderGuardianGhostSmaccer::class,
 		'EnderDragon' => EnderDragonSmaccer::class,
 		'Enderman' => EndermanSmaccer::class,
 		'Endermite' => EndermiteSmaccer::class,
@@ -154,6 +164,7 @@ class SmaccerHandler {
 		'Fox' => FoxSmaccer::class,
 		'Frog' => FrogSmaccer::class,
 		'Ghast' => GhastSmaccer::class,
+		'HappyGhast' => HappyGhastSmaccer::class,
 		'GlowSquid' => GlowSquidSmaccer::class,
 		'Goat' => GoatSmaccer::class,
 		'Guardian' => GuardianSmaccer::class,
@@ -206,6 +217,7 @@ class SmaccerHandler {
 		'Wolf' => WolfSmaccer::class,
 		'Zoglin' => ZoglinSmaccer::class,
 		'ZombieHorse' => ZombieHorseSmaccer::class,
+		'ZombiePigman' => ZombiePigmanSmaccer::class,
 		'Zombie' => ZombieSmaccer::class,
 		'ZombieVillager' => ZombieVillagerSmaccer::class,
 		'ZombieVillagerV2' => ZombieVillagerV2Smaccer::class,
