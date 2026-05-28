@@ -1,7 +1,7 @@
 name: Build phar
 on:
   push:
-    branches: [master, dev]
+    branches: [master]
 jobs:
   pharynx:
     name: build phar
