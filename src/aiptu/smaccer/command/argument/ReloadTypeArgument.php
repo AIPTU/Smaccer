@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -15,12 +15,14 @@ namespace aiptu\smaccer\command\argument;
 
 use CortexPE\Commando\args\StringEnumArgument;
 use pocketmine\command\CommandSender;
+use function assert;
+use function is_string;
 
 class ReloadTypeArgument extends StringEnumArgument {
-	public const CONFIG = 'config';
-	public const EMOTES = 'emotes';
+	public const string CONFIG = 'config';
+	public const string EMOTES = 'emotes';
 
-	protected const VALUES = [
+	protected const array VALUES = [
 		'config' => self::CONFIG,
 		'emotes' => self::EMOTES,
 	];
@@ -34,6 +36,8 @@ class ReloadTypeArgument extends StringEnumArgument {
 	}
 
 	public function parse(string $argument, CommandSender $sender) : string {
-		return (string) $this->getValue($argument);
+		$value = $this->getValue($argument);
+		assert(is_string($value));
+		return $value;
 	}
 }

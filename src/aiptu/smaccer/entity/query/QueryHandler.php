@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -19,14 +19,14 @@ use pocketmine\nbt\tag\ListTag;
 use function trim;
 
 class QueryHandler {
-	public const TYPE_SERVER = 'server';
-	public const TYPE_WORLD = 'world';
+	public const string TYPE_SERVER = 'server';
+	public const string TYPE_WORLD = 'world';
 
-	public const NBT_QUERIES_KEY = 'queries';
-	public const NBT_TYPE_KEY = 'type';
-	public const NBT_IP_KEY = 'ip';
-	public const NBT_PORT_KEY = 'port';
-	public const NBT_WORLD_NAME_KEY = 'world_name';
+	public const string NBT_QUERIES_KEY = 'queries';
+	public const string NBT_TYPE_KEY = 'type';
+	public const string NBT_IP_KEY = 'ip';
+	public const string NBT_PORT_KEY = 'port';
+	public const string NBT_WORLD_NAME_KEY = 'world_name';
 
 	/** @var array<int, array{type: string, value: array<string, int|string>}> */
 	private array $queries = [];

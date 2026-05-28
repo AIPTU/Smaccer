@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -14,18 +14,18 @@ declare(strict_types=1);
 namespace aiptu\smaccer\entity\utils;
 
 class EntityTag {
-	public const ACTOR_ID = 'ActorId';
-	public const CREATOR = 'Creator';
-	public const SCALE = 'Scale';
-	public const BABY = 'Baby';
-	public const COMMANDS = 'Commands';
-	public const COMMAND_TYPE_PLAYER = 'player';
-	public const COMMAND_TYPE_SERVER = 'server';
-	public const ROTATE_TO_PLAYERS = 'RotateToPlayers';
-	public const NAMETAG_VISIBLE = 'NametagVisible';
-	public const VISIBILITY = 'Visibility';
-	public const SLAP_BACK = 'SlapBack';
-	public const ACTION_EMOTE = 'ActionEmote';
-	public const EMOTE = 'Emote';
-	public const GRAVITY = 'Gravity';
+	public const string ACTOR_ID = 'ActorId';
+	public const string CREATOR = 'Creator';
+	public const string SCALE = 'Scale';
+	public const string BABY = 'Baby';
+	public const string COMMANDS = 'Commands';
+	public const string COMMAND_TYPE_PLAYER = 'player';
+	public const string COMMAND_TYPE_SERVER = 'server';
+	public const string ROTATE_TO_PLAYERS = 'RotateToPlayers';
+	public const string NAMETAG_VISIBLE = 'NametagVisible';
+	public const string VISIBILITY = 'Visibility';
+	public const string SLAP_BACK = 'SlapBack';
+	public const string ACTION_EMOTE = 'ActionEmote';
+	public const string EMOTE = 'Emote';
+	public const string GRAVITY = 'Gravity';
 }

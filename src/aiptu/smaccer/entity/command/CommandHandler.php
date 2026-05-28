@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -21,8 +21,8 @@ use function str_starts_with;
 use function substr;
 
 class CommandHandler {
-	public const KEY_COMMAND = 'command';
-	public const KEY_TYPE = 'type';
+	public const string KEY_COMMAND = 'command';
+	public const string KEY_TYPE = 'type';
 
 	/** @var array<int, array{command: string, type: string}> */
 	private array $commands = [];

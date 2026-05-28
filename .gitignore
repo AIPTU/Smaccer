@@ -1,2 +1,2 @@
-# Ignore Composer's vendor directory
-vendor/
+/vendor/
+.build/

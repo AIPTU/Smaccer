@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -13,95 +13,71 @@ declare(strict_types=1);
 
 namespace aiptu\smaccer\entity\emote;
 
-use function extract;
+use function array_key_exists;
 
 class EmoteManager {
-	/** @var array<EmoteType> */
-	private array $emotes = [];
+	/** @var array<string, EmoteType> */
+	private array $emotesByUuid = [];
+
+	/** @var array<string, EmoteType> */
+	private array $emotesByTitle = [];
 
 	/**
-	 * @param array{
-	 *      array{
-	 *          uuid: string,
-	 *          title: string,
-	 *          image: string
-	 *      }
-	 * } $emotes the array of emotes list
+	 * @param list<array{uuid: string, title: string, image: string}> $emotes
 	 */
 	public function __construct(array $emotes) {
 		$this->loadEmotes($emotes);
 	}
 
 	/**
-	 * Load emote from the given array.
+	 * Load emotes from the given array.
 	 *
-	 * @param array{
-	 *      array{
-	 *          uuid: string,
-	 *          title: string,
-	 *          image: string
-	 *      }
-	 * } $emotes the array of emotes list
+	 * @param list<array{uuid: string, title: string, image: string}> $emotes
 	 */
 	public function loadEmotes(array $emotes) : void {
-		// TODO: if your want to force load from github using a single command. so its should be empty first
-		$this->emotes = [];
+		$this->emotesByUuid = [];
+		$this->emotesByTitle = [];
 
-		foreach ($emotes as $emote) {
-			extract($emote);
+		foreach ($emotes as $emoteData) {
+			$uuid = $emoteData['uuid'];
+			$title = $emoteData['title'];
+			$image = $emoteData['image'];
 
 			$originalTitle = $title;
 			$counter = 2;
 
-			while ($this->ensureUniqueTitle($title)) {
+			while (array_key_exists($title, $this->emotesByTitle)) {
 				$title = $originalTitle . ' ' . $counter;
 				++$counter;
 			}
 
-			$this->emotes[] = new EmoteType($uuid, $title, $image);
+			$emote = new EmoteType($uuid, $title, $image);
+
+			$this->emotesByUuid[$uuid] = $emote;
+			$this->emotesByTitle[$title] = $emote;
 		}
 	}
 
 	/**
-	 * Ensure none of the title are the same.
-	 *
-	 * @param string $title The title that will be checked
-	 *
-	 * @return bool Returns `true` when the title is the same as the one listed and `false` when the title is Unique
+	 * Check if a title already exists.
 	 */
-	public function ensureUniqueTitle(string $title) {
-		foreach ($this->emotes as $emote) {
-			if ($emote->getTitle() === $title) {
-				return true;
-			}
-		}
-
-		return false;
+	public function ensureUniqueTitle(string $title) : bool {
+		return array_key_exists($title, $this->emotesByTitle);
 	}
 
 	/**
-	 * Get an emote by its uuid.
-	 *
-	 * @param string $uuid the UUID of the emote
-	 *
-	 * @return EmoteType|null returns `EmoteType` class when the uuid exists and `null` if the UUID doesn`t exists
+	 * Get an emote by its UUID.
 	 */
 	public function getEmote(string $uuid) : ?EmoteType {
-		foreach ($this->emotes as $emote) {
-			if ($emote->getUuid() === $uuid) {
-				return $emote;
-			}
-		}
-
-		return null;
+		return $this->emotesByUuid[$uuid] ?? null;
 	}
 
 	/**
-	 * Return all emotes.
+	 * Return all emotes indexed by UUID.
 	 *
-	 * @return array<EmoteType> Returns all of the `EmoteType`
+	 * @return array<string, EmoteType>
 	 */
 	public function getAll() : array {
-		return $this->emotes;
+		return $this->emotesByUuid;
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -79,12 +79,14 @@ class CreateSubCommand extends BaseSubCommand {
 
 		$isBaby = $args['isBaby'] ?? false;
 
-		$npcData = NPCData::create()
+		$npcData = NPCData::create($entityType)
 			->setNameTag($nameTag)
 			->setScale($scale)
 			->setBaby($isBaby);
 
-		SmaccerHandler::getInstance()->spawnNPC($entityType, $target, $npcData)->onCompletion(
+		SmaccerHandler::getInstance()->spawnNPC(
+			$target,
+			$npcData,
 			function (Entity $entity) use ($sender, $target) : void {
 				if (($entity instanceof HumanSmaccer) || ($entity instanceof EntitySmaccer)) {
 					$npcName = $entity->getName();

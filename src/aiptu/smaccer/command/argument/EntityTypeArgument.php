@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -16,13 +16,11 @@ namespace aiptu\smaccer\command\argument;
 use aiptu\smaccer\entity\SmaccerHandler;
 use CortexPE\Commando\args\StringEnumArgument;
 use pocketmine\command\CommandSender;
-use function array_keys;
-use function array_map;
+use function array_values;
 
 class EntityTypeArgument extends StringEnumArgument {
 	public function getEnumValues() : array {
-		$names = array_keys(SmaccerHandler::getInstance()->getRegisteredNPC());
-		return array_map('strtolower', $names);
+		return array_values(SmaccerHandler::getInstance()->getRegisteredNPC());
 	}
 
 	public function getTypeName() : string {

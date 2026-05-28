@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -16,7 +16,7 @@ namespace aiptu\smaccer\command\subcommand;
 use aiptu\smaccer\entity\EntitySmaccer;
 use aiptu\smaccer\entity\HumanSmaccer;
 use aiptu\smaccer\entity\utils\ActorHandler;
-use aiptu\smaccer\utils\FormManager;
+use aiptu\smaccer\forms\NPCForms;
 use aiptu\smaccer\utils\Permissions;
 use aiptu\smaccer\utils\Queue;
 use CortexPE\Commando\args\IntegerArgument;
@@ -73,7 +73,7 @@ class DeleteSubCommand extends BaseSubCommand {
 			return;
 		}
 
-		FormManager::confirmDeleteNPC($sender, $entity);
+		NPCForms::confirmDelete($sender, $entity);
 	}
 
 	public function prepare() : void {

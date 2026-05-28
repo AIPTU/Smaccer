@@ -166,7 +166,6 @@ npc-default-settings:
 ## Credits
 
 - [Bedrock-Emotes by TwistedAsylumMC](https://github.com/TwistedAsylumMC/Bedrock-Emotes) for providing the emotes.
-- [CPlot by ColinHDev](https://github.com/ColinHDev/CPlot) for implementing promises.
 
 ## Additional Notes
 

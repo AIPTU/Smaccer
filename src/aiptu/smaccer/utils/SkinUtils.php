@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -14,11 +14,14 @@ declare(strict_types=1);
 namespace aiptu\smaccer\utils;
 
 use aiptu\smaccer\Smaccer;
-use aiptu\smaccer\utils\promise\Promise;
-use aiptu\smaccer\utils\promise\PromiseResolver;
-use pocketmine\entity\Skin;
+use Closure;
+use GdImage;
+use InvalidArgumentException;
 use pocketmine\utils\Filesystem;
+use pocketmine\utils\InternetRequestResult;
+use RuntimeException;
 use Symfony\Component\Filesystem\Path;
+use Throwable;
 use function chr;
 use function imagecolorat;
 use function imagecreatefrompng;
@@ -32,184 +35,154 @@ use function uniqid;
 use function unlink;
 
 class SkinUtils {
-	private const SKIN = 'skin';
-	private const CAPE = 'cape';
+	private const string TYPE_SKIN = 'skin';
+	private const string TYPE_CAPE = 'cape';
+
+	private function __construct() {}
 
 	/**
-	 * Downloads a skin from a URL and returns the skin bytes in a promise.
+	 * Download and process skin from URL asynchronously.
 	 *
-	 * @param string $url the URL of the PNG skin
+	 * @param string  $url       PNG image URL
+	 * @param Closure $onSuccess Callback on success: function(string $skinBytes)
+	 * @param Closure $onError   Callback on error: function(Throwable $error)
 	 *
-	 * @return Promise<string> a promise that resolves to the skin bytes
-	 *
-	 * @throws \InvalidArgumentException if the URL is invalid or not a PNG
+	 * @throws InvalidArgumentException if URL format invalid
 	 */
-	public static function skinFromURL(string $url) : Promise {
-		$resolver = new PromiseResolver();
-
+	public static function skinFromURL(string $url, Closure $onSuccess, Closure $onError) : void {
 		try {
-			self::validateUrl($url);
 			self::validatePngUrl($url);
-
-			Utils::fetchAsync($url, function ($result) use ($resolver) : void {
-				if ($result === null) {
-					$resolver->reject(new \RuntimeException('Failed to download skin.'));
-					return;
-				}
-
-				$skinData = $result->getBody();
-				$filePath = self::saveSkinToFile($skinData);
-
-				$skinBytes = self::skinFromFile($filePath);
-				$resolver->resolve($skinBytes);
-			});
-		} catch (\Throwable $e) {
-			$resolver->reject($e);
+			self::downloadAndProcess($url, self::TYPE_SKIN, $onSuccess, $onError);
+		} catch (InvalidArgumentException $e) {
+			$onError($e);
 		}
-
-		return $resolver->getPromise();
 	}
 
 	/**
-	 * Downloads a cape from a URL and returns the cape bytes in a promise.
+	 * Download and process cape from URL asynchronously.
 	 *
-	 * @param string $url the URL of the PNG cape
+	 * @param string  $url       PNG image URL
+	 * @param Closure $onSuccess Callback on success: function(string $capeBytes)
+	 * @param Closure $onError   Callback on error: function(Throwable $error)
 	 *
-	 * @return Promise<string> a promise that resolves to the cape bytes
-	 *
-	 * @throws \InvalidArgumentException if the URL is invalid or not a PNG
+	 * @throws InvalidArgumentException if URL format invalid
 	 */
-	public static function capeFromURL(string $url) : Promise {
-		$resolver = new PromiseResolver();
-
+	public static function capeFromURL(string $url, Closure $onSuccess, Closure $onError) : void {
 		try {
-			self::validateUrl($url);
 			self::validatePngUrl($url);
-
-			Utils::fetchAsync($url, function ($result) use ($resolver) : void {
-				if ($result === null) {
-					$resolver->reject(new \RuntimeException('Failed to download cape.'));
-					return;
-				}
-
-				$capeData = $result->getBody();
-				$filePath = self::saveSkinToFile($capeData);
-
-				$capeBytes = self::capeFromFile($filePath);
-				$resolver->resolve($capeBytes);
-			});
-		} catch (\Throwable $e) {
-			$resolver->reject($e);
+			self::downloadAndProcess($url, self::TYPE_CAPE, $onSuccess, $onError);
+		} catch (InvalidArgumentException $e) {
+			$onError($e);
 		}
-
-		return $resolver->getPromise();
 	}
 
 	/**
-	 * Processes a skin from a file path and returns the skin bytes.
+	 * Process skin from local file.
 	 *
-	 * @param string $filePath the file path of the PNG skin
+	 * @param string $filePath Path to PNG file
 	 *
-	 * @return string the skin bytes
+	 * @return string RGBA bytes (64x64 or 64x32)
 	 *
-	 * @throws \RuntimeException if the file is not a valid PNG skin
+	 * @throws RuntimeException if file invalid or processing fails
 	 */
 	public static function skinFromFile(string $filePath) : string {
-		return self::processPngFile($filePath, self::SKIN);
+		return self::processPngFile($filePath, self::TYPE_SKIN);
 	}
 
 	/**
-	 * Processes a cape from a file path and returns the cape bytes.
+	 * Process cape from local file.
 	 *
-	 * @param string $filePath the file path of the PNG cape
+	 * @param string $filePath Path to PNG file
 	 *
-	 * @return string the cape bytes
+	 * @return string RGBA bytes (typically 64x32)
 	 *
-	 * @throws \RuntimeException if the file is not a valid PNG cape
+	 * @throws RuntimeException if file invalid or processing fails
 	 */
 	public static function capeFromFile(string $filePath) : string {
-		return self::processPngFile($filePath, self::CAPE);
+		return self::processPngFile($filePath, self::TYPE_CAPE);
 	}
 
+	/**
+	 * Download and process skin or cape from URL.
+	 *
+	 * @phpstan-param self::TYPE_* $type
+	 */
+	private static function downloadAndProcess(string $url, string $type, Closure $onSuccess, Closure $onError) : void {
+		Utils::fetchAsync($url, static function (?InternetRequestResult $result) use ($type, $onSuccess, $onError) : void {
+			if ($result === null) {
+				$onError(new RuntimeException('Failed to download image from URL'));
+				return;
+			}
+
+			try {
+				$imageData = $result->getBody();
+				$tempPath = self::saveTempFile($imageData);
+
+				$bytes = self::processPngFile($tempPath, $type);
+				$onSuccess($bytes);
+			} catch (Throwable $e) {
+				$onError($e);
+			}
+		});
+	}
+
+	/**
+	 * Process PNG file to RGBA bytes.
+	 *
+	 * @phpstan-param self::TYPE_* $type
+	 *
+	 * @throws RuntimeException on invalid PNG or processing error
+	 */
 	private static function processPngFile(string $filePath, string $type) : string {
-		$image = imagecreatefrompng($filePath);
+		$image = @imagecreatefrompng($filePath);
+
 		if ($image === false) {
 			self::cleanupFile($filePath);
-			throw new \RuntimeException("The file is not a valid PNG {$type}.");
+			throw new RuntimeException("Invalid PNG {$type} file");
 		}
 
+		// Convert palette images to truecolor
 		if (!imageistruecolor($image)) {
 			imagepalettetotruecolor($image);
 		}
 
-		$bytes = ($type === self::SKIN) ? self::extractSkinBytes($image) : self::extractCapeBytes($image);
-		imagedestroy($image);
-		self::cleanupFile($filePath);
+		try {
+			$bytes = match ($type) {
+				self::TYPE_SKIN => self::extractSkinBytes($image),
+				self::TYPE_CAPE => self::extractCapeBytes($image),
+				default => throw new RuntimeException("Unknown type: {$type}")
+			};
+		} finally {
+			imagedestroy($image);
+			self::cleanupFile($filePath);
+		}
 
 		return $bytes;
 	}
 
 	/**
-	 * Validates that a URL is in the correct format.
+	 * Extract RGBA bytes from skin image.
 	 *
-	 * @param string $url the URL to validate
+	 * Format: 4 bytes per pixel (R, G, B, A), row-major order.
 	 *
-	 * @throws \InvalidArgumentException if the URL format is invalid
+	 * @param GdImage $image Source image resource
+	 *
+	 * @return string RGBA byte string
 	 */
-	private static function validateUrl(string $url) : void {
-		if (!Utils::isValidUrl($url)) {
-			throw new \InvalidArgumentException('Invalid URL format.');
-		}
-	}
-
-	/**
-	 * Validates that a URL points to a PNG image.
-	 *
-	 * @param string $url the URL to validate
-	 *
-	 * @throws \InvalidArgumentException if the URL does not point to a PNG image
-	 */
-	private static function validatePngUrl(string $url) : void {
-		if (!Utils::isPngUrl($url)) {
-			throw new \InvalidArgumentException('URL does not point to a PNG image.');
-		}
-	}
-
-	/**
-	 * Saves image data to a temporary file.
-	 *
-	 * @param string $data the image data to save
-	 *
-	 * @return string the file path where the image data was saved
-	 *
-	 * @throws \RuntimeException if there is an error saving the image data
-	 */
-	private static function saveSkinToFile(string $data) : string {
-		$filePath = Path::join(Smaccer::getInstance()->getDataFolder(), uniqid('skin_', true) . '.png');
-		try {
-			Filesystem::safeFilePutContents($filePath, $data);
-			return $filePath;
-		} catch (\RuntimeException $e) {
-			throw new \RuntimeException('An error occurred while saving the skin file: ' . $e->getMessage());
-		}
-	}
-
-	/**
-	 * Extracts the bytes from a GD image resource for skin.
-	 *
-	 * @param \GdImage $image the GD image resource
-	 *
-	 * @return string the extracted skin bytes
-	 */
-	private static function extractSkinBytes(\GdImage $image) : string {
+	private static function extractSkinBytes(GdImage $image) : string {
 		$bytes = '';
-		for ($y = 0; $y < imagesy($image); ++$y) {
-			for ($x = 0; $x < imagesx($image); ++$x) {
+		$width = imagesx($image);
+		$height = imagesy($image);
+
+		for ($y = 0; $y < $height; ++$y) {
+			for ($x = 0; $x < $width; ++$x) {
 				$rgba = imagecolorat($image, $x, $y);
-				$a = ((~($rgba >> 24)) << 1) & 0xFF;
+
 				$r = ($rgba >> 16) & 0xFF;
 				$g = ($rgba >> 8) & 0xFF;
 				$b = $rgba & 0xFF;
+				$a = ((~($rgba >> 24)) << 1) & 0xFF; // Convert 7-bit alpha to 8-bit
+
 				$bytes .= chr($r) . chr($g) . chr($b) . chr($a);
 			}
 		}
@@ -218,18 +191,27 @@ class SkinUtils {
 	}
 
 	/**
-	 * Extracts the bytes from a GD image resource for cape.
+	 * Extract RGBA bytes from cape image.
 	 *
-	 * @param \GdImage $image the GD image resource
+	 * @param GdImage $image Source image resource
 	 *
-	 * @return string the extracted cape bytes
+	 * @return string RGBA byte string
 	 */
-	private static function extractCapeBytes(\GdImage $image) : string {
+	private static function extractCapeBytes(GdImage $image) : string {
 		$bytes = '';
-		for ($y = 0; $y < imagesy($image); ++$y) {
-			for ($x = 0; $x < imagesx($image); ++$x) {
+		$width = imagesx($image);
+		$height = imagesy($image);
+
+		for ($y = 0; $y < $height; ++$y) {
+			for ($x = 0; $x < $width; ++$x) {
 				$argb = imagecolorat($image, $x, $y);
-				$bytes .= chr(($argb >> 16) & 0xFF) . chr(($argb >> 8) & 0xFF) . chr($argb & 0xFF) . chr(((~($argb >> 24)) << 1) & 0xFF);
+
+				$r = ($argb >> 16) & 0xFF;
+				$g = ($argb >> 8) & 0xFF;
+				$b = $argb & 0xFF;
+				$a = ((~($argb >> 24)) << 1) & 0xFF;
+
+				$bytes .= chr($r) . chr($g) . chr($b) . chr($a);
 			}
 		}
 
@@ -237,13 +219,51 @@ class SkinUtils {
 	}
 
 	/**
-	 * Deletes a file if it exists.
+	 * Validate URL format and PNG extension.
 	 *
-	 * @param string $filePath the path to the file to delete
+	 * @throws InvalidArgumentException if validation fails
+	 */
+	private static function validatePngUrl(string $url) : void {
+		if (!Utils::isValidUrl($url)) {
+			throw new InvalidArgumentException('Invalid URL format');
+		}
+
+		if (!Utils::isPngUrl($url)) {
+			throw new InvalidArgumentException('URL must point to PNG image');
+		}
+	}
+
+	/**
+	 * Save image data to temporary file.
+	 *
+	 * @param string $data Image bytes
+	 *
+	 * @return string Path to saved file
+	 *
+	 * @throws RuntimeException on write failure
+	 */
+	private static function saveTempFile(string $data) : string {
+		$filePath = Path::join(
+			Smaccer::getInstance()->getDataFolder(),
+			uniqid('skin_', true) . '.png'
+		);
+
+		try {
+			Filesystem::safeFilePutContents($filePath, $data);
+			return $filePath;
+		} catch (RuntimeException $e) {
+			throw new RuntimeException('Failed to save temporary file: ' . $e->getMessage(), 0, $e);
+		}
+	}
+
+	/**
+	 * Delete temporary file if exists.
+	 *
+	 * @param string $filePath Path to file
 	 */
 	private static function cleanupFile(string $filePath) : void {
 		if (is_file($filePath)) {
-			unlink($filePath);
+			@unlink($filePath);
 		}
 	}
 }

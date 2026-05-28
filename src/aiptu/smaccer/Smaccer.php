@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2024-2025 AIPTU
+ * Copyright (c) 2024-2026 AIPTU
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -23,12 +23,14 @@ use aiptu\smaccer\utils\EmoteUtils;
 use CortexPE\Commando\PacketHooker;
 use InvalidArgumentException;
 use JackMD\UpdateNotifier\UpdateNotifier;
+use pocketmine\command\CommandSender;
 use pocketmine\plugin\DisablePluginException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
+use function count;
 use function is_bool;
 use function is_int;
 use function is_numeric;
@@ -37,7 +39,7 @@ use function is_string;
 class Smaccer extends PluginBase {
 	use SingletonTrait;
 
-	private const CONFIG_VERSION = 1.2;
+	private const float CONFIG_VERSION = 1.2;
 
 	private bool $updateNotifierEnabled;
 	private NPCDefaultSettings $npcDefaultSettings;
@@ -238,17 +240,43 @@ class Smaccer extends PluginBase {
 
 	/**
 	 * Checks if emotes are already cached and loads them synchronously if available.
-	 * If not, it submits the LoadEmotesTask to the async task pool.
+	 * If not, submits the LoadEmotesTask to the async task pool.
 	 */
-	private function loadEmotes() : void {
-		$cachedFile = EmoteUtils::getEmotesFromCache(EmoteUtils::getEmoteCachePath());
+	private function loadEmotes(?CommandSender $sender = null) : void {
+		$cacheFilePath = EmoteUtils::getEmoteCachePath();
+		$cachedFile = EmoteUtils::getEmotesFromCache($cacheFilePath);
+
 		if ($cachedFile !== null) {
-			/** @var array{array{uuid: string, title: string, image: string}} $emotes */
-			$emotes = $cachedFile['emotes'];
-			$this->emoteManager = new EmoteManager($emotes);
+			$this->emoteManager = new EmoteManager($cachedFile['emotes']);
+
+			if ($sender === null) {
+				$this->getLogger()->info('Loaded ' . count($cachedFile['emotes']) . ' emotes from cache');
+			}
+
+			$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask($cacheFilePath, $cachedFile['commit_id'], $sender));
 		} else {
-			$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask(EmoteUtils::getEmoteCachePath()));
+			$this->emoteManager = new EmoteManager([]);
+
+			if ($sender === null) {
+				$this->getLogger()->info('No emote cache found, loading emotes asynchronously...');
+			} else {
+				$sender->sendMessage('[Smaccer] §eLoading emotes from repository...');
+			}
+
+			$this->getServer()->getAsyncPool()->submitTask(new LoadEmotesTask($cacheFilePath, null, $sender));
 		}
+	}
+
+	/**
+	 * Reload emotes from repository.
+	 * Can be called from reload command to notify the player.
+	 */
+	public function reloadEmotes(?CommandSender $sender = null) : void {
+		if ($sender !== null) {
+			$sender->sendMessage('[Smaccer] §eReloading emotes...');
+		}
+
+		$this->loadEmotes($sender);
 	}
 
 	public function getDefaultSettings() : NPCDefaultSettings {
