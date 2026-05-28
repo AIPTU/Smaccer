@@ -41,7 +41,6 @@ use function array_map;
 use function array_merge;
 use function array_unique;
 use function is_a;
-use function is_subclass_of;
 use function ksort;
 use function sprintf;
 use function strtolower;
@@ -78,7 +77,7 @@ class SmaccerHandler {
 			throw new InvalidArgumentException("NPC type '{$identifier}' is already registered.");
 		}
 
-		if (!is_subclass_of($entityClass, EntitySmaccer::class, true) && !is_subclass_of($entityClass, HumanSmaccer::class, true)) {
+		if (!is_a($entityClass, EntitySmaccer::class, true) && !is_a($entityClass, HumanSmaccer::class, true)) {
 			throw new InvalidArgumentException("Class {$entityClass} must be a subclass of " . EntitySmaccer::class . ' or ' . HumanSmaccer::class);
 		}
 
@@ -93,19 +92,19 @@ class SmaccerHandler {
 	 * @throws InvalidArgumentException
 	 */
 	private function registerEntity(string $identifier, string $entityClass) : void {
-		if (!is_subclass_of($entityClass, Entity::class)) {
+		if (!is_a($entityClass, Entity::class, true)) {
 			throw new InvalidArgumentException("Class {$entityClass} must be a subclass of " . Entity::class);
 		}
 
 		$registerFunction = function (World $world, CompoundTag $nbt) use ($entityClass) : Entity {
-			if (is_subclass_of($entityClass, EntitySmaccer::class, true)) {
+			if (is_a($entityClass, EntitySmaccer::class, true)) {
 				return new $entityClass(EntityDataHelper::parseLocation($nbt, $world), $nbt);
 			}
 
 			return new $entityClass(EntityDataHelper::parseLocation($nbt, $world), Human::parseSkinNBT($nbt), $nbt);
 		};
 
-		EntityFactory::getInstance()->register($entityClass, $registerFunction, array_merge([$entityClass], Utils::getClassNamespace($entityClass)));
+		EntityFactory::getInstance()->register($entityClass, $registerFunction, array_merge([$identifier, $entityClass], Utils::getClassNamespace($entityClass)));
 		$this->registered_npcs[strtolower($identifier)] = $entityClass;
 	}
 
@@ -173,11 +172,11 @@ class SmaccerHandler {
 	public function createEntity(string $type, Location $location, CompoundTag $nbt) : EntitySmaccer|HumanSmaccer {
 		$entityClass = $this->getNPCStrict($type);
 
-		if (!is_subclass_of($entityClass, Entity::class)) {
+		if (!is_a($entityClass, Entity::class, true)) {
 			throw new InvalidArgumentException("Class {$entityClass} must be a subclass of " . Entity::class);
 		}
 
-		if (is_subclass_of($entityClass, EntitySmaccer::class, true)) {
+		if (is_a($entityClass, EntitySmaccer::class, true)) {
 			return new $entityClass($location, $nbt);
 		}
 
