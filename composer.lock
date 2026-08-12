@@ -67,19 +67,20 @@
         },
         {
             "name": "aiptu/libplaceholder",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/AIPTU/libplaceholder.git",
-                "reference": "99afc16093d4b43febdad445b16fe3626d897531"
+                "reference": "415af1d5df07839cfd3b88100db8111a9b8a4b3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AIPTU/libplaceholder/zipball/99afc16093d4b43febdad445b16fe3626d897531",
-                "reference": "99afc16093d4b43febdad445b16fe3626d897531",
+                "url": "https://api.github.com/repos/AIPTU/libplaceholder/zipball/415af1d5df07839cfd3b88100db8111a9b8a4b3f",
+                "reference": "415af1d5df07839cfd3b88100db8111a9b8a4b3f",
                 "shasum": ""
             },
             "require": {
+                "php": "^8.3",
                 "pocketmine/pocketmine-mp": "^5.0"
             },
             "type": "library",
@@ -101,9 +102,9 @@
             "description": "A flexible placeholder library for PocketMine-MP plugins, allowing dynamic insertion of player and global data into messages.",
             "support": {
                 "issues": "https://github.com/AIPTU/libplaceholder/issues",
-                "source": "https://github.com/AIPTU/libplaceholder/tree/1.0.0"
+                "source": "https://github.com/AIPTU/libplaceholder/tree/1.1.0"
             },
-            "time": "2024-09-07T07:12:46+00:00"
+            "time": "2025-11-30T10:08:58+00:00"
         },
         {
             "name": "brick/math",
